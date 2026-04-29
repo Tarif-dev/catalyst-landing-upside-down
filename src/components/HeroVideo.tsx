@@ -12,15 +12,13 @@ export function HeroVideo() {
         playsInline
         nohotkeys
         thumbnailTime={0}
-        style={
-          {
-            "--controls": "none",
-            "--media-object-fit": "cover",
-            width: "100%",
-            height: "100%",
-            aspectRatio: "unset",
-          } as React.CSSProperties
-        }
+        style={{
+          "--controls": "none",
+          "--media-object-fit": "cover",
+          width: "100%",
+          height: "100%",
+          aspectRatio: "unset",
+        }}
       />
       {/* Red wash + vignette to pull video into ST palette */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/40 via-background/20 to-background" />
