@@ -4,35 +4,32 @@ export function SectionTitle({
   eyebrow,
   children,
   align = "center",
-  accent = "blood",
+  italic = false,
 }: {
   eyebrow?: string;
   children: ReactNode;
   align?: "center" | "left";
-  accent?: "blood" | "magenta" | "cyan";
+  italic?: boolean;
 }) {
-  const accentColor =
-    accent === "magenta" ? "text-magenta" : accent === "cyan" ? "text-cyan" : "text-blood";
-  const outline =
-    accent === "magenta" ? "title-outline-magenta" : "title-outline";
-  const wrap = align === "left" ? "text-left" : "text-center";
-  const lineWrap = align === "left" ? "" : "mx-auto";
-
+  const wrap = align === "left" ? "text-left items-start" : "text-center items-center";
   return (
-    <div className={`mb-16 ${wrap}`}>
+    <div className={`mb-20 flex flex-col ${wrap} reveal`}>
       {eyebrow && (
-        <p
-          className={`font-mono text-[10px] uppercase tracking-[0.5em] ${accentColor} mb-5`}
-        >
-          ▎ {eyebrow}
-        </p>
+        <div className="mb-6 flex items-center gap-3">
+          <span className="block h-px w-8 bg-blood/60" />
+          <p className="font-mono text-[10px] uppercase tracking-[0.45em] text-blood/80">
+            {eyebrow}
+          </p>
+          <span className="block h-px w-8 bg-blood/60" />
+        </div>
       )}
-      <h2 className={`font-display text-5xl md:text-7xl ${outline} leading-[0.95]`}>
+      <h2
+        className={`font-display text-5xl md:text-7xl text-bone leading-[1.02] ${
+          italic ? "italic" : ""
+        }`}
+      >
         {children}
       </h2>
-      <div
-        className={`mt-6 h-px w-24 ${lineWrap} bg-gradient-to-r from-transparent via-current to-transparent ${accentColor}`}
-      />
     </div>
   );
 }
