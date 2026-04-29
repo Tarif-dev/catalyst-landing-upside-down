@@ -10,30 +10,30 @@ const faqs = [
 
 export function Faq() {
   return (
-    <section id="faq" className="px-6 py-32 md:py-44">
+    <section id="faq" className="px-6 py-32 md:py-44 border-t border-blood/10">
       <div className="mx-auto max-w-3xl">
-        <SectionTitle eyebrow="Transmissions // Decoded" accent="cyan">
-          FAQ
+        <SectionTitle eyebrow="Transmissions — Decoded" italic>
+          Questions.
         </SectionTitle>
 
-        <ul className="space-y-4">
+        <ul className="border-t border-bone/10">
           {faqs.map((f, i) => (
-            <li key={i}>
-              <details className="hud neon-card group p-6 [&_summary::-webkit-details-marker]:hidden">
-                <summary className="flex cursor-pointer items-center justify-between gap-6">
-                  <span className="flex items-center gap-4">
-                    <span className="font-pixel text-cyan text-xl tabular-nums">
+            <li key={i} className="border-b border-bone/10 reveal" style={{ animationDelay: `${i * 0.06}s` }}>
+              <details className="group [&_summary::-webkit-details-marker]:hidden">
+                <summary className="flex cursor-pointer items-center justify-between gap-6 py-7 transition-colors hover:text-bone">
+                  <span className="flex items-baseline gap-6">
+                    <span className="font-mono text-[10px] tracking-[0.4em] text-blood/70 tabular-nums">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="font-display text-lg md:text-xl tracking-wider text-bone">
+                    <span className="font-display text-xl md:text-2xl text-bone italic">
                       {f.q}
                     </span>
                   </span>
-                  <span className="font-mono text-magenta text-xl transition-transform group-open:rotate-45">
+                  <span className="font-mono text-2xl text-blood transition-transform duration-500 group-open:rotate-45">
                     +
                   </span>
                 </summary>
-                <p className="mt-4 ml-10 text-sm leading-relaxed text-bone/65">
+                <p className="pb-7 pl-14 pr-10 font-serif text-base leading-relaxed text-bone/65">
                   {f.a}
                 </p>
               </details>

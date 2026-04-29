@@ -1,61 +1,57 @@
 import { SectionTitle } from "./SectionTitle";
-import { Trophy, Medal, Award } from "lucide-react";
 
 const prizes = [
-  { icon: Trophy, place: "01", label: "The Eleven", note: "Champion of Hawkins", accent: "blood" },
-  { icon: Medal, place: "02", label: "The Hopper", note: "Runner-up", accent: "magenta" },
-  { icon: Award, place: "03", label: "The Dustin", note: "Third place", accent: "cyan" },
-] as const;
-
-const accentMap = {
-  blood: "neon-card-blood text-blood",
-  magenta: "text-magenta",
-  cyan: "neon-card-cyan text-cyan",
-};
+  { place: "I", label: "The Eleven", note: "Champion of Hawkins" },
+  { place: "II", label: "The Hopper", note: "Runner-up" },
+  { place: "III", label: "The Dustin", note: "Third place" },
+];
 
 export function Prizes() {
   return (
-    <section id="prizes" className="relative overflow-hidden px-6 py-32 md:py-44">
-      {/* Synthwave horizon backdrop */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] grid-floor opacity-50" />
-      <div className="pointer-events-none absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 retro-sun opacity-60 blur-[1px]" />
+    <section id="prizes" className="relative overflow-hidden px-6 py-32 md:py-44 border-t border-blood/10">
+      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[28rem] w-[28rem] -translate-x-1/2 blob-blood opacity-60" />
+      <div className="pointer-events-none absolute right-10 bottom-10 h-72 w-72 blob-rose opacity-40" />
 
       <div className="relative mx-auto max-w-5xl">
-        <SectionTitle eyebrow="Reward // For surviving the Upside Down" accent="blood">
-          Prize Pool
+        <SectionTitle eyebrow="Reward — For Those Who Survive" italic>
+          The Spoils.
         </SectionTitle>
 
-        <div className="mb-20 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-bone/50 mb-4">
-            Total · INR
+        <div className="mb-24 text-center reveal reveal-delay-1">
+          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-bone/45 mb-6">
+            Total Pool · INR
           </p>
-          <div className="font-display text-7xl md:text-[11rem] title-outline flicker leading-[0.9]">
-            ₹50,000+
+          <div className="font-display text-7xl md:text-[10rem] title-outline breathe leading-[0.9] tracking-tight">
+            ₹50,000<span className="text-blood/60">+</span>
           </div>
-          <p className="mt-6 font-mono text-xs uppercase tracking-[0.3em] text-magenta">
-            distributed across champions, runners-up & track leaders
+          <div className="mx-auto mt-8 h-px w-32 bg-blood/40" />
+          <p className="mt-8 font-italic-display text-lg md:text-xl text-bone/65 italic">
+            distributed across champions, runners-up &amp; track leaders
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {prizes.map((p) => {
-            const a = accentMap[p.accent];
-            return (
-              <div key={p.place} className={`hud neon-card ${a.split(" ")[0]} p-10 text-center`}>
-                <p.icon className={`mx-auto mb-5 h-10 w-10 ${a.split(" ")[1]}`} strokeWidth={1.5} />
-                <div className="font-display text-6xl md:text-7xl text-bone mb-3 leading-none">
-                  {p.place}
-                </div>
-                <div className={`font-mono text-[11px] uppercase tracking-[0.4em] ${a.split(" ")[1]} mb-4`}>
-                  {p.label}
-                </div>
-                <p className="text-sm text-bone/60">{p.note}</p>
+        <div className="grid gap-px bg-blood/15 md:grid-cols-3">
+          {prizes.map((p, i) => (
+            <div
+              key={p.place}
+              className="panel bracket relative bg-black p-12 text-center reveal"
+              style={{ animationDelay: `${i * 0.12}s` }}
+            >
+              <div className="font-display text-6xl md:text-7xl text-blood text-glow-blood mb-4 leading-none">
+                {p.place}
               </div>
-            );
-          })}
+              <div className="hairline-bone mx-auto w-12 mb-4" />
+              <div className="font-display text-2xl text-bone italic mb-2">
+                {p.label}
+              </div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-bone/45">
+                {p.note}
+              </p>
+            </div>
+          ))}
         </div>
 
-        <p className="mt-12 text-center font-mono text-[10px] uppercase tracking-[0.4em] text-bone/50">
+        <p className="mt-16 text-center font-italic-display text-base text-bone/50 italic">
           + track-wise prizes · swag · sponsor goodies · internship offers
         </p>
       </div>

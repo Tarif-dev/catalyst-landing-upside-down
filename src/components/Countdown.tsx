@@ -13,7 +13,6 @@ function diff(now: number) {
 }
 
 export function Countdown() {
-  // SSR-safe: start with zeros, populate after mount to avoid hydration mismatch
   const [t, setT] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [mounted, setMounted] = useState(false);
 
@@ -32,19 +31,20 @@ export function Countdown() {
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-3 md:gap-5">
-      {items.map((it) => (
+    <div className="grid grid-cols-4 gap-px bg-blood/15">
+      {items.map((it, i) => (
         <div
           key={it.label}
-          className="hud neon-card neon-card-blood relative px-3 py-6 text-center md:py-8"
+          className="bracket relative bg-black px-3 py-8 text-center md:py-12"
         >
           <div
-            className="font-pixel text-5xl md:text-7xl text-blood text-glow-blood tabular-nums leading-none"
+            className="font-display text-5xl md:text-7xl text-blood text-glow-blood tabular-nums leading-none breathe"
+            style={{ animationDelay: `${i * 0.3}s` }}
             suppressHydrationWarning
           >
             {mounted ? String(it.v).padStart(2, "0") : "00"}
           </div>
-          <div className="mt-3 font-mono text-[9px] md:text-[10px] uppercase tracking-[0.35em] text-bone/60">
+          <div className="mt-4 font-mono text-[9px] uppercase tracking-[0.4em] text-bone/55">
             {it.label}
           </div>
         </div>
