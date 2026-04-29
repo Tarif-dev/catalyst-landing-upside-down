@@ -32,7 +32,7 @@ function Hero() {
   return (
     <section
       id="top"
-      className="relative h-screen w-full overflow-hidden"
+      className="relative h-screen w-full overflow-hidden bg-black"
       aria-label="Catalyst 2K26 hero"
     >
       <HeroVideo />
@@ -44,56 +44,57 @@ function Details() {
   return (
     <section
       id="details"
-      className="relative overflow-hidden px-6 pt-28 pb-32 md:pt-36 md:pb-44"
+      className="relative overflow-hidden px-6 pt-32 pb-32 md:pt-40 md:pb-44"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-magenta/60 to-transparent" />
+      <div className="pointer-events-none absolute left-1/2 top-10 h-96 w-[40rem] -translate-x-1/2 blob-blood opacity-40" />
 
-      <div className="relative mx-auto max-w-6xl">
+      <div className="relative mx-auto max-w-5xl">
         {/* Eyebrow */}
-        <div className="mb-10 flex items-center justify-center gap-3">
-          <span className="block h-1.5 w-1.5 rounded-full bg-magenta shadow-magenta pulse-blood" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-magenta">
-            Hawkins Lab // Transmission 2K26
+        <div className="mb-12 flex items-center justify-center gap-4 reveal">
+          <span className="block h-px w-10 bg-blood/60" />
+          <span className="block h-1.5 w-1.5 rounded-full bg-blood pulse-dot" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood">
+            Hawkins Lab — Transmission 2K26
           </span>
-          <span className="block h-1.5 w-1.5 rounded-full bg-cyan shadow-cyan" />
+          <span className="block h-1.5 w-1.5 rounded-full bg-blood pulse-dot" />
+          <span className="block h-px w-10 bg-blood/60" />
         </div>
 
-        {/* Title */}
-        <h1 className="text-center font-display leading-[0.85] tracking-tight">
-          <span className="block title-outline text-[20vw] md:text-[14rem]">
-            CATALYST
+        {/* Editorial title — serif, restrained */}
+        <h1 className="text-center font-display text-bone leading-[1.05] reveal reveal-delay-1">
+          <span className="block text-4xl md:text-6xl italic text-bone/80">
+            A 24-hour AI hackathon
           </span>
-          <span className="mt-3 block title-outline-magenta text-[12vw] md:text-[8rem]">
-            2K26
+          <span className="mt-4 block text-3xl md:text-5xl">
+            at <span className="title-outline not-italic">Amity University Kolkata</span>
           </span>
         </h1>
 
-        {/* Tagline */}
-        <p className="mx-auto mt-10 max-w-2xl text-center font-body text-base md:text-lg leading-relaxed text-bone/80">
-          A <span className="text-magenta">24-hour AI hackathon</span> at{" "}
-          <span className="text-cyan">Amity University Kolkata</span>. Five
-          tracks. One gate. Build something the Upside Down hasn't seen.
+        {/* Subhead */}
+        <p className="mx-auto mt-12 max-w-2xl text-center font-serif text-lg md:text-xl leading-relaxed text-bone/65 reveal reveal-delay-2">
+          Five tracks. One gate. Build something the Upside Down hasn't seen —
+          on the floor at Amity Kolkata, the night the world flickers.
         </p>
 
-        {/* Quick spec strip */}
-        <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
+        {/* Spec strip — minimal grid */}
+        <div className="mx-auto mt-20 grid max-w-4xl grid-cols-2 gap-px bg-blood/10 md:grid-cols-4 reveal reveal-delay-3">
           {[
-            { k: "Date", v: "19–20 May", sub: "2026" },
-            { k: "Format", v: "24 Hours", sub: "On-campus" },
-            { k: "Tracks", v: "5", sub: "AI verticals" },
+            { k: "Date", v: "19–20", sub: "May 2026" },
+            { k: "Format", v: "24h", sub: "On-campus" },
+            { k: "Tracks", v: "05", sub: "AI verticals" },
             { k: "Prize Pool", v: "₹50K+", sub: "INR" },
           ].map((item) => (
             <div
               key={item.k}
-              className="hud neon-card px-4 py-5 text-center"
+              className="bracket relative bg-black px-4 py-7 text-center"
             >
-              <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-bone/50">
+              <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/45">
                 {item.k}
               </div>
-              <div className="mt-2 font-display text-2xl md:text-3xl text-bone tracking-wider">
+              <div className="mt-3 font-display text-3xl md:text-4xl text-bone tracking-tight">
                 {item.v}
               </div>
-              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-magenta/80">
+              <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.35em] text-blood/70">
                 {item.sub}
               </div>
             </div>
@@ -101,26 +102,30 @@ function Details() {
         </div>
 
         {/* CTAs */}
-        <div className="mt-14 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div className="mt-16 flex flex-col items-center justify-center gap-4 sm:flex-row reveal reveal-delay-4">
           <a
             href="#register"
-            className="hud relative border border-magenta bg-magenta px-10 py-4 font-mono text-[11px] uppercase tracking-[0.4em] text-background transition-all hover:bg-transparent hover:text-magenta hover:shadow-magenta"
+            className="bracket relative border border-blood bg-blood px-12 py-4 font-mono text-[10px] uppercase tracking-[0.45em] text-black transition-all duration-500 hover:bg-transparent hover:text-blood"
           >
             Enter the Gate
           </a>
           <a
             href="#tracks"
-            className="hud relative border border-cyan/60 bg-cyan/5 px-10 py-4 font-mono text-[11px] uppercase tracking-[0.4em] text-cyan transition-all hover:border-cyan hover:bg-cyan/15 hover:shadow-cyan"
+            className="bracket relative border border-bone/20 bg-transparent px-12 py-4 font-mono text-[10px] uppercase tracking-[0.45em] text-bone/80 transition-all duration-500 hover:border-blood/60 hover:text-blood"
           >
             Explore Tracks ↓
           </a>
         </div>
 
         {/* Countdown */}
-        <div className="mx-auto mt-24 w-full max-w-3xl">
-          <p className="mb-5 text-center font-mono text-[10px] uppercase tracking-[0.5em] text-bone/55">
-            ▎ Gate opens in
-          </p>
+        <div className="mx-auto mt-28 w-full max-w-3xl reveal reveal-delay-4">
+          <div className="mb-6 flex items-center justify-center gap-3">
+            <span className="block h-px w-8 bg-blood/50" />
+            <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-bone/55">
+              Gate opens in
+            </p>
+            <span className="block h-px w-8 bg-blood/50" />
+          </div>
           <Countdown />
         </div>
       </div>
@@ -130,7 +135,7 @@ function Details() {
 
 function MarqueeStrip() {
   const items = [
-    "MAY 19–20, 2026",
+    "MAY 19 — 20, 2026",
     "AMITY UNIVERSITY KOLKATA",
     "₹50,000+ PRIZE POOL",
     "24 HOURS",
@@ -138,19 +143,18 @@ function MarqueeStrip() {
     "ONE GATE",
   ];
   return (
-    <div className="overflow-hidden border-y border-magenta/20 bg-void/60 py-4 backdrop-blur-sm">
-      <div className="flex animate-[marquee_40s_linear_infinite] whitespace-nowrap">
+    <div className="overflow-hidden border-y border-blood/15 bg-black py-5">
+      <div className="flex marquee-track whitespace-nowrap">
         {[...items, ...items, ...items].map((it, i) => (
           <span
             key={i}
-            className="mx-8 font-display text-2xl tracking-[0.35em] text-magenta/70"
+            className="mx-10 font-display text-2xl italic tracking-wide text-bone/80"
           >
-            {it}{" "}
-            <span className="mx-8 text-cyan">✦</span>
+            {it}
+            <span className="ml-10 text-blood not-italic">✦</span>
           </span>
         ))}
       </div>
-      <style>{`@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }`}</style>
     </div>
   );
 }
