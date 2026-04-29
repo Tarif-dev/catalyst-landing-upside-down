@@ -30,60 +30,100 @@ export const Route = createFileRoute("/")({
 
 function Hero() {
   return (
-    <section id="top" className="relative min-h-screen overflow-hidden">
+    <section
+      id="top"
+      className="relative h-screen w-full overflow-hidden"
+      aria-label="Catalyst 2K26 hero"
+    >
       <HeroVideo />
+    </section>
+  );
+}
 
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 pt-24 text-center">
-        {/* Eyebrow tape */}
-        <div className="mb-8 inline-flex items-center gap-3 border border-blood/40 bg-background/60 px-4 py-2 backdrop-blur-sm">
-          <span className="block h-1.5 w-1.5 rounded-full bg-blood pulse-blood" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood">
-            Hawkins Lab Presents · A 24hr AI Hackathon
+function Details() {
+  return (
+    <section
+      id="details"
+      className="relative overflow-hidden px-6 pt-28 pb-32 md:pt-36 md:pb-44"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-magenta/60 to-transparent" />
+
+      <div className="relative mx-auto max-w-6xl">
+        {/* Eyebrow */}
+        <div className="mb-10 flex items-center justify-center gap-3">
+          <span className="block h-1.5 w-1.5 rounded-full bg-magenta shadow-magenta pulse-blood" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-magenta">
+            Hawkins Lab // Transmission 2K26
           </span>
+          <span className="block h-1.5 w-1.5 rounded-full bg-cyan shadow-cyan" />
         </div>
 
-        {/* Title — ST style outlined letters with blood-glow */}
-        <h1 className="font-display text-[18vw] leading-[0.85] tracking-tight md:text-[12rem]">
-          <span className="block title-outline flicker">CATALYST</span>
-          <span className="mt-2 block text-blood text-glow-blood text-[10vw] md:text-[7rem]">
+        {/* Title */}
+        <h1 className="text-center font-display leading-[0.85] tracking-tight">
+          <span className="block title-outline text-[20vw] md:text-[14rem]">
+            CATALYST
+          </span>
+          <span className="mt-3 block title-outline-magenta text-[12vw] md:text-[8rem]">
             2K26
           </span>
         </h1>
 
-        <p className="mt-8 max-w-xl font-mono text-sm leading-relaxed text-bone/90 md:text-base">
-          Something is coming to{" "}
-          <span className="text-blood">Amity University Kolkata</span>.
-          <br className="hidden md:block" />
-          24 hours. 5 tracks. One chance to step through.
+        {/* Tagline */}
+        <p className="mx-auto mt-10 max-w-2xl text-center font-body text-base md:text-lg leading-relaxed text-bone/80">
+          A <span className="text-magenta">24-hour AI hackathon</span> at{" "}
+          <span className="text-cyan">Amity University Kolkata</span>. Five
+          tracks. One gate. Build something the Upside Down hasn't seen.
         </p>
 
+        {/* Quick spec strip */}
+        <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
+          {[
+            { k: "Date", v: "19–20 May", sub: "2026" },
+            { k: "Format", v: "24 Hours", sub: "On-campus" },
+            { k: "Tracks", v: "5", sub: "AI verticals" },
+            { k: "Prize Pool", v: "₹50K+", sub: "INR" },
+          ].map((item) => (
+            <div
+              key={item.k}
+              className="hud neon-card px-4 py-5 text-center"
+            >
+              <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-bone/50">
+                {item.k}
+              </div>
+              <div className="mt-2 font-display text-2xl md:text-3xl text-bone tracking-wider">
+                {item.v}
+              </div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-magenta/80">
+                {item.sub}
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* CTAs */}
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-14 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <a
             href="#register"
-            className="border border-blood bg-blood px-8 py-3 font-mono text-xs uppercase tracking-[0.3em] text-primary-foreground transition-all hover:bg-transparent hover:text-blood hover:shadow-blood"
+            className="hud relative border border-magenta bg-magenta px-10 py-4 font-mono text-[11px] uppercase tracking-[0.4em] text-background transition-all hover:bg-transparent hover:text-magenta hover:shadow-magenta"
           >
             Enter the Gate
           </a>
           <a
             href="#tracks"
-            className="border border-blood/50 bg-background/40 px-8 py-3 font-mono text-xs uppercase tracking-[0.3em] text-blood backdrop-blur-sm transition-all hover:border-blood hover:bg-blood/10"
+            className="hud relative border border-cyan/60 bg-cyan/5 px-10 py-4 font-mono text-[11px] uppercase tracking-[0.4em] text-cyan transition-all hover:border-cyan hover:bg-cyan/15 hover:shadow-cyan"
           >
-            See Tracks ↓
+            Explore Tracks ↓
           </a>
         </div>
 
         {/* Countdown */}
-        <div className="mt-16 w-full max-w-2xl">
-          <p className="mb-3 text-center font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
-            Gate opens in
+        <div className="mx-auto mt-24 w-full max-w-3xl">
+          <p className="mb-5 text-center font-mono text-[10px] uppercase tracking-[0.5em] text-bone/55">
+            ▎ Gate opens in
           </p>
           <Countdown />
         </div>
       </div>
-
-      {/* Bottom fade into next section */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-background" />
     </section>
   );
 }
@@ -98,14 +138,15 @@ function MarqueeStrip() {
     "ONE GATE",
   ];
   return (
-    <div className="overflow-hidden border-y border-blood/20 bg-background/80 py-4">
-      <div className="flex animate-[marquee_30s_linear_infinite] whitespace-nowrap">
+    <div className="overflow-hidden border-y border-magenta/20 bg-void/60 py-4 backdrop-blur-sm">
+      <div className="flex animate-[marquee_40s_linear_infinite] whitespace-nowrap">
         {[...items, ...items, ...items].map((it, i) => (
           <span
             key={i}
-            className="mx-8 font-display text-2xl tracking-[0.3em] text-blood/70"
+            className="mx-8 font-display text-2xl tracking-[0.35em] text-magenta/70"
           >
-            {it} <span className="mx-8 text-blood">✦</span>
+            {it}{" "}
+            <span className="mx-8 text-cyan">✦</span>
           </span>
         ))}
       </div>
@@ -120,6 +161,7 @@ function Index() {
       <Nav />
       <main>
         <Hero />
+        <Details />
         <MarqueeStrip />
         <Tracks />
         <Timeline />
