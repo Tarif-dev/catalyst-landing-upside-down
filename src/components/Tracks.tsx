@@ -146,9 +146,9 @@ export function Tracks() {
                   {/* Content */}
                   <div className="md:col-span-8 p-8 md:p-12 flex flex-col justify-center">
                     <div className="mb-4 flex items-center gap-3 text-[10px] uppercase tracking-[0.4em] font-mono">
-                      <span className="text-bone/40">Track {t.code}</span>
+                      <span className="text-bone/40">Track {t.code} / 05</span>
                       <span className="h-px w-8 bg-blood/40" />
-                      <span className="text-blood">₹10,000 · Single Winner</span>
+                      <span className="text-bone/40">Single Winner</span>
                     </div>
 
                     <h3 className="font-display text-4xl md:text-5xl text-bone leading-tight italic mb-5">
@@ -164,11 +164,11 @@ export function Tracks() {
 
                     <div className="hairline-bone w-16 mb-6" />
 
-                    <p className="text-base md:text-[17px] leading-relaxed text-bone/70 font-serif mb-6">
+                    <p className="text-base md:text-[17px] leading-relaxed text-bone/70 font-serif mb-8">
                       {t.desc}
                     </p>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-8">
                       {t.looking.map((tag) => (
                         <span
                           key={tag}
@@ -177,6 +177,29 @@ export function Tracks() {
                           {tag}
                         </span>
                       ))}
+                    </div>
+
+                    {/* Prominent prize block */}
+                    <div className="bracket relative border border-blood/30 bg-gradient-to-r from-blood/10 via-blood/5 to-transparent px-6 py-5 flex items-center justify-between gap-4">
+                      <div>
+                        <div className="font-mono text-[9px] uppercase tracking-[0.45em] text-blood/80 mb-2">
+                          Champion's Purse
+                        </div>
+                        <div className="font-display text-5xl md:text-6xl text-bone italic leading-none text-glow-blood">
+                          ₹10,000
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/45 mb-1">
+                          Awarded to
+                        </div>
+                        <div className="font-display italic text-xl text-blood">
+                          01 Team
+                        </div>
+                        <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-bone/40 mt-1">
+                          Winner takes all
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
