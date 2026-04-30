@@ -4,14 +4,14 @@ const coords = [
   { k: "Campus", v: "Amity University", sub: "Kolkata" },
   { k: "City", v: "Rajarhat", sub: "New Town · WB" },
   { k: "Coordinates", v: "22.596° N", sub: "88.484° E" },
-  { k: "Gate Opens", v: "19 May", sub: "09:00 IST" },
+  { k: "Gate Opens", v: "21 May", sub: "09:00 IST" },
 ];
 
 export function Venue() {
   return (
     <section
       id="venue"
-      className="relative overflow-hidden px-6 py-32 md:py-44 border-t border-blood/10"
+      className="relative overflow-hidden px-5 sm:px-6 py-24 md:py-44 border-t border-blood/10"
     >
       <div className="pointer-events-none absolute left-10 top-20 h-80 w-80 blob-blood opacity-40" />
       <div className="pointer-events-none absolute right-0 bottom-0 h-96 w-96 blob-rose opacity-30" />
@@ -66,7 +66,7 @@ export function Venue() {
           </div>
 
           {/* Address panel */}
-          <div className="md:col-span-5 bg-black p-8 md:p-10 flex flex-col justify-between">
+          <div className="md:col-span-5 bg-black p-7 sm:p-10 flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <span className="block h-px w-8 bg-blood/60" />
@@ -75,13 +75,13 @@ export function Venue() {
                 </span>
               </div>
 
-              <h3 className="font-display text-4xl md:text-5xl italic text-bone leading-tight mb-5">
+              <h3 className="font-display text-3xl sm:text-4xl md:text-5xl italic text-bone leading-tight mb-5">
                 Amity University,
                 <br />
                 <span className="title-outline not-italic">Kolkata</span>
               </h3>
 
-              <p className="font-serif italic text-bone/60 text-lg leading-relaxed mb-8">
+              <p className="font-serif italic text-bone/60 text-base sm:text-lg leading-relaxed mb-8">
                 Major Arterial Road, Action Area II,
                 <br />
                 Rajarhat, New Town,

@@ -8,6 +8,8 @@ import { Faq } from "@/components/Faq";
 import { Footer } from "@/components/Footer";
 import { Countdown } from "@/components/Countdown";
 import { Venue } from "@/components/Venue";
+import { Sponsors } from "@/components/Sponsors";
+import { Contact } from "@/components/Contact";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,13 +18,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Catalyst 2K26: a 24-hour AI hackathon hosted by Amity University Kolkata on 19–20 May 2026. ₹50,000+ prize pool. Five tracks. One Upside Down.",
+          "Catalyst 2K26: a 24-hour AI hackathon hosted by Amity University Kolkata on 21–22 May 2026. ₹50,000+ prize pool. Five tracks. One Upside Down.",
       },
       { property: "og:title", content: "Catalyst 2K26 — AI Hackathon" },
       {
         property: "og:description",
         content:
-          "24 hours. 5 tracks. ₹50,000+ prize pool. Step through the gate at Amity Kolkata, May 19–20, 2026.",
+          "24 hours. 5 tracks. ₹50,000+ prize pool. Step through the gate at Amity Kolkata, May 21–22, 2026.",
       },
     ],
   }),
@@ -33,7 +35,7 @@ function Hero() {
   return (
     <section
       id="top"
-      className="relative h-screen w-full overflow-hidden bg-black"
+      className="relative h-[100svh] w-full overflow-hidden bg-black"
       aria-label="Catalyst 2K26 hero"
     >
       <HeroVideo />
@@ -45,54 +47,54 @@ function Details() {
   return (
     <section
       id="details"
-      className="relative overflow-hidden px-6 pt-32 pb-32 md:pt-40 md:pb-44"
+      className="relative overflow-hidden px-5 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-32 md:pt-40 md:pb-44"
     >
-      <div className="pointer-events-none absolute left-1/2 top-10 h-96 w-[40rem] -translate-x-1/2 blob-blood opacity-40" />
+      <div className="pointer-events-none absolute left-1/2 top-10 h-96 w-[40rem] max-w-[90vw] -translate-x-1/2 blob-blood opacity-40" />
 
       <div className="relative mx-auto max-w-5xl">
         {/* Eyebrow */}
-        <div className="mb-12 flex items-center justify-center gap-4 reveal">
-          <span className="block h-px w-10 bg-blood/60" />
+        <div className="mb-10 sm:mb-12 flex flex-wrap items-center justify-center gap-2 sm:gap-4 reveal">
+          <span className="hidden sm:block h-px w-10 bg-blood/60" />
           <span className="block h-1.5 w-1.5 rounded-full bg-blood pulse-dot" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood">
+          <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.5em] text-blood text-center">
             Hawkins Lab — Transmission 2K26
           </span>
           <span className="block h-1.5 w-1.5 rounded-full bg-blood pulse-dot" />
-          <span className="block h-px w-10 bg-blood/60" />
+          <span className="hidden sm:block h-px w-10 bg-blood/60" />
         </div>
 
-        {/* Editorial title — serif, restrained */}
+        {/* Editorial title */}
         <h1 className="text-center font-display text-bone leading-[1.05] reveal reveal-delay-1">
-          <span className="block text-4xl md:text-6xl italic text-bone/80">
+          <span className="block text-3xl sm:text-4xl md:text-6xl italic text-bone/80">
             A 24-hour AI hackathon
           </span>
-          <span className="mt-4 block text-3xl md:text-5xl">
+          <span className="mt-3 sm:mt-4 block text-2xl sm:text-3xl md:text-5xl">
             at <span className="title-outline not-italic">Amity University Kolkata</span>
           </span>
         </h1>
 
         {/* Subhead */}
-        <p className="mx-auto mt-12 max-w-2xl text-center font-serif text-lg md:text-xl leading-relaxed text-bone/65 reveal reveal-delay-2">
+        <p className="mx-auto mt-10 sm:mt-12 max-w-2xl text-center font-serif text-base sm:text-lg md:text-xl leading-relaxed text-bone/65 reveal reveal-delay-2 px-2">
           Five tracks. One gate. Build something the Upside Down hasn't seen —
           on the floor at Amity Kolkata, the night the world flickers.
         </p>
 
-        {/* Spec strip — minimal grid */}
-        <div className="mx-auto mt-20 grid max-w-4xl grid-cols-2 gap-px bg-blood/10 md:grid-cols-4 reveal reveal-delay-3">
+        {/* Spec strip */}
+        <div className="mx-auto mt-14 sm:mt-20 grid max-w-4xl grid-cols-2 gap-px bg-blood/10 md:grid-cols-4 reveal reveal-delay-3">
           {[
-            { k: "Date", v: "19–20", sub: "May 2026" },
+            { k: "Date", v: "21–22", sub: "May 2026" },
             { k: "Format", v: "24h", sub: "On-campus" },
             { k: "Tracks", v: "05", sub: "AI verticals" },
             { k: "Prize Pool", v: "₹50K+", sub: "INR" },
           ].map((item) => (
             <div
               key={item.k}
-              className="bracket relative bg-black px-4 py-7 text-center"
+              className="bracket relative bg-black px-3 sm:px-4 py-6 sm:py-7 text-center"
             >
               <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/45">
                 {item.k}
               </div>
-              <div className="mt-3 font-display text-3xl md:text-4xl text-bone tracking-tight">
+              <div className="mt-3 font-display text-2xl sm:text-3xl md:text-4xl text-bone tracking-tight">
                 {item.v}
               </div>
               <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.35em] text-blood/70">
@@ -103,29 +105,29 @@ function Details() {
         </div>
 
         {/* CTAs */}
-        <div className="mt-16 flex flex-col items-center justify-center gap-4 sm:flex-row reveal reveal-delay-4">
+        <div className="mt-12 sm:mt-16 flex flex-col items-center justify-center gap-4 sm:flex-row reveal reveal-delay-4">
           <a
             href="#register"
-            className="bracket relative border border-blood bg-blood px-12 py-4 font-mono text-[10px] uppercase tracking-[0.45em] text-black transition-all duration-500 hover:bg-transparent hover:text-blood"
+            className="bracket relative w-full sm:w-auto text-center border border-blood bg-blood px-8 sm:px-12 py-4 font-mono text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.45em] text-black transition-all duration-500 hover:bg-transparent hover:text-blood"
           >
             Enter the Gate
           </a>
           <a
             href="#tracks"
-            className="bracket relative border border-bone/20 bg-transparent px-12 py-4 font-mono text-[10px] uppercase tracking-[0.45em] text-bone/80 transition-all duration-500 hover:border-blood/60 hover:text-blood"
+            className="bracket relative w-full sm:w-auto text-center border border-bone/20 bg-transparent px-8 sm:px-12 py-4 font-mono text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.45em] text-bone/80 transition-all duration-500 hover:border-blood/60 hover:text-blood"
           >
             Explore Tracks ↓
           </a>
         </div>
 
         {/* Countdown */}
-        <div className="mx-auto mt-28 w-full max-w-3xl reveal reveal-delay-4">
+        <div className="mx-auto mt-20 sm:mt-28 w-full max-w-3xl reveal reveal-delay-4">
           <div className="mb-6 flex items-center justify-center gap-3">
-            <span className="block h-px w-8 bg-blood/50" />
-            <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-bone/55">
+            <span className="block h-px w-6 sm:w-8 bg-blood/50" />
+            <p className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.5em] text-bone/55">
               Gate opens in
             </p>
-            <span className="block h-px w-8 bg-blood/50" />
+            <span className="block h-px w-6 sm:w-8 bg-blood/50" />
           </div>
           <Countdown />
         </div>
@@ -136,7 +138,7 @@ function Details() {
 
 function MarqueeStrip() {
   const items = [
-    "MAY 19 — 20, 2026",
+    "MAY 21 — 22, 2026",
     "AMITY UNIVERSITY KOLKATA",
     "₹50,000+ PRIZE POOL",
     "24 HOURS",
@@ -144,15 +146,15 @@ function MarqueeStrip() {
     "ONE GATE",
   ];
   return (
-    <div className="overflow-hidden border-y border-blood/15 bg-black py-5">
+    <div className="overflow-hidden border-y border-blood/15 bg-black py-4 sm:py-5">
       <div className="flex marquee-track whitespace-nowrap">
         {[...items, ...items, ...items].map((it, i) => (
           <span
             key={i}
-            className="mx-10 font-display text-2xl italic tracking-wide text-bone/80"
+            className="mx-6 sm:mx-10 font-display text-xl sm:text-2xl italic tracking-wide text-bone/80"
           >
             {it}
-            <span className="ml-10 text-blood not-italic">✦</span>
+            <span className="ml-6 sm:ml-10 text-blood not-italic">✦</span>
           </span>
         ))}
       </div>
@@ -170,9 +172,11 @@ function Index() {
         <MarqueeStrip />
         <Prizes />
         <Tracks />
+        <Sponsors />
         <Timeline />
         <Venue />
         <Faq />
+        <Contact />
       </main>
       <Footer />
     </>
