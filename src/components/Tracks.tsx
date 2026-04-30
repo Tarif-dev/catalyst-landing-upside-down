@@ -1,86 +1,200 @@
-import { Heart, Banknote, Leaf, GraduationCap, Sparkles } from "lucide-react";
 import { SectionTitle } from "./SectionTitle";
+import dustin from "@/assets/dustin.png";
+import hopper from "@/assets/hopper.png";
+import eleven from "@/assets/eleven.png";
+import will from "@/assets/will.png";
+import steve from "@/assets/steve.png";
 
 const tracks = [
   {
-    icon: Heart,
-    name: "AI for Healthcare",
     code: "I",
-    desc: "Diagnostic models, predictive care, biotech tooling. Build what heals.",
+    name: "AI for Healthcare",
+    patron: "Hopper",
+    quote: "“Mornings are for coffee and contemplation.”",
+    role: "The Chief — steady under pressure, the one who runs toward the dark.",
+    image: hopper,
+    desc: "Diagnostic intelligence, predictive care, patient triage, medical imaging, drug discovery copilots, mental-health companions.",
+    looking: [
+      "Clinical-grade reasoning",
+      "Privacy-first architectures",
+      "Edge / offline inference",
+    ],
   },
   {
-    icon: Banknote,
-    name: "AI for Fintech",
     code: "II",
-    desc: "Risk, fraud detection, embedded finance, autonomous trading systems.",
+    name: "AI for Fintech",
+    patron: "Dustin",
+    quote: "“Curiosity Voyager.”",
+    role: "The Strategist — reads the patterns, breaks the code, beats the system.",
+    image: dustin,
+    desc: "Fraud detection, risk modelling, autonomous trading agents, credit intelligence for the underbanked, embedded finance copilots.",
+    looking: [
+      "Real-time signal extraction",
+      "Explainable decisions",
+      "Regulation-aware design",
+    ],
   },
   {
-    icon: Leaf,
-    name: "AI for Sustainability",
     code: "III",
-    desc: "Climate intelligence, energy optimization, ocean & forest tech.",
+    name: "AI for Sustainability",
+    patron: "Will",
+    quote: "“I made it eighty-five days.”",
+    role: "The Sensitive — attuned to what others miss, the first to feel the shift.",
+    image: will,
+    desc: "Climate intelligence, carbon accounting, biodiversity monitoring, energy-grid optimisation, circular supply chains, disaster prediction.",
+    looking: [
+      "Satellite / sensor fusion",
+      "Measurable impact",
+      "Low-compute footprints",
+    ],
   },
   {
-    icon: GraduationCap,
-    name: "AI for Education",
     code: "IV",
-    desc: "Tutors, accessibility, personalized learning at planetary scale.",
+    name: "AI for Education",
+    patron: "Eleven",
+    quote: "“Friends don't lie.”",
+    role: "The Prodigy — raw power shaped into purpose, learning in public.",
+    image: eleven,
+    desc: "Adaptive tutors, accessibility tools, regional-language learning, assessment copilots, skill-gap mapping, teacher augmentation.",
+    looking: [
+      "Personalised pedagogy",
+      "Accessibility by default",
+      "Low-bandwidth delivery",
+    ],
   },
   {
-    icon: Sparkles,
-    name: "Open Innovation",
     code: "V",
-    desc: "No rules. Surprise the jury. Build the unbuildable.",
+    name: "Open Innovation",
+    patron: "Steve",
+    quote: "“I have no idea what I'm doing — but I'm doing it.”",
+    role: "The Wildcard — shows up with a bat, a plan, and the right friends.",
+    image: steve,
+    desc: "No rules. No vertical. Agents, robotics, creative AI, dev-tools, hardware hybrids, anything that surprises the jury.",
+    looking: [
+      "Originality",
+      "Technical ambition",
+      "A demo that lands",
+    ],
   },
 ];
 
 export function Tracks() {
   return (
     <section id="tracks" className="relative px-6 py-32 md:py-44">
-      <div className="pointer-events-none absolute left-1/2 top-32 h-96 w-96 -translate-x-1/2 blob-blood opacity-50" />
+      <div className="pointer-events-none absolute left-1/2 top-32 h-96 w-96 -translate-x-1/2 blob-blood opacity-40" />
       <div className="relative mx-auto max-w-6xl">
-        <SectionTitle eyebrow="Channels — Five Frequencies" italic>
+        <SectionTitle eyebrow="Channels — Five Frequencies, Five Patrons" italic>
           The Tracks.
         </SectionTitle>
 
-        <div className="grid grid-cols-1 gap-px bg-blood/10 md:grid-cols-2 lg:grid-cols-3">
-          {tracks.map((t, i) => (
-            <article
-              key={t.code}
-              className="panel group relative bg-black p-10 reveal"
-              style={{ animationDelay: `${i * 0.08}s` }}
-            >
-              <div className="mb-8 flex items-start justify-between">
-                <div className="flex h-11 w-11 items-center justify-center border border-blood/40 text-blood transition-all duration-500 group-hover:border-blood group-hover:bg-blood group-hover:text-black">
-                  <t.icon className="h-5 w-5" strokeWidth={1.25} />
+        <p className="mx-auto -mt-6 mb-20 max-w-2xl text-center font-serif text-base md:text-lg italic text-bone/55 reveal">
+          Each track is guarded by a resident of Hawkins. Pick your patron.
+          Build your case. One winner per track takes home{" "}
+          <span className="text-blood not-italic font-medium">₹10,000</span>.
+        </p>
+
+        <div className="flex flex-col gap-px bg-blood/10">
+          {tracks.map((t, i) => {
+            const reverse = i % 2 === 1;
+            return (
+              <article
+                key={t.code}
+                className="panel group relative bg-black reveal"
+                style={{ animationDelay: `${i * 0.08}s` }}
+              >
+                <div
+                  className={`grid grid-cols-1 md:grid-cols-12 gap-0 items-stretch ${
+                    reverse ? "md:[&>div:first-child]:order-2" : ""
+                  }`}
+                >
+                  {/* Portrait */}
+                  <div className="relative md:col-span-4 overflow-hidden border-b md:border-b-0 md:border-r border-blood/10 bg-gradient-to-b from-blood/[0.06] to-black aspect-[4/5] md:aspect-auto">
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(200,40,40,0.15),transparent_70%)]" />
+                    <img
+                      src={t.image}
+                      alt={t.patron}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover object-top grayscale contrast-110 opacity-80 transition-all duration-700 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-[1.02]"
+                    />
+                    {/* Scanline veil */}
+                    <div
+                      className="pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay"
+                      style={{
+                        backgroundImage:
+                          "repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 3px)",
+                      }}
+                    />
+                    {/* Gradient fade to black */}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                    {/* Name plate */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
+                      <div>
+                        <div className="font-mono text-[9px] uppercase tracking-[0.45em] text-blood/80 mb-1">
+                          Patron · {t.code.padStart(2, "0")}/05
+                        </div>
+                        <div className="font-display text-3xl italic text-bone leading-none">
+                          {t.patron}
+                        </div>
+                      </div>
+                      <span className="block h-2 w-2 rounded-full bg-blood pulse-dot" />
+                    </div>
+                    {/* Corner brackets */}
+                    <span className="absolute top-3 left-3 h-3 w-3 border-t border-l border-blood/60" />
+                    <span className="absolute top-3 right-3 h-3 w-3 border-t border-r border-blood/60" />
+                  </div>
+
+                  {/* Content */}
+                  <div className="md:col-span-8 p-8 md:p-12 flex flex-col justify-center">
+                    <div className="mb-4 flex items-center gap-3 text-[10px] uppercase tracking-[0.4em] font-mono">
+                      <span className="text-bone/40">Track {t.code}</span>
+                      <span className="h-px w-8 bg-blood/40" />
+                      <span className="text-blood">₹10,000 · Single Winner</span>
+                    </div>
+
+                    <h3 className="font-display text-4xl md:text-5xl text-bone leading-tight italic mb-5">
+                      {t.name}
+                    </h3>
+
+                    <p className="font-serif italic text-bone/55 text-lg mb-2">
+                      {t.quote}
+                    </p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/40 mb-6">
+                      — {t.role}
+                    </p>
+
+                    <div className="hairline-bone w-16 mb-6" />
+
+                    <p className="text-base md:text-[17px] leading-relaxed text-bone/70 font-serif mb-6">
+                      {t.desc}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {t.looking.map((tag) => (
+                        <span
+                          key={tag}
+                          className="border border-bone/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.3em] text-bone/60 font-mono transition-colors hover:border-blood/60 hover:text-blood"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-bone/35">
-                  {t.code.padStart(2, "0")} / 05
-                </span>
-              </div>
+              </article>
+            );
+          })}
+        </div>
 
-              <h3 className="font-display text-3xl md:text-[2rem] text-bone mb-4 leading-tight italic">
-                {t.name}
-              </h3>
-              <p className="text-base leading-relaxed text-bone/55 font-serif">
-                {t.desc}
-              </p>
-
-              <div className="mt-8 hairline-bone opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            </article>
-          ))}
-
-          <div className="panel relative flex flex-col items-start justify-center bg-black p-10 reveal" style={{ animationDelay: "0.4s" }}>
-            <div className="font-mono text-[10px] uppercase tracking-[0.45em] text-blood mb-4">
-              Open Call
-            </div>
-            <p className="font-display text-3xl md:text-[2rem] text-bone italic leading-tight">
-              Choose a frequency.<br/>Or break it.
-            </p>
-            <a href="#register" className="mt-6 font-mono text-[10px] uppercase tracking-[0.4em] text-blood/80 hover:text-blood transition-colors">
-              Register →
-            </a>
-          </div>
+        <div className="mt-12 flex flex-col items-center gap-4 text-center reveal">
+          <p className="font-serif italic text-bone/55 text-lg">
+            Five tracks. Five winners. ₹50,000 guaranteed across the channels.
+          </p>
+          <a
+            href="#register"
+            className="bracket border border-blood/40 bg-blood/5 px-8 py-3 font-mono text-[10px] uppercase tracking-[0.4em] text-blood transition-all duration-500 hover:border-blood hover:bg-blood hover:text-black"
+          >
+            Choose your patron →
+          </a>
         </div>
       </div>
     </section>
