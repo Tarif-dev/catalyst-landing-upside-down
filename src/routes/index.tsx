@@ -7,6 +7,7 @@ import { Prizes } from "@/components/Prizes";
 import { Faq } from "@/components/Faq";
 import { Footer } from "@/components/Footer";
 import { Countdown } from "@/components/Countdown";
+import { Venue } from "@/components/Venue";
 
 export const Route = createFileRoute("/")({
   head: () => ({
