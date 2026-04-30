@@ -1,9 +1,10 @@
 import { SectionTitle } from "./SectionTitle";
 
-const prizes = [
-  { place: "I", label: "The Eleven", note: "Champion of Hawkins" },
-  { place: "II", label: "The Hopper", note: "Runner-up" },
-  { place: "III", label: "The Dustin", note: "Third place" },
+const breakdown = [
+  { k: "Per Track", v: "₹10,000", sub: "× 5 channels" },
+  { k: "Winners", v: "05", sub: "One per track" },
+  { k: "Guaranteed", v: "₹50,000", sub: "Cash pool" },
+  { k: "Beyond Cash", v: "∞", sub: "Swag · Offers" },
 ];
 
 export function Prizes() {
@@ -17,7 +18,7 @@ export function Prizes() {
           The Spoils.
         </SectionTitle>
 
-        <div className="mb-24 text-center reveal reveal-delay-1">
+        <div className="mb-20 text-center reveal reveal-delay-1">
           <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-bone/45 mb-6">
             Total Pool · INR
           </p>
@@ -25,34 +26,30 @@ export function Prizes() {
             ₹50,000<span className="text-blood/60">+</span>
           </div>
           <div className="mx-auto mt-8 h-px w-32 bg-blood/40" />
-          <p className="mt-8 font-italic-display text-lg md:text-xl text-bone/65 italic">
-            distributed across champions, runners-up &amp; track leaders
+          <p className="mt-8 font-italic-display text-lg md:text-xl text-bone/65 italic max-w-2xl mx-auto">
+            No podium. No runners-up. Every track crowns a single champion — and
+            the Upside Down pays each one the same respect.
           </p>
         </div>
 
-        <div className="grid gap-px bg-blood/15 md:grid-cols-3">
-          {prizes.map((p, i) => (
-            <div
-              key={p.place}
-              className="panel bracket relative bg-black p-12 text-center reveal"
-              style={{ animationDelay: `${i * 0.12}s` }}
-            >
-              <div className="font-display text-6xl md:text-7xl text-blood text-glow-blood mb-4 leading-none">
-                {p.place}
+        <div className="grid gap-px bg-blood/15 md:grid-cols-4 reveal reveal-delay-2">
+          {breakdown.map((item) => (
+            <div key={item.k} className="bracket relative bg-black px-4 py-10 text-center">
+              <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/45">
+                {item.k}
               </div>
-              <div className="hairline-bone mx-auto w-12 mb-4" />
-              <div className="font-display text-2xl text-bone italic mb-2">
-                {p.label}
+              <div className="mt-4 font-display text-4xl md:text-5xl text-bone tracking-tight italic">
+                {item.v}
               </div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-bone/45">
-                {p.note}
-              </p>
+              <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.35em] text-blood/70">
+                {item.sub}
+              </div>
             </div>
           ))}
         </div>
 
         <p className="mt-16 text-center font-italic-display text-base text-bone/50 italic">
-          + track-wise prizes · swag · sponsor goodies · internship offers
+          + track-wise swag · sponsor goodies · internship interviews · bragging rights until ’27
         </p>
       </div>
     </section>
