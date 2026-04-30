@@ -4,7 +4,7 @@ export function HeroVideo() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-black">
       <MuxPlayer
-        playbackId="LqCoyL4ueeeLRj1H01IaJRXonQ4D7EkwcJCS3waZegS8"
+        playbackId="rt42FVRXL01VirdZbHjOMjPwd5sTP1LKKGFj1bDQpbnM"
         streamType="on-demand"
         autoPlay="muted"
         loop
