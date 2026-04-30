@@ -12,9 +12,10 @@ export function Nav() {
 
   const links = [
     { href: "#details", label: "Details" },
+    { href: "#prizes", label: "Prizes" },
     { href: "#tracks", label: "Tracks" },
     { href: "#timeline", label: "Schedule" },
-    { href: "#prizes", label: "Prizes" },
+    { href: "#venue", label: "Venue" },
     { href: "#faq", label: "FAQ" },
   ];
 
