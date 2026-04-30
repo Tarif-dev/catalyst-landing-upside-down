@@ -168,9 +168,10 @@ function Index() {
         <Hero />
         <Details />
         <MarqueeStrip />
+        <Prizes />
         <Tracks />
         <Timeline />
-        <Prizes />
+        <Venue />
         <Faq />
       </main>
       <Footer />
