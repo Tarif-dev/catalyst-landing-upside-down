@@ -19,8 +19,8 @@ export function Footer() {
         </p>
 
         <a
-          href="mailto:catalyst@amitykolkata.edu.in"
-          className="bracket relative inline-block border border-blood bg-blood px-14 py-4 font-mono text-[10px] uppercase tracking-[0.5em] text-black transition-all duration-500 hover:bg-transparent hover:text-blood reveal reveal-delay-3"
+          href="mailto:catalyst.auk@gmail.com"
+          className="bracket relative inline-block border border-blood bg-blood px-10 sm:px-14 py-4 font-mono text-[10px] uppercase tracking-[0.5em] text-black transition-all duration-500 hover:bg-transparent hover:text-blood reveal reveal-delay-3"
         >
           Register Interest
         </a>
@@ -33,8 +33,8 @@ export function Footer() {
             </span>
             <span className="block h-1 w-1 rounded-full bg-blood pulse-dot" />
           </div>
-          <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/40">
-            Amity University Kolkata · 19–20 May 2026
+          <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/40 text-center">
+            Amity University Kolkata · 21–22 May 2026
           </p>
         </div>
       </div>

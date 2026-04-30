@@ -4,7 +4,7 @@ const coords = [
   { k: "Campus", v: "Amity University", sub: "Kolkata" },
   { k: "City", v: "Rajarhat", sub: "New Town · WB" },
   { k: "Coordinates", v: "22.596° N", sub: "88.484° E" },
-  { k: "Gate Opens", v: "19 May", sub: "09:00 IST" },
+  { k: "Gate Opens", v: "21 May", sub: "09:00 IST" },
 ];
 
 export function Venue() {
