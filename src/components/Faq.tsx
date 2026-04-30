@@ -10,7 +10,7 @@ const faqs = [
 
 export function Faq() {
   return (
-    <section id="faq" className="px-6 py-32 md:py-44 border-t border-blood/10">
+    <section id="faq" className="px-5 sm:px-6 py-24 md:py-44 border-t border-blood/10">
       <div className="mx-auto max-w-3xl">
         <SectionTitle eyebrow="Transmissions — Decoded" italic>
           Questions.
@@ -20,20 +20,20 @@ export function Faq() {
           {faqs.map((f, i) => (
             <li key={i} className="border-b border-bone/10 reveal" style={{ animationDelay: `${i * 0.06}s` }}>
               <details className="group [&_summary::-webkit-details-marker]:hidden">
-                <summary className="flex cursor-pointer items-center justify-between gap-6 py-7 transition-colors hover:text-bone">
-                  <span className="flex items-baseline gap-6">
-                    <span className="font-mono text-[10px] tracking-[0.4em] text-blood/70 tabular-nums">
+                <summary className="flex cursor-pointer items-center justify-between gap-4 sm:gap-6 py-6 sm:py-7 transition-colors hover:text-bone">
+                  <span className="flex items-baseline gap-4 sm:gap-6 min-w-0">
+                    <span className="font-mono text-[10px] tracking-[0.3em] sm:tracking-[0.4em] text-blood/70 tabular-nums shrink-0">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="font-display text-xl md:text-2xl text-bone italic">
+                    <span className="font-display text-lg sm:text-xl md:text-2xl text-bone italic">
                       {f.q}
                     </span>
                   </span>
-                  <span className="font-mono text-2xl text-blood transition-transform duration-500 group-open:rotate-45">
+                  <span className="font-mono text-2xl text-blood transition-transform duration-500 group-open:rotate-45 shrink-0">
                     +
                   </span>
                 </summary>
-                <p className="pb-7 pl-14 pr-10 font-serif text-base leading-relaxed text-bone/65">
+                <p className="pb-6 sm:pb-7 pl-10 sm:pl-14 pr-2 sm:pr-10 font-serif text-sm sm:text-base leading-relaxed text-bone/65">
                   {f.a}
                 </p>
               </details>

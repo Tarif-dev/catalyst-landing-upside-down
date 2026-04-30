@@ -13,7 +13,7 @@ const events = [
 
 export function Timeline() {
   return (
-    <section id="timeline" className="relative px-6 py-32 md:py-44 border-t border-blood/10">
+    <section id="timeline" className="relative px-5 sm:px-6 py-24 md:py-44 border-t border-blood/10">
       <div className="mx-auto max-w-4xl">
         <SectionTitle eyebrow="Transmission — 21 / 22 May 2026" italic>
           The Schedule.
@@ -24,24 +24,24 @@ export function Timeline() {
           {events.map((e, i) => (
             <li
               key={i}
-              className="group relative grid grid-cols-1 md:grid-cols-[7.5rem_1fr] gap-2 md:gap-12 py-8 border-b border-bone/5 last:border-0 reveal"
+              className="group relative grid grid-cols-1 md:grid-cols-[7.5rem_1fr] gap-1 md:gap-12 py-6 sm:py-8 border-b border-bone/5 last:border-0 reveal"
               style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <div className="md:text-right">
+              <div className="md:text-right flex items-baseline gap-3 md:block">
                 <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood/80">
                   {e.day}
                 </div>
-                <div className="font-display text-3xl text-bone tabular-nums mt-1">
+                <div className="font-display text-2xl sm:text-3xl text-bone tabular-nums md:mt-1">
                   {e.time}
                 </div>
               </div>
 
               <div className="relative md:pl-8">
                 <span className="absolute -left-[0.3rem] top-3 hidden h-1.5 w-1.5 rotate-45 bg-blood transition-all duration-500 group-hover:scale-150 md:block" />
-                <h3 className="font-display text-2xl md:text-3xl text-bone italic leading-tight transition-colors group-hover:text-blood">
+                <h3 className="font-display text-xl sm:text-2xl md:text-3xl text-bone italic leading-tight transition-colors group-hover:text-blood">
                   {e.title}
                 </h3>
-                <p className="mt-2 text-base text-bone/55 font-serif">{e.note}</p>
+                <p className="mt-2 text-sm sm:text-base text-bone/55 font-serif">{e.note}</p>
               </div>
             </li>
           ))}
