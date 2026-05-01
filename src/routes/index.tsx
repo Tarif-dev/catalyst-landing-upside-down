@@ -10,6 +10,8 @@ import { Countdown } from "@/components/Countdown";
 import { Venue } from "@/components/Venue";
 import { Sponsors } from "@/components/Sponsors";
 import { Contact } from "@/components/Contact";
+import { Loader } from "@/components/Loader";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -163,8 +165,22 @@ function MarqueeStrip() {
 }
 
 function Index() {
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (loaded) {
+      document.body.style.overflow = "";
+    } else {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [loaded]);
+
   return (
     <>
+      {!loaded && <Loader onDone={() => setLoaded(true)} />}
       <Nav />
       <main>
         <Hero />
