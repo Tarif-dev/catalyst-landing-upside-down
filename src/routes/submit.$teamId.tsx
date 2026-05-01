@@ -37,7 +37,10 @@ function Submit() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) return nav({ to: "/login" });
+    if (!user) {
+      nav({ to: "/login" });
+      return;
+    }
     (async () => {
       const [{ data: t }, { data: s }, { count }] = await Promise.all([
         supabase.from("teams").select("*").eq("id", teamId).maybeSingle(),

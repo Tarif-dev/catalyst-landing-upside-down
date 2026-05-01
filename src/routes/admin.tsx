@@ -31,15 +31,19 @@ function Admin() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) return nav({ to: "/login" });
+    if (!user) {
+      nav({ to: "/login" });
+      return;
+    }
     if (!isAdmin) {
       toast.error("Admins only.");
-      return nav({ to: "/dashboard" });
+      nav({ to: "/dashboard" });
+      return;
     }
-    load();
+    void load();
   }, [user, isAdmin, loading, nav]);
 
-  const setStatus = async (id: string, payment_status: string) => {
+  const setStatus = async (id: string, payment_status: "unpaid" | "pending" | "paid" | "refunded") => {
     const { error } = await supabase.from("teams").update({ payment_status }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Updated.");
