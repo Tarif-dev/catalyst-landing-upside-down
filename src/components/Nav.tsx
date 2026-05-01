@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import amityLogo from "@/assets/Amity_logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [authed, setAuthed] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAuthed(!!s));
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -20,14 +29,14 @@ export function Nav() {
   }, [open]);
 
   const links = [
-    { href: "#details", label: "Details" },
-    { href: "#prizes", label: "Prizes" },
-    { href: "#tracks", label: "Tracks" },
-    { href: "#sponsors", label: "Sponsors" },
-    { href: "#timeline", label: "Schedule" },
-    { href: "#venue", label: "Venue" },
-    { href: "#faq", label: "FAQ" },
-    { href: "#contact", label: "Contact" },
+    { href: "/#details", label: "Details" },
+    { href: "/#prizes", label: "Prizes" },
+    { href: "/#tracks", label: "Tracks" },
+    { href: "/#sponsors", label: "Sponsors" },
+    { href: "/#timeline", label: "Schedule" },
+    { href: "/#venue", label: "Venue" },
+    { href: "/#faq", label: "FAQ" },
+    { href: "/#contact", label: "Contact" },
   ];
 
   return (
@@ -70,14 +79,14 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-3">
-          <a
-            href="#register"
+          <Link
+            to={authed ? "/dashboard" : "/register"}
             className="bracket hidden sm:inline-flex group relative items-center gap-2.5 border border-blood/40 bg-blood/5 px-5 md:px-6 py-2 md:py-2.5 text-[13px] italic text-blood transition-all duration-500 hover:border-blood hover:bg-blood hover:text-black"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
             <span className="block h-1 w-1 rounded-full bg-blood transition-colors group-hover:bg-black" />
-            Register
-          </a>
+            {authed ? "Dashboard" : "Register"}
+          </Link>
 
           {/* Mobile toggle */}
           <button
@@ -123,13 +132,13 @@ export function Nav() {
             </li>
           ))}
           <li className="pt-4">
-            <a
-              href="#register"
+            <Link
+              to={authed ? "/dashboard" : "/register"}
               onClick={() => setOpen(false)}
               className="bracket block text-center border border-blood bg-blood py-3 font-mono text-[10px] uppercase tracking-[0.4em] text-black"
             >
-              Register
-            </a>
+              {authed ? "Dashboard" : "Register"}
+            </Link>
           </li>
         </ul>
       </div>

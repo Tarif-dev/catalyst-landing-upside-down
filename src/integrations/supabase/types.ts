@@ -14,16 +14,268 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      certificates: {
+        Row: {
+          certificate_code: string
+          id: string
+          issued_at: string
+          kind: string
+          recipient_name: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          certificate_code?: string
+          id?: string
+          issued_at?: string
+          kind?: string
+          recipient_name: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          certificate_code?: string
+          id?: string
+          issued_at?: string
+          kind?: string
+          recipient_name?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          college: string | null
+          course: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+          year_of_study: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          college?: string | null
+          course?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+          year_of_study?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          college?: string | null
+          course?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+          year_of_study?: string | null
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          attachment_url: string | null
+          demo_url: string | null
+          description: string
+          id: string
+          repo_url: string | null
+          submitted_at: string
+          team_id: string
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          attachment_url?: string | null
+          demo_url?: string | null
+          description: string
+          id?: string
+          repo_url?: string | null
+          submitted_at?: string
+          team_id: string
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          attachment_url?: string | null
+          demo_url?: string | null
+          description?: string
+          id?: string
+          repo_url?: string | null
+          submitted_at?: string
+          team_id?: string
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          college: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["member_role"]
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          college?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["member_role"]
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          college?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["member_role"]
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          leader_id: string
+          name: string
+          pass_code: string
+          payment_ref: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          tagline: string | null
+          track: Database["public"]["Enums"]["track_kind"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          leader_id: string
+          name: string
+          pass_code?: string
+          payment_ref?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          tagline?: string | null
+          track: Database["public"]["Enums"]["track_kind"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          leader_id?: string
+          name?: string
+          pass_code?: string
+          payment_ref?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          tagline?: string | null
+          track?: Database["public"]["Enums"]["track_kind"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_team_leader: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_team_member: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "participant"
+      member_role: "leader" | "member"
+      payment_status: "unpaid" | "pending" | "paid" | "refunded"
+      track_kind:
+        | "healthcare"
+        | "fintech"
+        | "sustainability"
+        | "education"
+        | "open"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +402,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "participant"],
+      member_role: ["leader", "member"],
+      payment_status: ["unpaid", "pending", "paid", "refunded"],
+      track_kind: [
+        "healthcare",
+        "fintech",
+        "sustainability",
+        "education",
+        "open",
+      ],
+    },
   },
 } as const

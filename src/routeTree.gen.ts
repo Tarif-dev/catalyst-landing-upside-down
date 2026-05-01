@@ -9,38 +9,200 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VerifyCodeRouteImport } from './routes/verify.$code'
+import { Route as TeamNewRouteImport } from './routes/team.new'
+import { Route as TeamTeamIdRouteImport } from './routes/team.$teamId'
+import { Route as SubmitTeamIdRouteImport } from './routes/submit.$teamId'
+import { Route as PassTeamIdRouteImport } from './routes/pass.$teamId'
+import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerifyCodeRoute = VerifyCodeRouteImport.update({
+  id: '/verify/$code',
+  path: '/verify/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamNewRoute = TeamNewRouteImport.update({
+  id: '/team/new',
+  path: '/team/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamTeamIdRoute = TeamTeamIdRouteImport.update({
+  id: '/team/$teamId',
+  path: '/team/$teamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubmitTeamIdRoute = SubmitTeamIdRouteImport.update({
+  id: '/submit/$teamId',
+  path: '/submit/$teamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PassTeamIdRoute = PassTeamIdRouteImport.update({
+  id: '/pass/$teamId',
+  path: '/pass/$teamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CertificateCodeRoute = CertificateCodeRouteImport.update({
+  id: '/certificate/$code',
+  path: '/certificate/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/certificate/$code': typeof CertificateCodeRoute
+  '/pass/$teamId': typeof PassTeamIdRoute
+  '/submit/$teamId': typeof SubmitTeamIdRoute
+  '/team/$teamId': typeof TeamTeamIdRoute
+  '/team/new': typeof TeamNewRoute
+  '/verify/$code': typeof VerifyCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/certificate/$code': typeof CertificateCodeRoute
+  '/pass/$teamId': typeof PassTeamIdRoute
+  '/submit/$teamId': typeof SubmitTeamIdRoute
+  '/team/$teamId': typeof TeamTeamIdRoute
+  '/team/new': typeof TeamNewRoute
+  '/verify/$code': typeof VerifyCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/certificate/$code': typeof CertificateCodeRoute
+  '/pass/$teamId': typeof PassTeamIdRoute
+  '/submit/$teamId': typeof SubmitTeamIdRoute
+  '/team/$teamId': typeof TeamTeamIdRoute
+  '/team/new': typeof TeamNewRoute
+  '/verify/$code': typeof VerifyCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/dashboard'
+    | '/login'
+    | '/register'
+    | '/certificate/$code'
+    | '/pass/$teamId'
+    | '/submit/$teamId'
+    | '/team/$teamId'
+    | '/team/new'
+    | '/verify/$code'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/dashboard'
+    | '/login'
+    | '/register'
+    | '/certificate/$code'
+    | '/pass/$teamId'
+    | '/submit/$teamId'
+    | '/team/$teamId'
+    | '/team/new'
+    | '/verify/$code'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/dashboard'
+    | '/login'
+    | '/register'
+    | '/certificate/$code'
+    | '/pass/$teamId'
+    | '/submit/$teamId'
+    | '/team/$teamId'
+    | '/team/new'
+    | '/verify/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
+  CertificateCodeRoute: typeof CertificateCodeRoute
+  PassTeamIdRoute: typeof PassTeamIdRoute
+  SubmitTeamIdRoute: typeof SubmitTeamIdRoute
+  TeamTeamIdRoute: typeof TeamTeamIdRoute
+  TeamNewRoute: typeof TeamNewRoute
+  VerifyCodeRoute: typeof VerifyCodeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +210,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verify/$code': {
+      id: '/verify/$code'
+      path: '/verify/$code'
+      fullPath: '/verify/$code'
+      preLoaderRoute: typeof VerifyCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team/new': {
+      id: '/team/new'
+      path: '/team/new'
+      fullPath: '/team/new'
+      preLoaderRoute: typeof TeamNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team/$teamId': {
+      id: '/team/$teamId'
+      path: '/team/$teamId'
+      fullPath: '/team/$teamId'
+      preLoaderRoute: typeof TeamTeamIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/submit/$teamId': {
+      id: '/submit/$teamId'
+      path: '/submit/$teamId'
+      fullPath: '/submit/$teamId'
+      preLoaderRoute: typeof SubmitTeamIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pass/$teamId': {
+      id: '/pass/$teamId'
+      path: '/pass/$teamId'
+      fullPath: '/pass/$teamId'
+      preLoaderRoute: typeof PassTeamIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/certificate/$code': {
+      id: '/certificate/$code'
+      path: '/certificate/$code'
+      fullPath: '/certificate/$code'
+      preLoaderRoute: typeof CertificateCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
+  CertificateCodeRoute: CertificateCodeRoute,
+  PassTeamIdRoute: PassTeamIdRoute,
+  SubmitTeamIdRoute: SubmitTeamIdRoute,
+  TeamTeamIdRoute: TeamTeamIdRoute,
+  TeamNewRoute: TeamNewRoute,
+  VerifyCodeRoute: VerifyCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
