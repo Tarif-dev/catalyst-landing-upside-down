@@ -91,7 +91,7 @@ function Admin() {
                   {["unpaid", "paid"].map((s) => (
                     <button
                       key={s}
-                      onClick={() => setStatus(t.id, s)}
+                      onClick={() => setStatus(t.id, s as "unpaid" | "paid")}
                       className={`font-mono text-[9px] uppercase tracking-[0.3em] px-3 py-1.5 border transition ${
                         t.payment_status === s
                           ? "border-blood bg-blood/20 text-blood"
