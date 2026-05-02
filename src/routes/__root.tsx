@@ -1,4 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Toaster } from "sonner";
+import { AuthProvider } from "@/lib/auth";
 
 import appCss from "../styles.css?url";
 
@@ -68,5 +70,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <AuthProvider>
+      <Outlet />
+      <Toaster
+        theme="dark"
+        position="top-center"
+        richColors
+        closeButton
+        toastOptions={{
+          style: {
+            background: "#0a0a0a",
+            border: "1px solid oklch(0.56 0.26 25 / 0.5)",
+            color: "oklch(0.94 0.018 85)",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "12px",
+            letterSpacing: "0.05em",
+          },
+        }}
+      />
+    </AuthProvider>
+  );
 }
