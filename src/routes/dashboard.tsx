@@ -2,15 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
-import { useAuth, AuthProvider } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Catalyst 2K26" }] }),
-  component: () => (
-    <AuthProvider>
-      <Dashboard />
-    </AuthProvider>
-  ),
+  component: Dashboard,
 });
 
 const TRACK_LABEL: Record<string, string> = {

@@ -3,16 +3,12 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
-import { AuthProvider, useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/team/new")({
   head: () => ({ meta: [{ title: "Create Team — Catalyst 2K26" }] }),
-  component: () => (
-    <AuthProvider>
-      <NewTeam />
-    </AuthProvider>
-  ),
+  component: NewTeam,
 });
 
 const TRACKS = [
