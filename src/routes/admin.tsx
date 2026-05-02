@@ -2,16 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
-import { AuthProvider, useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Catalyst 2K26" }] }),
-  component: () => (
-    <AuthProvider>
-      <Admin />
-    </AuthProvider>
-  ),
+  component: Admin,
 });
 
 function Admin() {
