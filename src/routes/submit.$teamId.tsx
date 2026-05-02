@@ -3,16 +3,12 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
-import { AuthProvider, useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/submit/$teamId")({
   head: () => ({ meta: [{ title: "Submit Project — Catalyst 2K26" }] }),
-  component: () => (
-    <AuthProvider>
-      <Submit />
-    </AuthProvider>
-  ),
+  component: Submit,
 });
 
 const schema = z.object({

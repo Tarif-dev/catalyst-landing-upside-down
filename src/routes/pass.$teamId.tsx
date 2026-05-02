@@ -2,16 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
-import { AuthProvider, useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { EventPass } from "@/components/EventPass";
 
 export const Route = createFileRoute("/pass/$teamId")({
   head: () => ({ meta: [{ title: "Event Pass — Catalyst 2K26" }] }),
-  component: () => (
-    <AuthProvider>
-      <PassPage />
-    </AuthProvider>
-  ),
+  component: PassPage,
 });
 
 function PassPage() {
