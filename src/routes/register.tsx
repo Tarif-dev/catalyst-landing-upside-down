@@ -64,6 +64,16 @@ function RegisterPage() {
       );
       return;
     }
+
+    // Supabase returns a user with empty identities when the email is already
+    // registered and email confirmation is enabled (prevents email enumeration).
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      setLoading(false);
+      toast.error("This email is already registered. Please sign in instead.");
+      nav({ to: "/login" });
+      return;
+    }
+
     if (data.user) {
       await supabase
         .from("profiles")
