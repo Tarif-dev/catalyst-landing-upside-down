@@ -6,6 +6,7 @@ import { PortalShell } from "@/components/PortalShell";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { Loader2, UploadCloud } from "lucide-react";
+import { getWelcomeEmailTemplate } from "@/lib/email-template";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Complete Application — Catalyst 2K26" }] }),
@@ -152,6 +153,28 @@ function OnboardingPage() {
         .eq("user_id", user.id);
 
       if (profileError) throw profileError;
+
+      // 3. Send Welcome Email via Resend
+      if (import.meta.env.VITE_RESEND_API_KEY && user.email) {
+        try {
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from: "Catalyst 2K26 <onboarding@resend.dev>", // NOTE: Change this to your verified domain for production
+              to: user.email,
+              subject: "Welcome to Catalyst 2K26",
+              html: getWelcomeEmailTemplate(`${window.location.origin}/dashboard`),
+            }),
+          });
+        } catch (emailErr) {
+          console.error("Failed to send welcome email:", emailErr);
+          // Don't throw here; we still want to let them into the dashboard
+        }
+      }
 
       // Force a reload so AuthProvider gets the updated profile
       window.location.href = "/dashboard";

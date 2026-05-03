@@ -14,7 +14,7 @@ export function PortalShell({ children, title }: { children: ReactNode; title?: 
       <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] blob-upside-down opacity-50 pointer-events-none" />
       
       <header className="sticky top-0 z-40 border-b border-border bg-background/60 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 sm:px-6 py-4">
+        <div className="mx-auto w-full flex max-w-6xl items-center justify-between px-5 sm:px-6 py-4">
           <Link to="/" className="flex items-center gap-4 group">
             <img src={amityLogo} alt="Amity" className="h-9 w-auto filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] transition-transform group-hover:scale-105" />
             <div className="hidden sm:block">
@@ -48,7 +48,7 @@ export function PortalShell({ children, title }: { children: ReactNode; title?: 
         </div>
       </header>
       
-      <main className="relative mx-auto max-w-6xl px-5 sm:px-6 py-12 sm:py-16 z-10">
+      <main className="relative mx-auto w-full max-w-6xl px-5 sm:px-6 py-12 sm:py-16 z-10 flex-1">
         {title && (
           <div className="mb-10 sm:mb-14 reveal">
             <div className="mb-4 flex items-center gap-3">
