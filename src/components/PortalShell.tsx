@@ -8,7 +8,7 @@ export function PortalShell({ children, title }: { children: ReactNode; title?: 
   const nav = useNavigate();
 
   return (
-    <div className="min-h-screen relative overflow-hidden portal-bg">
+    <div className="min-h-screen portal-bg theme-portal overflow-x-hidden flex flex-col relative text-bone font-body">
       {/* Cinematic Background Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] blob-blood opacity-60 pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] blob-upside-down opacity-50 pointer-events-none" />
