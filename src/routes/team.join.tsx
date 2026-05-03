@@ -12,7 +12,7 @@ export const Route = createFileRoute("/team/join")({
 });
 
 function JoinTeam() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const nav = useNavigate();
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
@@ -21,6 +21,10 @@ function JoinTeam() {
     if (loading) return;
     if (!user) {
       nav({ to: "/login" });
+      return;
+    }
+    if (profile && !profile.is_complete) {
+      nav({ to: "/onboarding" });
       return;
     }
     // Check if already in a team
@@ -34,7 +38,7 @@ function JoinTeam() {
       .then(({ data }) => {
         if (data) nav({ to: "/dashboard" });
       });
-  }, [user, loading, nav]);
+  }, [user, profile, loading, nav]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

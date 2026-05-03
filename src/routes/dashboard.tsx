@@ -25,7 +25,7 @@ const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
 };
 
 function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const nav = useNavigate();
   const [team, setTeam] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
@@ -39,6 +39,11 @@ function Dashboard() {
       nav({ to: "/login" });
       return;
     }
+    if (profile && !profile.is_complete) {
+      nav({ to: "/onboarding" });
+      return;
+    }
+    
     (async () => {
       const { data: tm } = await supabase
         .from("team_members")
@@ -64,7 +69,7 @@ function Dashboard() {
       setCerts(c ?? []);
       setBusy(false);
     })();
-  }, [user, loading, nav]);
+  }, [user, profile, loading, nav]);
 
   if (busy) {
     return (

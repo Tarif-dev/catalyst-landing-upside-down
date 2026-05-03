@@ -26,7 +26,7 @@ const schema = z.object({
 });
 
 function NewTeam() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const nav = useNavigate();
   const [form, setForm] = useState({ name: "", track: "open", tagline: "" });
   const [busy, setBusy] = useState(false);
@@ -35,6 +35,10 @@ function NewTeam() {
     if (loading) return;
     if (!user) {
       nav({ to: "/login" });
+      return;
+    }
+    if (profile && !profile.is_complete) {
+      nav({ to: "/onboarding" });
       return;
     }
     // already in a team?
@@ -47,7 +51,7 @@ function NewTeam() {
       .then(({ data }) => {
         if (data) nav({ to: "/dashboard" });
       });
-  }, [user, loading, nav]);
+  }, [user, profile, loading, nav]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

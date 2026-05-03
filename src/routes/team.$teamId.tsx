@@ -21,7 +21,7 @@ const TRACKS = [
 
 function TeamPage() {
   const { teamId } = Route.useParams();
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const nav = useNavigate();
   const [team, setTeam] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
@@ -50,8 +50,12 @@ function TeamPage() {
       nav({ to: "/login" });
       return;
     }
+    if (profile && !profile.is_complete) {
+      nav({ to: "/onboarding" });
+      return;
+    }
     load();
-  }, [user, loading, teamId, nav]);
+  }, [user, profile, loading, teamId, nav]);
 
   const removeMember = async (id: string) => {
     if (!confirm("Remove this member from the team?")) return;
