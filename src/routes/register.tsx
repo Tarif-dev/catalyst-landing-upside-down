@@ -125,10 +125,10 @@ function RegisterPage() {
         <p className="mb-6 font-serif italic text-bone/70 text-lg">
           One account per participant. The team leader registers first, then adds 1–4 teammates.
         </p>
-        <form onSubmit={submit} className="panel p-7 sm:p-9 space-y-5">
+        <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
           {fields.map((f) => (
             <div key={f.k}>
-              <label htmlFor={f.k} className="block font-mono text-[10px] uppercase tracking-[0.35em] text-blood/90">
+              <label htmlFor={f.k} className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
                 {f.label}
               </label>
               <input
@@ -139,16 +139,16 @@ function RegisterPage() {
                 placeholder={f.placeholder}
                 value={form[f.k]}
                 onChange={(e) => setForm({ ...form, [f.k]: e.target.value })}
-                className="mt-2 w-full bg-black border border-bone/25 px-4 py-3 text-bone text-base placeholder:text-bone/30 focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/40 transition"
+                className="input-styled"
               />
             </div>
           ))}
 
           <div>
-            <label htmlFor="password" className="block font-mono text-[10px] uppercase tracking-[0.35em] text-blood/90">
+            <label htmlFor="password" className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
               Password <span className="text-bone/40 normal-case tracking-normal">(min 8)</span>
             </label>
-            <div className="relative mt-2">
+            <div className="relative">
               <input
                 id="password"
                 type={showPw ? "text" : "password"}
@@ -156,14 +156,14 @@ function RegisterPage() {
                 autoComplete="new-password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full bg-black border border-bone/25 px-4 py-3 pr-12 text-bone text-base placeholder:text-bone/30 focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/40 transition"
+                className="input-styled pr-12"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPw((s) => !s)}
                 aria-label={showPw ? "Hide password" : "Show password"}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-bone/60 hover:text-blood transition"
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-bone/50 hover:text-blood transition-colors"
               >
                 {showPw ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -173,23 +173,23 @@ function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="bracket flex w-full items-center justify-center gap-2 border border-blood bg-blood py-3.5 font-mono text-[11px] uppercase tracking-[0.4em] text-black hover:bg-transparent hover:text-blood transition-all duration-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="btn-primary w-full flex items-center justify-center gap-3 mt-4"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading ? "Creating…" : "Create account"}
           </button>
 
-          <div className="relative my-1 flex items-center">
-            <span className="flex-1 border-t border-bone/15" />
-            <span className="px-3 font-mono text-[9px] uppercase tracking-[0.4em] text-bone/40">or</span>
-            <span className="flex-1 border-t border-bone/15" />
+          <div className="relative my-4 flex items-center">
+            <span className="flex-1 hairline" />
+            <span className="px-4 font-mono text-[9px] uppercase tracking-[0.4em] text-bone/50">or</span>
+            <span className="flex-1 hairline" />
           </div>
 
           <button
             type="button"
             onClick={google}
             disabled={googleLoading}
-            className="flex w-full items-center justify-center gap-3 border border-bone/30 bg-bone/[0.02] py-3 font-mono text-[11px] uppercase tracking-[0.35em] text-bone hover:bg-bone hover:text-black transition disabled:opacity-60"
+            className="btn-secondary w-full flex items-center justify-center gap-3"
           >
             {googleLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -199,9 +199,9 @@ function RegisterPage() {
             Continue with Google
           </button>
 
-          <p className="text-center text-base font-serif italic text-bone/70">
+          <p className="text-center text-base font-serif italic text-bone/70 mt-6">
             Already have an account?{" "}
-            <Link to="/login" className="text-blood hover:underline underline-offset-4">
+            <Link to="/login" className="text-blood hover:text-glow-blood transition-all underline-offset-4 hover:underline">
               Sign in
             </Link>
           </p>

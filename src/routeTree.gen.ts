@@ -16,6 +16,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyCodeRouteImport } from './routes/verify.$code'
 import { Route as TeamNewRouteImport } from './routes/team.new'
+import { Route as TeamJoinRouteImport } from './routes/team.join'
 import { Route as TeamTeamIdRouteImport } from './routes/team.$teamId'
 import { Route as SubmitTeamIdRouteImport } from './routes/submit.$teamId'
 import { Route as PassTeamIdRouteImport } from './routes/pass.$teamId'
@@ -56,6 +57,11 @@ const TeamNewRoute = TeamNewRouteImport.update({
   path: '/team/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamJoinRoute = TeamJoinRouteImport.update({
+  id: '/team/join',
+  path: '/team/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamTeamIdRoute = TeamTeamIdRouteImport.update({
   id: '/team/$teamId',
   path: '/team/$teamId',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/pass/$teamId': typeof PassTeamIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/$teamId': typeof TeamTeamIdRoute
+  '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
 }
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/pass/$teamId': typeof PassTeamIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/$teamId': typeof TeamTeamIdRoute
+  '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
 }
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/pass/$teamId': typeof PassTeamIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/$teamId': typeof TeamTeamIdRoute
+  '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
 }
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/pass/$teamId'
     | '/submit/$teamId'
     | '/team/$teamId'
+    | '/team/join'
     | '/team/new'
     | '/verify/$code'
   fileRoutesByTo: FileRoutesByTo
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/pass/$teamId'
     | '/submit/$teamId'
     | '/team/$teamId'
+    | '/team/join'
     | '/team/new'
     | '/verify/$code'
   id:
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/pass/$teamId'
     | '/submit/$teamId'
     | '/team/$teamId'
+    | '/team/join'
     | '/team/new'
     | '/verify/$code'
   fileRoutesById: FileRoutesById
@@ -169,6 +181,7 @@ export interface RootRouteChildren {
   PassTeamIdRoute: typeof PassTeamIdRoute
   SubmitTeamIdRoute: typeof SubmitTeamIdRoute
   TeamTeamIdRoute: typeof TeamTeamIdRoute
+  TeamJoinRoute: typeof TeamJoinRoute
   TeamNewRoute: typeof TeamNewRoute
   VerifyCodeRoute: typeof VerifyCodeRoute
 }
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team/join': {
+      id: '/team/join'
+      path: '/team/join'
+      fullPath: '/team/join'
+      preLoaderRoute: typeof TeamJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/team/$teamId': {
       id: '/team/$teamId'
       path: '/team/$teamId'
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   PassTeamIdRoute: PassTeamIdRoute,
   SubmitTeamIdRoute: SubmitTeamIdRoute,
   TeamTeamIdRoute: TeamTeamIdRoute,
+  TeamJoinRoute: TeamJoinRoute,
   TeamNewRoute: TeamNewRoute,
   VerifyCodeRoute: VerifyCodeRoute,
 }

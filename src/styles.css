@@ -5,8 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ---------------------------------------------------------------
- * CATALYST 2K26 — Black canvas. Rosarivo serif. Stranger Things bleed.
- * Minimal, editorial, cinematic. Subtle motion.
+ * CATALYST 2K26 — STRANGER THINGS OVERHAUL
+ * Richer darks for outdoor visibility, glassmorphism, glowing neon,
+ * cinematic editorial typography. 
  * --------------------------------------------------------------- */
 
 @theme inline {
@@ -41,60 +42,62 @@
   --color-amber: var(--amber);
   --color-bone: var(--bone);
   --color-void: var(--void);
+  --color-upside-down: var(--upside-down);
 
   --font-display: "Rosarivo", "Cormorant Garamond", serif;
   --font-serif: "Cormorant Garamond", "Rosarivo", serif;
-  --font-body: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Inter", "Roboto", sans-serif; /* Cleaner body font for readability */
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 :root {
-  --radius: 0;
+  --radius: 0.5rem;
 
-  /* Pure black canvas */
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.95 0.012 80);
+  /* Deep, rich cinematic dark — NOT pure black. High contrast for outdoors. */
+  --background: oklch(0.14 0.02 260); /* Deep indigo/slate */
+  --foreground: oklch(0.98 0.01 250); /* Crisp off-white */
 
-  --card: oklch(0.05 0.005 0);
-  --card-foreground: oklch(0.95 0.012 80);
-  --popover: oklch(0.03 0 0);
-  --popover-foreground: oklch(0.95 0.012 80);
+  /* Glassmorphic panels */
+  --card: oklch(0.18 0.03 260 / 0.6); 
+  --card-foreground: oklch(0.98 0.01 250);
+  --popover: oklch(0.16 0.03 260 / 0.8);
+  --popover-foreground: oklch(0.98 0.01 250);
 
-  --primary: oklch(0.55 0.26 25);
+  --primary: oklch(0.60 0.25 25); /* Stranger Things Red */
   --primary-foreground: oklch(0.98 0.01 90);
 
-  --secondary: oklch(0.1 0.005 0);
-  --secondary-foreground: oklch(0.95 0.012 80);
+  --secondary: oklch(0.25 0.05 260);
+  --secondary-foreground: oklch(0.95 0.01 250);
 
-  --muted: oklch(0.08 0.003 0);
-  --muted-foreground: oklch(0.65 0.02 80);
+  --muted: oklch(0.20 0.03 260);
+  --muted-foreground: oklch(0.75 0.02 250);
 
-  --accent: oklch(0.12 0.005 0);
-  --accent-foreground: oklch(0.97 0.012 80);
+  --accent: oklch(0.22 0.04 260);
+  --accent-foreground: oklch(0.98 0.01 250);
 
-  --destructive: oklch(0.55 0.26 25);
+  --destructive: oklch(0.60 0.25 25);
   --destructive-foreground: oklch(0.98 0.01 90);
 
-  --border: oklch(0.18 0.01 0);
-  --input: oklch(0.15 0.005 0);
-  --ring: oklch(0.55 0.26 25);
+  --border: oklch(0.35 0.05 260 / 0.3);
+  --input: oklch(0.15 0.02 260 / 0.5);
+  --ring: oklch(0.60 0.25 25);
 
-  /* Signature palette — restrained */
-  --blood: oklch(0.56 0.26 25);          /* Hawkins title red */
-  --magenta: oklch(0.65 0.26 350);       /* deep rose accent */
-  --cyan: oklch(0.78 0.14 200);          /* faint electric cyan */
-  --amber: oklch(0.82 0.15 75);
-  --bone: oklch(0.94 0.018 85);          /* aged paper / cream */
-  --void: oklch(0 0 0);
+  /* Signature palette */
+  --blood: oklch(0.60 0.25 25);          /* Hawkins red */
+  --magenta: oklch(0.65 0.26 350);       
+  --cyan: oklch(0.75 0.15 220);          /* 80s neon cyan */
+  --amber: oklch(0.85 0.18 80);
+  --bone: oklch(0.96 0.02 85);          
+  --void: oklch(0.08 0.02 260);          /* Deepest shade */
+  --upside-down: oklch(0.18 0.08 260);   /* Dark blue/purple */
 
-  --shadow-blood: 0 0 40px oklch(0.56 0.26 25 / 0.35), 0 0 100px oklch(0.56 0.26 25 / 0.15);
-  --shadow-soft: 0 30px 80px -30px oklch(0 0 0 / 0.8);
+  --shadow-blood: 0 0 20px oklch(0.60 0.25 25 / 0.4), 0 0 40px oklch(0.60 0.25 25 / 0.2);
+  --shadow-cyan: 0 0 20px oklch(0.75 0.15 220 / 0.4), 0 0 40px oklch(0.75 0.15 220 / 0.2);
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
 
-  --text-glow-blood: 0 0 14px oklch(0.56 0.26 25 / 0.55), 0 0 40px oklch(0.56 0.26 25 / 0.3);
-  --text-glow-bone: 0 0 18px oklch(0.94 0.018 85 / 0.18);
+  --text-glow-blood: 0 0 10px oklch(0.60 0.25 25 / 0.8), 0 0 20px oklch(0.60 0.25 25 / 0.5);
+  --text-glow-cyan: 0 0 10px oklch(0.75 0.15 220 / 0.8), 0 0 20px oklch(0.75 0.15 220 / 0.5);
 }
-
-.dark { --background: oklch(0 0 0); --foreground: oklch(0.95 0.012 80); }
 
 @layer base {
   * { border-color: var(--color-border); }
@@ -106,9 +109,10 @@
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
   }
 
-  /* Very subtle film grain only — no scanlines, keep it editorial */
+  /* Very subtle film grain only ? no scanlines, keep it editorial */
   body::after {
     content: "";
     position: fixed; inset: 0;
@@ -117,133 +121,132 @@
     mix-blend-mode: overlay;
   }
 
+  /* Portal Background Styles */
+  .portal-bg {
+    background-color: var(--background);
+    background-image: 
+      radial-gradient(circle at top right, oklch(0.25 0.1 260 / 0.4), transparent 40%),
+      radial-gradient(circle at bottom left, oklch(0.4 0.2 25 / 0.15), transparent 40%);
+    background-attachment: fixed;
+  }
+
+  /* Stranger things floating particles / dust overlay */
+  .portal-bg::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0; opacity: 0.08;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    mix-blend-mode: color-dodge;
+  }
+
   ::selection { background: var(--blood); color: var(--bone); }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--background); }
+  ::-webkit-scrollbar-thumb { background: oklch(0.3 0.05 260); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--blood); }
 }
 
 @layer utilities {
-  .font-display { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.005em; }
+  .font-display { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.02em; }
   .font-serif { font-family: var(--font-serif); }
   .font-body { font-family: var(--font-body); }
   .font-mono { font-family: var(--font-mono); }
-  .font-italic-display { font-family: var(--font-display); font-style: italic; }
 
   .text-blood { color: var(--blood); }
   .text-magenta { color: var(--magenta); }
   .text-cyan { color: var(--cyan); }
   .text-bone { color: var(--bone); }
-  .bg-blood { background: var(--blood); }
-  .bg-void { background: #000; }
-
+  .bg-blood { background-color: var(--blood); }
+  
   .text-glow-blood { text-shadow: var(--text-glow-blood); }
-  .text-glow-bone { text-shadow: var(--text-glow-bone); }
-
+  .text-glow-cyan { text-shadow: var(--text-glow-cyan); }
   .shadow-blood { box-shadow: var(--shadow-blood); }
-  .shadow-soft { box-shadow: var(--shadow-soft); }
 
-  /* Outlined Stranger Things-style title (still serif) */
-  .title-outline {
-    color: var(--blood);
-    text-shadow:
-      0 0 14px oklch(0.56 0.26 25 / 0.55),
-      0 0 50px oklch(0.56 0.26 25 / 0.3);
-  }
-  .title-stroke {
-    color: transparent;
-    -webkit-text-stroke: 1px var(--blood);
-    text-shadow: 0 0 22px oklch(0.56 0.26 25 / 0.45);
-  }
-
-  /* Editorial card — subtle border, soft hover lift */
+  /* Premium Glassmorphism Panel */
   .panel {
     position: relative;
-    background: linear-gradient(180deg, oklch(0.04 0 0 / 0.9), oklch(0 0 0 / 0.9));
-    border: 1px solid oklch(0.2 0.01 0);
-    transition: border-color 600ms ease, transform 600ms cubic-bezier(.2,.7,.2,1), box-shadow 600ms ease;
+    background: var(--card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-top: 1px solid oklch(0.4 0.05 260 / 0.5);
+    border-left: 1px solid oklch(0.4 0.05 260 / 0.3);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-panel);
+    transition: all 400ms cubic-bezier(.2,.7,.2,1);
+    overflow: hidden;
   }
-  .panel:hover {
-    border-color: oklch(0.56 0.26 25 / 0.55);
-    transform: translateY(-3px);
-    box-shadow: 0 24px 60px -30px oklch(0.56 0.26 25 / 0.45), inset 0 0 0 1px oklch(0.56 0.26 25 / 0.08);
-  }
-  .panel-blood { border-color: oklch(0.56 0.26 25 / 0.35); }
-
-  /* Hairline rule */
-  .hairline {
-    height: 1px;
-    background: linear-gradient(to right, transparent, oklch(0.56 0.26 25 / 0.6), transparent);
-  }
-  .hairline-bone {
-    height: 1px;
-    background: linear-gradient(to right, transparent, oklch(0.94 0.018 85 / 0.25), transparent);
-  }
-
-  /* Fine corner brackets */
-  .bracket { position: relative; }
-  .bracket::before, .bracket::after {
+  .panel::after {
     content: "";
     position: absolute;
-    width: 10px; height: 10px;
-    border: 1px solid var(--blood);
-    opacity: 0.7;
-    transition: opacity 400ms ease;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent 50%, rgba(255,255,255,0.02));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
   }
-  .bracket::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
-  .bracket::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
-  .bracket:hover::before, .bracket:hover::after { opacity: 1; }
+  .panel:hover {
+    border-color: oklch(0.60 0.25 25 / 0.5);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 20px oklch(0.60 0.25 25 / 0.2);
+  }
+
+  /* Interactive Elements */
+  .input-styled {
+    @apply w-full bg-black/40 border border-white/10 px-4 py-3 rounded-md text-bone text-base placeholder:text-white/30 focus:outline-none focus:border-blood focus:ring-2 focus:ring-blood/30 transition-all shadow-inner;
+  }
+
+  .btn-primary {
+    @apply relative overflow-hidden bg-blood text-white font-mono text-[12px] uppercase tracking-[0.3em] px-8 py-3.5 rounded-md border border-blood/50 shadow-[0_0_15px_oklch(0.6_0.25_25/0.4)] hover:shadow-[0_0_25px_oklch(0.6_0.25_25/0.8)] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .btn-primary:hover {
+    text-shadow: 0 0 8px white;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    @apply relative overflow-hidden bg-white/5 backdrop-blur-md text-bone font-mono text-[12px] uppercase tracking-[0.2em] px-8 py-3.5 rounded-md border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all duration-300;
+  }
+
+  /* Glowing Dividers */
+  .hairline {
+    height: 1px;
+    background: linear-gradient(to right, transparent, oklch(0.60 0.25 25 / 0.8), transparent);
+    box-shadow: 0 0 8px oklch(0.60 0.25 25 / 0.6);
+  }
+  .hairline-cyan {
+    height: 1px;
+    background: linear-gradient(to right, transparent, oklch(0.75 0.15 220 / 0.8), transparent);
+    box-shadow: 0 0 8px oklch(0.75 0.15 220 / 0.6);
+  }
 
   /* Subtle red wash blob */
   .blob-blood {
-    background: radial-gradient(closest-side, oklch(0.56 0.26 25 / 0.35), transparent 70%);
-    filter: blur(40px);
-  }
-  .blob-rose {
-    background: radial-gradient(closest-side, oklch(0.65 0.26 350 / 0.25), transparent 70%);
+    background: radial-gradient(closest-side, oklch(0.60 0.25 25 / 0.4), transparent 70%);
     filter: blur(50px);
   }
+  .blob-upside-down {
+    background: radial-gradient(closest-side, oklch(0.25 0.15 260 / 0.5), transparent 70%);
+    filter: blur(60px);
+  }
 
-  /* Reveal-on-scroll style (used as initial state) */
   .reveal {
     opacity: 0;
-    transform: translateY(14px);
-    animation: reveal 1.1s cubic-bezier(.2,.7,.2,1) forwards;
+    transform: translateY(20px);
+    animation: reveal 0.8s cubic-bezier(.2,.7,.2,1) forwards;
   }
-  .reveal-delay-1 { animation-delay: 0.12s; }
-  .reveal-delay-2 { animation-delay: 0.24s; }
-  .reveal-delay-3 { animation-delay: 0.36s; }
-  .reveal-delay-4 { animation-delay: 0.48s; }
-
-  .breathe { animation: breathe 6s ease-in-out infinite; }
-  .drift { animation: drift 14s ease-in-out infinite; }
-  .flicker-soft { animation: flicker-soft 7s infinite; }
-  .pulse-dot { animation: pulse-dot 2.4s ease-in-out infinite; }
-  .marquee-track { animation: marquee 50s linear infinite; }
+  .reveal-delay-1 { animation-delay: 0.1s; }
+  .reveal-delay-2 { animation-delay: 0.2s; }
+  .reveal-delay-3 { animation-delay: 0.3s; }
 }
 
 @keyframes reveal {
   to { opacity: 1; transform: translateY(0); }
-}
-@keyframes breathe {
-  0%, 100% { opacity: 0.85; text-shadow: 0 0 14px oklch(0.56 0.26 25 / 0.5), 0 0 50px oklch(0.56 0.26 25 / 0.25); }
-  50% { opacity: 1; text-shadow: 0 0 22px oklch(0.56 0.26 25 / 0.75), 0 0 80px oklch(0.56 0.26 25 / 0.4); }
-}
-@keyframes drift {
-  0%, 100% { transform: translate3d(0,0,0); }
-  50% { transform: translate3d(0,-10px,0); }
-}
-@keyframes flicker-soft {
-  0%, 96%, 100% { opacity: 1; }
-  97% { opacity: 0.85; }
-  98% { opacity: 1; }
-  98.5% { opacity: 0.7; }
-  99% { opacity: 1; }
-}
-@keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.56 0.26 25 / 0.6); opacity: 1; }
-  50% { box-shadow: 0 0 0 8px oklch(0.56 0.26 25 / 0); opacity: 0.7; }
-}
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-33.333%); }
 }
 
 main, header, footer, nav { position: relative; z-index: 2; }

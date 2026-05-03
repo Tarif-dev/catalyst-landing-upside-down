@@ -42,6 +42,7 @@ function NewTeam() {
       .from("team_members")
       .select("team_id")
       .eq("user_id", user.id)
+      .limit(1)
       .maybeSingle()
       .then(({ data }) => {
         if (data) nav({ to: "/dashboard" });
@@ -79,49 +80,49 @@ function NewTeam() {
   return (
     <PortalShell title="Forge your team">
       <div className="mx-auto max-w-xl">
-        <form onSubmit={submit} className="panel p-7 sm:p-9 space-y-6">
+        <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
           <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.35em] text-blood/90">Team name</label>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">Team name</label>
             <input
               required
               maxLength={50}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="mt-2 w-full bg-black border border-bone/25 px-4 py-3 text-bone text-base placeholder:text-bone/30 focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/40 transition"
+              className="input-styled"
               placeholder="The Hawkins Party"
             />
           </div>
           <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.35em] text-blood/90">Track</label>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">Track</label>
             <select
               value={form.track}
               onChange={(e) => setForm({ ...form, track: e.target.value })}
-              className="mt-2 w-full bg-black border border-bone/25 px-4 py-3 text-bone text-base focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/40 transition"
+              className="input-styled appearance-none cursor-pointer"
             >
               {TRACKS.map((t) => (
-                <option key={t.v} value={t.v} className="bg-black">{t.l}</option>
+                <option key={t.v} value={t.v} className="bg-void text-bone">{t.l}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.35em] text-blood/90">Tagline (optional)</label>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">Tagline (optional)</label>
             <input
               maxLength={120}
               value={form.tagline}
               onChange={(e) => setForm({ ...form, tagline: e.target.value })}
-              className="mt-2 w-full bg-black border border-bone/25 px-4 py-3 text-bone text-base placeholder:text-bone/30 focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/40 transition"
+              className="input-styled"
               placeholder="Friends don't lie."
             />
           </div>
           <button
             type="submit"
             disabled={busy}
-            className="bracket flex w-full items-center justify-center gap-2 border border-blood bg-blood py-3.5 font-mono text-[11px] uppercase tracking-[0.4em] text-black hover:bg-transparent hover:text-blood transition-all duration-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="btn-primary w-full flex items-center justify-center gap-3 mt-4"
           >
-            {busy && <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/40 border-t-black" />}
+            {busy && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
             {busy ? "Creating…" : "Create team"}
           </button>
-          <p className="text-center text-sm font-serif italic text-bone/60">
+          <p className="text-center text-sm font-serif italic text-bone/60 mt-4">
             You'll be set as leader. After this, add 1–4 more members (each must already have a Catalyst account).
           </p>
         </form>

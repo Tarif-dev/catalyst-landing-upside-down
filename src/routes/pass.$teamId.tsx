@@ -40,8 +40,8 @@ function PassPage() {
   if (members.length < 2) {
     return (
       <PortalShell title="Pass locked">
-        <p className="text-bone/60 mb-4">Your pass unlocks once your team has at least 2 members.</p>
-        <Link to="/team/$teamId" params={{ teamId }} className="text-blood underline">
+        <p className="text-bone/80 mb-6 text-lg font-serif">Your pass unlocks once your team has at least 2 members.</p>
+        <Link to="/team/$teamId" params={{ teamId }} className="btn-secondary">
           Manage team →
         </Link>
       </PortalShell>

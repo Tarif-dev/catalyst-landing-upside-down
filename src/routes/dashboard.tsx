@@ -44,6 +44,8 @@ function Dashboard() {
         .from("team_members")
         .select("team_id, teams(*)")
         .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       const t = (tm as any)?.teams ?? null;
       setTeam(t);
@@ -75,18 +77,26 @@ function Dashboard() {
   return (
     <PortalShell title={`Welcome, ${user?.email?.split("@")[0]}`}>
       {!team ? (
-        <div className="panel p-8 sm:p-10 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-4">No team yet</p>
-          <h2 className="font-display text-3xl text-bone mb-3">Assemble your party</h2>
-          <p className="font-serif italic text-bone/60 max-w-md mx-auto mb-6">
+        <div className="panel p-8 sm:p-12 text-center reveal">
+          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood text-glow-blood mb-6 font-bold">No team yet</p>
+          <h2 className="font-display text-4xl sm:text-5xl text-bone mb-4 drop-shadow-md">Assemble your party</h2>
+          <p className="font-serif italic text-bone/80 max-w-lg mx-auto mb-8 text-lg">
             Teams of 2–5. You'll be the leader. Invite your members by email after creation.
           </p>
-          <Link
-            to="/team/new"
-            className="bracket inline-block border border-blood bg-blood px-8 py-3 font-mono text-[10px] uppercase tracking-[0.4em] text-black hover:bg-transparent hover:text-blood transition"
-          >
-            Create team
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              to="/team/new"
+              className="btn-primary inline-flex items-center justify-center min-w-[200px]"
+            >
+              Create team
+            </Link>
+            <Link
+              to="/team/join"
+              className="btn-secondary inline-flex items-center justify-center min-w-[200px]"
+            >
+              Join via Code
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-8">
@@ -113,18 +123,18 @@ function Dashboard() {
 
             <div className="hairline my-6" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <Link to="/team/$teamId" params={{ teamId: team.id }} className="bracket border border-bone/15 px-4 py-3 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-bone/80 hover:border-blood hover:text-blood transition">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link to="/team/$teamId" params={{ teamId: team.id }} className="btn-secondary text-center px-4 py-3 border-white/20">
                 Manage team
               </Link>
-              <Link to="/pass/$teamId" params={{ teamId: team.id }} className="bracket border border-bone/15 px-4 py-3 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-bone/80 hover:border-blood hover:text-blood transition">
+              <Link to="/pass/$teamId" params={{ teamId: team.id }} className="btn-secondary text-center px-4 py-3 border-white/20">
                 Event Pass
               </Link>
-              <Link to="/submit/$teamId" params={{ teamId: team.id }} className="bracket border border-bone/15 px-4 py-3 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-bone/80 hover:border-blood hover:text-blood transition">
+              <Link to="/submit/$teamId" params={{ teamId: team.id }} className="btn-secondary text-center px-4 py-3 border-white/20">
                 {submission ? "Edit submission" : "Submit project"}
               </Link>
               {team.payment_status !== "paid" && (
-                <div className="bracket border border-amber/30 bg-amber/5 px-4 py-3 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+                <div className="btn-secondary text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-default">
                   Pay at venue
                 </div>
               )}
