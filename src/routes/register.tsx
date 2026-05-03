@@ -13,21 +13,15 @@ export const Route = createFileRoute("/register")({
 });
 
 const schema = z.object({
-  fullName: z.string().trim().min(2, "Enter your full name").max(100),
   email: z.string().trim().email("Enter a valid email").max(255),
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
-  phone: z.string().trim().min(7, "Enter a valid phone").max(20),
-  college: z.string().trim().min(2).max(150),
 });
 
 function RegisterPage() {
   const nav = useNavigate();
   const [form, setForm] = useState({
-    fullName: "",
     email: "",
     password: "",
-    phone: "",
-    college: "Amity University Kolkata",
   });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,7 +46,6 @@ function RegisterPage() {
       password: parsed.data.password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: { full_name: parsed.data.fullName },
       },
     });
     if (error) {
@@ -74,16 +67,7 @@ function RegisterPage() {
       return;
     }
 
-    if (data.user) {
-      await supabase
-        .from("profiles")
-        .update({
-          full_name: parsed.data.fullName,
-          phone: parsed.data.phone,
-          college: parsed.data.college,
-        })
-        .eq("user_id", data.user.id);
-    }
+
     setLoading(false);
     if (data.session) {
       toast.success("Account created. Welcome to Hawkins.", {
@@ -100,24 +84,19 @@ function RegisterPage() {
 
   const google = async () => {
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/dashboard`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
     });
-    if (result.error) {
+    if (error) {
       setGoogleLoading(false);
-      toast.error(result.error.message || "Google sign-in failed.");
-      return;
+      toast.error(error.message || "Google sign-in failed.");
     }
-    if (result.redirected) return;
-    nav({ to: "/dashboard" });
   };
 
-  const fields: { k: keyof typeof form; label: string; type: string; placeholder?: string; autoComplete?: string }[] = [
-    { k: "fullName", label: "Full name", type: "text", placeholder: "Eleven Hopper", autoComplete: "name" },
-    { k: "email", label: "Email", type: "email", placeholder: "you@hawkins.lab", autoComplete: "email" },
-    { k: "phone", label: "Phone", type: "tel", placeholder: "+91 …", autoComplete: "tel" },
-    { k: "college", label: "College / Institution", type: "text", autoComplete: "organization" },
-  ];
+
 
   return (
     <PortalShell title="Create your account">
@@ -126,23 +105,21 @@ function RegisterPage() {
           One account per participant. The team leader registers first, then adds 1–4 teammates.
         </p>
         <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
-          {fields.map((f) => (
-            <div key={f.k}>
-              <label htmlFor={f.k} className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
-                {f.label}
-              </label>
-              <input
-                id={f.k}
-                type={f.type}
-                required
-                autoComplete={f.autoComplete}
-                placeholder={f.placeholder}
-                value={form[f.k]}
-                onChange={(e) => setForm({ ...form, [f.k]: e.target.value })}
-                className="input-styled"
-              />
-            </div>
-          ))}
+          <div>
+            <label htmlFor="email" className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="you@hawkins.lab"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="input-styled"
+            />
+          </div>
 
           <div>
             <label htmlFor="password" className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">

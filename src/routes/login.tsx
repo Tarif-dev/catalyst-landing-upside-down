@@ -51,16 +51,16 @@ function LoginPage() {
 
   const google = async () => {
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/dashboard`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
     });
-    if (result.error) {
+    if (error) {
       setGoogleLoading(false);
-      toast.error(result.error.message || "Google sign-in failed.");
-      return;
+      toast.error(error.message || "Google sign-in failed.");
     }
-    if (result.redirected) return;
-    nav({ to: "/dashboard" });
   };
 
   return (
