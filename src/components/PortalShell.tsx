@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ReactNode } from "react";
 import amityLogo from "@/assets/amity_logo_white.png";
+import catalystLogo from "@/assets/catalyst_logo.png";
 import { useAuth } from "@/lib/auth";
 
 export function PortalShell({ children, title }: { children: ReactNode; title?: string }) {
@@ -15,14 +16,10 @@ export function PortalShell({ children, title }: { children: ReactNode; title?: 
       
       <header className="sticky top-0 z-40 border-b border-border bg-background/60 backdrop-blur-2xl">
         <div className="mx-auto w-full flex max-w-6xl items-center justify-between px-5 sm:px-6 py-4">
-          <Link to="/" className="flex items-center gap-4 group">
-            <img src={amityLogo} alt="Amity" className="h-9 w-auto filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] transition-transform group-hover:scale-105" fetchPriority="high" decoding="async" />
-            <div className="hidden sm:block">
-              <span className="block font-display text-lg text-bone leading-none tracking-wide group-hover:text-glow-cyan transition-all">CATALYST 2K26</span>
-              <span className="font-mono text-[9px] uppercase tracking-[0.4em] text-blood/80">
-                PORTAL
-              </span>
-            </div>
+          <Link to="/" className="flex items-center gap-3 group">
+            <img src={amityLogo} alt="Amity" className="h-8 w-auto filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] transition-transform group-hover:scale-105" fetchPriority="high" decoding="async" />
+            <div className="w-px h-7 bg-bone/20" />
+            <img src={catalystLogo} alt="Catalyst 2K26" className="h-7 w-auto brightness-200 transition-transform group-hover:scale-105" decoding="async" />
           </Link>
           <nav className="flex items-center gap-5 text-[14px]">
             {user ? (

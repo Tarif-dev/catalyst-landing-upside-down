@@ -27,6 +27,7 @@ export function EventPass({
   members: any[];
   currentUser?: any;
 }) {
+  const isPaid = team.payment_status === "paid";
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
   const [qr, setQr] = useState<string>("");
@@ -292,9 +293,21 @@ export function EventPass({
                 <div className="bg-white p-3 rounded-xl shadow-[0_0_40px_rgba(220,38,38,0.2)] w-full aspect-square relative group/qr">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/50 to-red-600/50 rounded-xl blur opacity-30 group-hover/qr:opacity-100 transition duration-500 animate-pulse z-[-1]" />
                   {qr ? (
-                    <img src={qr} alt="Verification QR" className="w-full h-full object-contain mix-blend-multiply rounded-lg" crossOrigin="anonymous" />
+                    <img
+                      src={qr}
+                      alt="Verification QR"
+                      className={`w-full h-full object-contain mix-blend-multiply rounded-lg transition-all duration-300 ${!isPaid ? "blur-md select-none" : ""}`}
+                      crossOrigin="anonymous"
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xs text-black/50 font-mono">Generating...</div>
+                  )}
+                  {/* Lock overlay for unpaid */}
+                  {!isPaid && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-black/20">
+                      <svg className="w-10 h-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                      <p className="mt-2 text-[9px] font-mono uppercase tracking-widest text-amber-400 text-center px-2">Payment Pending</p>
+                    </div>
                   )}
                   {/* Cyberpunk corners */}
                   <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-red-500" />

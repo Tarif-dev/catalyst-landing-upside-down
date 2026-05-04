@@ -52,6 +52,15 @@ function PassPage() {
 
   return (
     <PortalShell title="Your Event Pass">
+      {team.payment_status !== "paid" && (
+        <div className="mb-6 flex items-start gap-3 panel p-4 border-amber/40">
+          <span className="text-amber text-xl mt-0.5">⚠</span>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber font-bold">Payment Pending</p>
+            <p className="mt-1 font-serif italic text-bone/70">Your QR code is locked until payment is confirmed by the admin. The pass design is yours to keep!</p>
+          </div>
+        </div>
+      )}
       <p className="mb-6 font-serif italic text-bone/60 max-w-xl">
         Show this at the venue. Download it as a PNG and post it on LinkedIn, X, or Instagram —
         the Upside Down loves a good entrance.

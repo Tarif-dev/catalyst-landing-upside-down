@@ -53,10 +53,35 @@ function Admin() {
   };
 
   const toggleWinner = async (team: any) => {
-    const { error } = await supabase.from("teams").update({ is_winner: !team.is_winner }).eq("id", team.id);
+    const { error } = await (supabase.from("teams") as any).update({ is_winner: !team.is_winner }).eq("id", team.id);
     if (error) return toast.error(error.message);
     toast.success(team.is_winner ? "Winner status removed." : "🏆 Team marked as winner!");
     void load();
+  };
+
+  const openResume = async (resumeUrl: string) => {
+    if (!resumeUrl) return;
+    // Extract the file path from the full URL
+    // URL format: .../storage/v1/object/public/resumes/<path> or .../sign/<path>
+    try {
+      const match = resumeUrl.match(/\/resumes\/(.+)/);
+      if (!match) {
+        // Fallback: try to open the URL directly (may work if policy allows it)
+        window.open(resumeUrl, "_blank");
+        return;
+      }
+      const filePath = match[1];
+      const { data, error } = await supabase.storage
+        .from("resumes")
+        .createSignedUrl(filePath, 60 * 60); // 1 hour
+      if (error || !data?.signedUrl) {
+        toast.error("Could not generate resume link. Check bucket permissions.");
+        return;
+      }
+      window.open(data.signedUrl, "_blank");
+    } catch {
+      toast.error("Failed to open resume.");
+    }
   };
 
   /* ── CSV Exports ── */
@@ -366,16 +391,25 @@ function Admin() {
                 <h4 style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Professional Links</h4>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
                   {[
-                    { label: "LinkedIn", url: selectedParticipant.linkedin_url, icon: "🔗", color: "#0a66c2" },
-                    { label: "GitHub", url: selectedParticipant.github_url, icon: "🐙", color: "#111827" },
-                    { label: "Resume (PDF)", url: selectedParticipant.resume_url, icon: "📄", color: "#059669" },
-                  ].map(({ label, url, icon, color }) => (
+                    { label: "LinkedIn", url: selectedParticipant.linkedin_url, icon: "🔗", color: "#0a66c2", isResume: false },
+                    { label: "GitHub", url: selectedParticipant.github_url, icon: "🐙", color: "#111827", isResume: false },
+                    { label: "Resume (PDF)", url: selectedParticipant.resume_url, icon: "📄", color: "#059669", isResume: true },
+                  ].map(({ label, url, icon, color, isResume }) => (
                     <div key={label} style={{ background: "#f9fafb", borderRadius: 8, padding: "12px 14px", border: "1px solid #e5e7eb" }}>
                       <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 8 }}>{label}</div>
                       {url ? (
-                        <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: 13, color, textDecoration: "none", fontWeight: 500 }}>
-                          {icon} Open {label}
-                        </a>
+                        isResume ? (
+                          <button
+                            onClick={() => openResume(url)}
+                            style={{ fontSize: 13, color, textDecoration: "none", fontWeight: 500, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          >
+                            {icon} Open Resume
+                          </button>
+                        ) : (
+                          <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: 13, color, textDecoration: "none", fontWeight: 500 }}>
+                            {icon} Open {label}
+                          </a>
+                        )
                       ) : (
                         <span style={{ fontSize: 13, color: "#9ca3af" }}>Not provided</span>
                       )}
