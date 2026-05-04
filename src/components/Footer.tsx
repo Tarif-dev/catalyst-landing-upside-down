@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 export function Footer() {
   return (
     <footer
@@ -36,6 +38,9 @@ export function Footer() {
           <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/40 text-center">
             Amity University Kolkata · 21–22 May 2026
           </p>
+          <Link to="/admin-login" className="font-mono text-[8px] uppercase tracking-[0.4em] text-bone/20 hover:text-blood transition mt-4">
+            Admin Access
+          </Link>
         </div>
       </div>
     </footer>

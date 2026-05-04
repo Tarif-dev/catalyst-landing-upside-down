@@ -47,10 +47,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     Promise.all([
-      supabase.from("user_roles").select("role").eq("user_id", session.user.id).eq("role", "admin").maybeSingle(),
+      supabase.from("admins").select("id").eq("id", session.user.id).maybeSingle(),
       supabase.from("profiles").select("*").eq("user_id", session.user.id).maybeSingle()
-    ]).then(([roleRes, profRes]) => {
-      setIsAdmin(!!roleRes.data);
+    ]).then(([adminRes, profRes]) => {
+      setIsAdmin(!!adminRes.data);
       setProfile(profRes.data);
     });
   }, [session]);
