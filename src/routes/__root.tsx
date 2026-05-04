@@ -44,6 +44,9 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // DNS prefetch for Supabase API — reduces latency on first DB call
+      { rel: "dns-prefetch", href: "https://cflowfufdavtjvxrewqd.supabase.co" },
+      { rel: "preconnect", href: "https://cflowfufdavtjvxrewqd.supabase.co", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Rosarivo:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap",

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,6 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  // Track last fetched userId to avoid redundant DB calls
+  const lastFetchedUserId = useRef<string | null>(null);
 
   useEffect(() => {
     // Set up listener FIRST so we don't miss SIGNED_IN events
@@ -41,14 +43,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!session?.user) {
+    const userId = session?.user?.id ?? null;
+
+    if (!userId) {
       setIsAdmin(false);
       setProfile(null);
+      lastFetchedUserId.current = null;
       return;
     }
+
+    // Skip refetch if user hasn't changed (avoids double-fire on token refresh)
+    if (userId === lastFetchedUserId.current) return;
+    lastFetchedUserId.current = userId;
+
+    // Batch both requests in a single Promise.all
     Promise.all([
-      supabase.from("admins").select("id").eq("id", session.user.id).maybeSingle(),
-      supabase.from("profiles").select("*").eq("user_id", session.user.id).maybeSingle()
+      supabase.from("admins").select("id").eq("id", userId).maybeSingle(),
+      supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
     ]).then(([adminRes, profRes]) => {
       setIsAdmin(!!adminRes.data);
       setProfile(profRes.data);
@@ -64,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         isAdmin,
         signOut: async () => {
+          lastFetchedUserId.current = null;
           await supabase.auth.signOut();
         },
       }}
@@ -74,3 +86,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export const useAuth = () => useContext(AuthCtx);
+

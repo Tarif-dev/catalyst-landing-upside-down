@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import amityLogo from "@/assets/Amity_logo.png";
-import dustin from "@/assets/dustin.png";
-import eleven from "@/assets/eleven.png";
-import hopper from "@/assets/hopper.png";
-import steve from "@/assets/steve.png";
-import will from "@/assets/will.png";
+import amityLogo from "@/assets/amity_logo_white.png";
 
-const IMAGES = [amityLogo, dustin, eleven, hopper, steve, will];
+// These are loaded via URL for preloading only — NOT bundled into JS.
+// They are ~3.5MB each and must NOT be static imports.
+const CHARACTER_URLS = [
+  "/src/assets/dustin.png",
+  "/src/assets/eleven.png",
+  "/src/assets/hopper.png",
+  "/src/assets/steve.png",
+  "/src/assets/will.png",
+];
+
+const IMAGES = [amityLogo, ...CHARACTER_URLS];
 const VIDEO_THUMB =
   "https://image.mux.com/rt42FVRXL01VirdZbHjOMjPwd5sTP1LKKGFj1bDQpbnM/thumbnail.jpg?time=0";
 
@@ -39,7 +44,7 @@ export function Loader({ onDone }: { onDone: () => void }) {
       preloadImage(VIDEO_THUMB).then(tick),
     ];
 
-    const minTime = new Promise<void>((r) => setTimeout(r, 2400));
+    const minTime = new Promise<void>((r) => setTimeout(r, 1600));
 
     Promise.all([Promise.all(tasks), minTime]).then(() => {
       if (!mounted) return;

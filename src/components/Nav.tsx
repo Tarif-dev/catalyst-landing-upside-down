@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import amityLogo from "@/assets/Amity_logo.png";
+import amityLogo from "@/assets/amity_logo_white.png";
 import { supabase } from "@/integrations/supabase/client";
 
 export function Nav() {
@@ -59,6 +59,8 @@ export function Nav() {
             src={amityLogo}
             alt="Amity University Kolkata"
             className="h-8 sm:h-10 w-auto object-contain transition-opacity duration-500 group-hover:opacity-80"
+            decoding="async"
+            fetchPriority="high"
           />
         </a>
 

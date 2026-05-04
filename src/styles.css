@@ -159,6 +159,7 @@
     background: linear-gradient(180deg, oklch(0.04 0 0 / 0.9), oklch(0 0 0 / 0.9));
     border: 1px solid oklch(0.2 0.01 0);
     transition: border-color 600ms ease, transform 600ms cubic-bezier(.2,.7,.2,1), box-shadow 600ms ease;
+    contain: layout style;
   }
   .panel:hover {
     border-color: oklch(0.56 0.26 25 / 0.55);
@@ -216,7 +217,7 @@
   .drift { animation: drift 14s ease-in-out infinite; }
   .flicker-soft { animation: flicker-soft 7s infinite; }
   .pulse-dot { animation: pulse-dot 2.4s ease-in-out infinite; }
-  .marquee-track { animation: marquee 50s linear infinite; }
+  .marquee-track { animation: marquee 50s linear infinite; will-change: transform; }
 }
 
 @keyframes reveal {

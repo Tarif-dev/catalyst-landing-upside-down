@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
-import amityLogo from "@/assets/Amity_logo.png";
+import amityLogo from "@/assets/amity_logo_white.png";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/certificate/$code")({

@@ -23,7 +23,20 @@ function createSupabaseClient() {
       storage: typeof window !== 'undefined' ? localStorage : undefined,
       persistSession: true,
       autoRefreshToken: true,
-    }
+      // Detect session from URL (for email confirm redirects) only once
+      detectSessionInUrl: true,
+    },
+    global: {
+      headers: {
+        // Hint to the proxy that we accept compressed responses
+        'Accept-Encoding': 'gzip, br',
+      },
+    },
+    // Disable realtime entirely — we use polling via refetch, not subscriptions.
+    // This prevents 100s of simultaneous websocket handshakes under load.
+    realtime: {
+      params: { eventsPerSecond: 1 },
+    },
   });
 }
 
