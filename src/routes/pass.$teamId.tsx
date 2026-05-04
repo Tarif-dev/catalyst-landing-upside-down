@@ -48,6 +48,8 @@ function PassPage() {
     );
   }
 
+  const currentUser = members.find(m => m.user_id === user?.id) || members[0];
+
   return (
     <PortalShell title="Your Event Pass">
       <p className="mb-6 font-serif italic text-bone/60 max-w-xl">
@@ -55,7 +57,7 @@ function PassPage() {
         the Upside Down loves a good entrance.
       </p>
       <div className="mx-auto max-w-md">
-        <EventPass team={team} members={members} />
+        <EventPass team={team} members={members} currentUser={currentUser} />
       </div>
     </PortalShell>
   );

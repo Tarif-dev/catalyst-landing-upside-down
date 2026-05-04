@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { toPng } from "html-to-image";
-import amityLogo from "@/assets/Amity_logo.png";
+import amityLogo from "@/assets/amity_logo_white.png";
+import catalystLogo from "@/assets/catalyst_logo.png";
 import hopperImg from "@/assets/hopper.png";
 import dustinImg from "@/assets/dustin.png";
 import willImg from "@/assets/will.png";
@@ -20,54 +21,126 @@ const TRACK_CONFIG: Record<string, { label: string; img: string; theme: string }
 export function EventPass({
   team,
   members,
+  currentUser,
 }: {
   team: any;
   members: any[];
+  currentUser?: any;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const frontRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
   const [qr, setQr] = useState<string>("");
   const [busy, setBusy] = useState(false);
+  const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
     const verifyUrl = `${window.location.origin}/verify/${team.pass_code}`;
     QRCode.toDataURL(verifyUrl, {
       margin: 1,
-      width: 280,
-      color: { dark: "#ffffff", light: "#00000000" },
+      width: 400,
+      color: { dark: "#000000", light: "#ffffff" },
       errorCorrectionLevel: "H",
     }).then(setQr);
   }, [team.pass_code]);
 
-  const download = async () => {
-    if (!ref.current) return;
+  const download = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentRef = flipped ? backRef : frontRef;
+    if (!currentRef.current) return;
     setBusy(true);
     try {
-      const dataUrl = await toPng(ref.current, {
+      const dataUrl = await toPng(currentRef.current, {
         cacheBust: true,
-        pixelRatio: 3, // Higher quality for sharing
-        backgroundColor: "#0d021a", // Deep slate background matching new theme
+        pixelRatio: 3,
+        backgroundColor: "#000000",
       });
       const a = document.createElement("a");
       a.href = dataUrl;
-      a.download = `catalyst-2k26-${team.name.replace(/\s+/g, "-")}.png`;
+      const side = flipped ? "qr" : "pass";
+      a.download = `catalyst-2k26-${(currentUser?.full_name || team.name).replace(/\s+/g, "-")}-${side}.png`;
       a.click();
-    } catch (e) {
+      toast.success(`Pass ${side} saved to device.`);
+    } catch (err) {
       toast.error("Couldn't render pass.");
     } finally {
       setBusy(false);
     }
   };
 
-  const share = async () => {
+  const share = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     const text = `I'm in! 🌌 Building at Catalyst 2K26 — Amity University Kolkata's 24hr AI hackathon, May 21–22. Team: ${team.name}. #Catalyst2K26 #StrangerThings`;
     const url = window.location.href;
-    if (navigator.share) {
+    
+    setBusy(true);
+    try {
+      const currentRef = flipped ? backRef : frontRef;
+      if (!currentRef.current) throw new Error("Missing ref");
+      
+      const dataUrl = await toPng(currentRef.current, {
+        cacheBust: true,
+        pixelRatio: 3,
+        backgroundColor: "#000000",
+      });
+      
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const side = flipped ? "qr" : "pass";
+      const filename = `catalyst-2k26-${(currentUser?.full_name || team.name).replace(/\s+/g, "-")}-${side}.png`;
+      const file = new File([blob], filename, { type: "image/png" });
+      
+      const shareData = {
+        title: "Catalyst 2K26 — Event Pass",
+        text,
+        url,
+        files: [file],
+      };
+
+      // Try sharing with file if supported
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share(shareData);
+          return; // Success!
+        } catch (shareErr: any) {
+          if (shareErr.name === 'AbortError') return; // User cancelled
+          console.warn("Native file share failed, falling back:", shareErr);
+          throw shareErr; // Trigger fallback
+        }
+      } else if (navigator.share) {
+        // Fallback to basic text share if file sharing isn't supported by browser
+        try {
+          await navigator.share({ title: shareData.title, text: shareData.text, url: shareData.url });
+          toast.info("Shared link! (Image sharing unsupported)");
+          return;
+        } catch (shareErr: any) {
+          if (shareErr.name === 'AbortError') return;
+          throw shareErr; // Trigger fallback
+        }
+      } else {
+        throw new Error("Share API not supported");
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
+      
+      // Ultimate Fallback: Copy text to clipboard and trigger download
       try {
-        await navigator.share({ title: "Catalyst 2K26 — Event Pass", text, url });
-      } catch {/* user cancelled */}
-    } else {
-      navigator.clipboard.writeText(`${text}\n${url}`);
-      toast.success("Copied to clipboard.");
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        toast.success("Text copied! Downloading pass image...");
+        
+        const currentRef = flipped ? backRef : frontRef;
+        if (currentRef.current) {
+          const dataUrl = await toPng(currentRef.current, { cacheBust: true, pixelRatio: 3, backgroundColor: "#000000" });
+          const a = document.createElement("a");
+          a.href = dataUrl;
+          const side = flipped ? "qr" : "pass";
+          a.download = `catalyst-2k26-${(currentUser?.full_name || team.name).replace(/\s+/g, "-")}-${side}.png`;
+          a.click();
+        }
+      } catch (fallbackErr) {
+        toast.error("Couldn't share pass.");
+      }
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -75,118 +148,196 @@ export function EventPass({
   const track = TRACK_CONFIG[team.track] || TRACK_CONFIG.open;
 
   return (
-    <div className="space-y-6">
-      {/* Container for the pass itself - exactly what gets screenshotted */}
+    <div className="w-full flex flex-col items-center space-y-8 px-4">
+      {/* 3D Flip Container - using a vertical ID card ratio */}
       <div 
-        ref={ref} 
-        className="relative mx-auto w-full max-w-[480px] aspect-[4/5] overflow-hidden rounded-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-        style={{ background: "oklch(0.14 0.02 260)" }}
+        className="relative w-full max-w-[340px] sm:max-w-[360px] aspect-[2/3] cursor-pointer group"
+        style={{ perspective: "1500px" }}
+        onClick={() => setFlipped(!flipped)}
       >
-        {/* Cinematic Backdrop */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 z-0" />
-        <div className="absolute top-[-30%] right-[-20%] w-[80%] h-[80%] blob-blood opacity-40 mix-blend-screen" />
-        <div className="absolute bottom-[-20%] left-[-20%] w-[70%] h-[70%] blob-upside-down opacity-60 mix-blend-screen" />
-        
-        {/* Subtle Grid */}
         <div 
-          className="absolute inset-0 opacity-[0.05] z-0"
-          style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "20px 20px" }}
-        />
+          className="w-full h-full relative transition-transform duration-[800ms] ease-[cubic-bezier(0.175,0.885,0.32,1.275)]"
+          style={{ 
+            transformStyle: "preserve-3d",
+            transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)"
+          }}
+        >
+          {/* Front Side Wrapper */}
+          <div 
+            className="absolute inset-0 w-full h-full"
+            style={{ backfaceVisibility: "hidden" }}
+          >
+            <div 
+              ref={frontRef}
+              className="w-full h-full bg-[#050505] rounded-[24px] overflow-hidden border border-white/10 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.8)] relative flex flex-col"
+            >
+              {/* Modern Gradients & Background Effects */}
+              <div className="absolute inset-0 bg-gradient-to-br from-red-900/30 via-transparent to-black/80 z-0 pointer-events-none" />
+              <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-red-600/10 blur-[60px] rounded-full z-0 pointer-events-none" />
+              
+              {/* Subtle Grid Pattern for tech feel */}
+              <div 
+                className="absolute inset-0 opacity-[0.03] z-0 pointer-events-none"
+                style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+              />
 
-        {/* Character Image Background (Faded into bottom right) */}
-        <div className="absolute bottom-0 right-[-10%] w-[75%] h-[75%] opacity-80 z-0 select-none pointer-events-none mix-blend-luminosity">
-          <img 
-            src={track.img} 
-            alt="Track Character" 
-            className="w-full h-full object-contain object-bottom filter drop-shadow-[0_0_15px_rgba(220,38,38,0.3)] opacity-70"
-            crossOrigin="anonymous" 
-          />
-          {/* Gradient to blend image bottom into card */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-background" />
-        </div>
-
-        {/* Outer Frame overlay */}
-        <div className="absolute inset-4 border border-white/10 rounded-lg pointer-events-none z-10" />
-
-        {/* Foreground Content */}
-        <div className="relative h-full flex flex-col p-8 z-20">
-          
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div className="flex flex-col">
-              <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood text-glow-blood font-bold">Hawkins National Lab</span>
-              <span className="mt-1 font-mono text-[9px] uppercase tracking-[0.3em] text-bone/60">Classified Access · Level 4</span>
-            </div>
-            <img src={amityLogo} alt="Amity" className="h-8 w-auto filter opacity-90 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" crossOrigin="anonymous" />
-          </div>
-
-          {/* Hackathon Branding */}
-          <div className="mt-8">
-            <h1 className="font-display text-6xl leading-none text-bone tracking-wide drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
-              CATALYST
-            </h1>
-            <p className="font-display italic text-3xl text-blood text-glow-blood mt-1">2K26</p>
-            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.4em] text-bone/70 bg-black/40 inline-block px-3 py-1 rounded backdrop-blur-sm border border-white/5">
-              Amity University Kolkata
-            </p>
-          </div>
-
-          {/* Glowing Separator */}
-          <div className="w-full h-px bg-gradient-to-r from-blood via-red-500/50 to-transparent my-6 opacity-70 shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
-
-          {/* Team Info */}
-          <div className="bg-black/30 backdrop-blur-md border border-white/10 p-5 rounded-lg shadow-inner max-w-[80%]">
-            <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-blood font-bold">{track.label}</p>
-            <p className="mt-2 font-display text-3xl text-bone drop-shadow-md leading-tight">{team.name}</p>
-            {team.tagline && (
-              <p className="mt-2 font-serif italic text-sm text-bone/80 border-l-2 border-blood/50 pl-3">
-                "{team.tagline}"
-              </p>
-            )}
-          </div>
-
-          <div className="flex-1" />
-
-          {/* Footer Area with Barcode/QR */}
-          <div className="flex items-end justify-between w-full mt-6">
-            <div className="bg-black/50 backdrop-blur-md p-4 rounded-lg border border-white/10 flex flex-col">
-              <span className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/50 mb-1">Access Code</span>
-              <span className="font-display text-4xl text-blood text-glow-blood tracking-widest">{team.pass_code}</span>
-              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-bone/70 mt-3 pt-2 border-t border-white/10">
-                LDR: {leader?.full_name ?? "—"}
-              </span>
-            </div>
-            
-            {qr && (
-              <div className="bg-white/90 p-2 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                <img src={qr} alt="Verification QR" className="w-24 h-24" crossOrigin="anonymous" />
+              {/* Character Image Background Fade */}
+              <div className="absolute bottom-0 right-0 w-[120%] h-[70%] z-0 select-none pointer-events-none opacity-30 mix-blend-luminosity">
+                <img 
+                  src={track.img} 
+                  alt="Track Character" 
+                  className="w-full h-full object-contain object-bottom filter drop-shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+                  crossOrigin="anonymous" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#050505]/40 to-[#050505]" />
               </div>
-            )}
+
+              {/* Glass Inner Frame */}
+              <div className="absolute inset-2 rounded-[16px] border border-white/5 pointer-events-none z-10" />
+
+              {/* Layout Content */}
+              <div className="relative z-20 flex flex-col h-full p-6 sm:p-7">
+                
+                {/* Header */}
+                <div className="flex justify-between items-start">
+                  <div className="flex flex-col gap-1">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-red-500 font-bold flex items-center gap-1.5 drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(220,38,38,1)]" />
+                      Hawkins Lab
+                    </p>
+                    <p className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/40">Classified Access</p>
+                  </div>
+                  <img src={amityLogo} alt="Amity" className="h-6 w-auto opacity-80" crossOrigin="anonymous" />
+                </div>
+
+                {/* Event Title */}
+                <div className="relative mt-4 sm:mt-6 w-full h-20 sm:h-24">
+                  <img 
+                    src={catalystLogo} 
+                    alt="Catalyst" 
+                    className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-auto drop-shadow-lg" 
+                    crossOrigin="anonymous" 
+                  />
+                </div>
+
+                <div className="flex-1" /> {/* Spacer */}
+
+                {/* Dynamic Content: Team Info */}
+                <div className="bg-white/[0.03] backdrop-blur-md rounded-xl p-4 sm:p-5 border border-white/10 mb-6 shadow-inner">
+                  <p className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-red-400 font-bold mb-2">
+                    {track.label}
+                  </p>
+                  <h2 className="font-display text-2xl sm:text-3xl text-white leading-tight break-words line-clamp-2 drop-shadow-lg tracking-wider uppercase">
+                    {currentUser?.full_name || team.name}
+                  </h2>
+                  <div className="mt-3 pl-2 border-l border-red-500/30">
+                    <p className="font-mono text-[10px] text-white/80 uppercase tracking-widest">
+                      TEAM: {team.name}
+                    </p>
+                    {team.tagline && (
+                      <p className="font-serif italic text-[10px] sm:text-xs text-white/50 mt-1 line-clamp-2">
+                        "{team.tagline}"
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer Data */}
+                <div className="flex justify-between items-end">
+                  <div className="flex flex-col">
+                    <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/40 mb-1">Pass Code</p>
+                    <p className="font-mono text-3xl text-red-500 font-bold tracking-widest drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">
+                      {team.pass_code}
+                    </p>
+                  </div>
+                  <div className="flex flex-col text-right max-w-[40%]">
+                    <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/40 mb-1">Leader</p>
+                    <p className="font-mono text-xs text-white/80 truncate">
+                      {leader?.full_name ?? "—"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="w-full flex justify-center mt-6">
+                   <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 flex items-center gap-1.5 transition-colors group-hover:text-red-400/50">
+                     Tap to reveal QR <svg className="w-3 h-3 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                   </p>
+                </div>
+
+              </div>
+            </div>
           </div>
 
+          {/* Back Side Wrapper (QR Code) */}
+          <div 
+            className="absolute inset-0 w-full h-full"
+            style={{ 
+              backfaceVisibility: "hidden", 
+              transform: "rotateY(180deg)",
+            }}
+          >
+            <div 
+              ref={backRef}
+              className="w-full h-full bg-[#050205] rounded-[24px] overflow-hidden border border-red-500/20 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.8)] relative flex flex-col items-center justify-center p-6 sm:p-8"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent z-0 pointer-events-none" />
+              
+              <div className="relative z-10 w-full max-w-[220px] flex flex-col items-center">
+                <h2 className="font-display text-xl sm:text-2xl text-white tracking-[0.2em] uppercase mb-8 drop-shadow-md text-center leading-snug">
+                  Dimensional<br/>Access
+                </h2>
+                
+                {/* QR Code Frame */}
+                <div className="bg-white p-3 rounded-xl shadow-[0_0_40px_rgba(220,38,38,0.2)] w-full aspect-square relative group/qr">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/50 to-red-600/50 rounded-xl blur opacity-30 group-hover/qr:opacity-100 transition duration-500 animate-pulse z-[-1]" />
+                  {qr ? (
+                    <img src={qr} alt="Verification QR" className="w-full h-full object-contain mix-blend-multiply rounded-lg" crossOrigin="anonymous" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-black/50 font-mono">Generating...</div>
+                  )}
+                  {/* Cyberpunk corners */}
+                  <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-red-500" />
+                  <div className="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-red-500" />
+                  <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-red-500" />
+                  <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-red-500" />
+                </div>
+
+                <div className="mt-8 text-center w-full">
+                   <p className="font-mono text-red-500 text-glow-blood text-2xl sm:text-3xl font-bold tracking-[0.3em]">{team.pass_code}</p>
+                   <p className="font-mono text-[9px] uppercase tracking-[0.1em] text-white/40 mt-4 leading-relaxed max-w-[200px] mx-auto">
+                     Present to dimensional gate security for authorization.
+                   </p>
+                </div>
+              </div>
+
+              <div className="absolute bottom-6 w-full flex justify-center">
+                 <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 flex items-center gap-1.5 transition-colors group-hover:text-red-400/50">
+                   <svg className="w-3 h-3 animate-pulse transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg> Tap to flip back
+                 </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Action Buttons (Not part of the screenshot) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[480px] mx-auto">
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-[340px] sm:max-w-[360px] pt-4">
         <button
           onClick={download}
           disabled={busy}
-          className="btn-primary"
+          className="flex-1 btn-primary py-3.5 text-xs sm:text-sm tracking-[0.2em] uppercase rounded-xl transition-all"
         >
-          {busy ? "Rendering Portal..." : "Download Pass"}
+          {busy ? "Rendering..." : `Download ${flipped ? 'QR' : 'Pass'}`}
         </button>
         <button
           onClick={share}
-          className="btn-secondary"
+          disabled={busy}
+          className="flex-1 btn-secondary py-3.5 text-xs sm:text-sm tracking-[0.2em] uppercase rounded-xl transition-all bg-white/5 hover:bg-white/10 border border-white/10 text-white"
         >
-          Share Protocol
+          {busy ? "Generating..." : "Share"}
         </button>
       </div>
-      <p className="text-center text-xs font-serif italic text-bone/60">
-        Tag <span className="text-blood font-bold tracking-widest uppercase text-[10px]">@AmityKolkata</span> on comms.
-      </p>
     </div>
   );
 }
