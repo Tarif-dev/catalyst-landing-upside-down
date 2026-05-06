@@ -11,7 +11,8 @@ export function SectionTitle({
   align?: "center" | "left";
   italic?: boolean;
 }) {
-  const wrap = align === "left" ? "text-left items-start" : "text-center items-center";
+  const wrap =
+    align === "left" ? "text-left items-start" : "text-center items-center";
   return (
     <div className={`mb-14 sm:mb-20 flex flex-col ${wrap} reveal`}>
       {eyebrow && (

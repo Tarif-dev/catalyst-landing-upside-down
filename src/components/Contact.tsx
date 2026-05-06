@@ -4,7 +4,12 @@ import { SectionTitle } from "./SectionTitle";
 const RECIPIENT = "catalyst.auk@gmail.com";
 
 export function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
@@ -17,7 +22,8 @@ export function Contact() {
     const subject = form.subject.trim() || "Catalyst 2K26 — Enquiry";
     const message = form.message.trim();
 
-    if (!name || name.length > 100) return setError("Please enter your name (under 100 chars).");
+    if (!name || name.length > 100)
+      return setError("Please enter your name (under 100 chars).");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255)
       return setError("Please enter a valid email.");
     if (!message || message.length > 2000)
@@ -25,7 +31,7 @@ export function Contact() {
 
     const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
     const href = `mailto:${RECIPIENT}?subject=${encodeURIComponent(
-      subject
+      subject,
     )}&body=${encodeURIComponent(body)}`;
     window.location.href = href;
     setSent(true);
@@ -60,8 +66,8 @@ export function Contact() {
                 <span className="title-outline not-italic">frequency.</span>
               </h3>
               <p className="font-serif italic text-bone/60 text-base md:text-lg leading-relaxed mb-8">
-                Questions, sponsorships, press, or partnership proposals — send a
-                signal and we'll transmit back within 48 hours.
+                Questions, sponsorships, press, or partnership proposals — send
+                a signal and we'll transmit back within 48 hours.
               </p>
 
               <div className="space-y-4">

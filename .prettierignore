@@ -1,7 +1,3 @@
-node_modules
-dist
+src/styles.old.css
 .output
-.vinxi
-pnpm-lock.yaml
-package-lock.json
-routeTree.gen.ts
+node_modules

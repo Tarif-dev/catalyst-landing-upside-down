@@ -47,20 +47,20 @@ function JoinTeam() {
       toast.error("Please enter a valid 8-character team code.");
       return;
     }
-    
+
     setBusy(true);
     // Call the RPC
     const { data, error } = await supabase.rpc("join_team_by_code", {
       p_code: code.trim().toUpperCase(),
     });
-    
+
     setBusy(false);
-    
+
     if (error) {
       toast.error(error.message);
       return;
     }
-    
+
     toast.success("Successfully joined the team! Welcome to Hawkins.");
     nav({ to: "/dashboard" });
   };
@@ -68,13 +68,21 @@ function JoinTeam() {
   return (
     <PortalShell title="Join your party">
       <div className="mx-auto max-w-md">
-        <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood text-glow-blood mb-2 font-bold">Access Code</p>
-          <h2 className="font-display text-3xl sm:text-4xl text-bone mb-2">Enter Pass Code</h2>
-          <p className="text-sm font-serif italic text-bone/60 mb-6">
-            Ask your team leader for the 8-character code shown on their dashboard.
+        <form
+          onSubmit={submit}
+          className="panel p-8 sm:p-10 space-y-6 text-center"
+        >
+          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood text-glow-blood mb-2 font-bold">
+            Access Code
           </p>
-          
+          <h2 className="font-display text-3xl sm:text-4xl text-bone mb-2">
+            Enter Pass Code
+          </h2>
+          <p className="text-sm font-serif italic text-bone/60 mb-6">
+            Ask your team leader for the 8-character code shown on their
+            dashboard.
+          </p>
+
           <div>
             <input
               required
@@ -85,7 +93,7 @@ function JoinTeam() {
               placeholder="XXXXXXXX"
             />
           </div>
-          
+
           <button
             type="submit"
             disabled={busy || code.length !== 8}
@@ -94,9 +102,12 @@ function JoinTeam() {
             {busy && <Loader2 className="h-5 w-5 animate-spin" />}
             {busy ? "Authenticating…" : "Join Team"}
           </button>
-          
+
           <div className="pt-4 mt-4 border-t border-white/10">
-            <Link to="/dashboard" className="text-sm font-mono uppercase tracking-[0.2em] text-bone/40 hover:text-blood transition">
+            <Link
+              to="/dashboard"
+              className="text-sm font-mono uppercase tracking-[0.2em] text-bone/40 hover:text-blood transition"
+            >
               ← Back to Dashboard
             </Link>
           </div>

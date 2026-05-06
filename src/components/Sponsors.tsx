@@ -21,10 +21,7 @@ const tiers: Tier[] = [
     tag: "Tier 02 · Co-Presenter",
     note: "Fueling the 24-hour floor.",
     size: "lg",
-    sponsors: [
-      { name: "Palace Arcade" },
-      { name: "Scoops Ahoy" },
-    ],
+    sponsors: [{ name: "Palace Arcade" }, { name: "Scoops Ahoy" }],
   },
   {
     tier: "Cloud Partner",

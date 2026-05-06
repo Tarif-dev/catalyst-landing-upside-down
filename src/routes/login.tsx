@@ -24,7 +24,6 @@ function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) nav({ to: "/dashboard" });
@@ -42,21 +41,26 @@ function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
     if (error) {
-      toast.error(error.message === "Invalid login credentials" ? "Wrong email or password." : error.message);
+      toast.error(
+        error.message === "Invalid login credentials"
+          ? "Wrong email or password."
+          : error.message,
+      );
       return;
     }
     toast.success("Welcome back to Hawkins.");
     nav({ to: "/dashboard" });
   };
 
-
-
   return (
     <PortalShell title="Sign in">
       <div className="mx-auto max-w-md">
         <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
           <div>
-            <label htmlFor="email" className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
+            <label
+              htmlFor="email"
+              className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2"
+            >
               Email
             </label>
             <input
@@ -71,7 +75,10 @@ function LoginPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
+            <label
+              htmlFor="password"
+              className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2"
+            >
               Password
             </label>
             <div className="relative">
@@ -91,7 +98,11 @@ function LoginPage() {
                 aria-label={showPw ? "Hide password" : "Show password"}
                 className="absolute inset-y-0 right-0 flex items-center px-4 text-bone/50 hover:text-blood transition-colors"
               >
-                {showPw ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showPw ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
               </button>
             </div>
           </div>
@@ -104,11 +115,12 @@ function LoginPage() {
             {loading ? "Opening gate…" : "Enter"}
           </button>
 
-
-
           <p className="text-center text-base font-serif italic text-bone/70 mt-6">
             New here?{" "}
-            <Link to="/register" className="text-blood hover:text-glow-blood transition-all underline-offset-4 hover:underline">
+            <Link
+              to="/register"
+              className="text-blood hover:text-glow-blood transition-all underline-offset-4 hover:underline"
+            >
               Register your team
             </Link>
           </p>

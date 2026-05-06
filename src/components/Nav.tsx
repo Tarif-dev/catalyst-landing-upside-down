@@ -10,7 +10,9 @@ export function Nav() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAuthed(!!s));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) =>
+      setAuthed(!!s),
+    );
     return () => sub.subscription.unsubscribe();
   }, []);
 

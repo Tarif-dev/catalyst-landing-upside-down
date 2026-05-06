@@ -4,11 +4,11 @@ import amityLogo from "@/assets/amity_logo_white.png";
 // These are loaded via URL for preloading only — NOT bundled into JS.
 // They are ~3.5MB each and must NOT be static imports.
 const CHARACTER_URLS = [
-  "/src/assets/dustin.png",
-  "/src/assets/eleven.png",
-  "/src/assets/hopper.png",
-  "/src/assets/steve.png",
-  "/src/assets/will.png",
+  "/src/assets/dustin.webp",
+  "/src/assets/eleven.webp",
+  "/src/assets/hopper.webp",
+  "/src/assets/steve.webp",
+  "/src/assets/will.webp",
 ];
 
 const IMAGES = [amityLogo, ...CHARACTER_URLS];
@@ -163,9 +163,7 @@ export function Loader({ onDone }: { onDone: () => void }) {
                   className="relative inline-block h-3 w-3 rounded-full transition-all duration-500"
                   style={{
                     background: on ? c : "oklch(0.18 0.01 0)",
-                    boxShadow: on
-                      ? `0 0 14px ${c}, 0 0 28px ${c}`
-                      : "none",
+                    boxShadow: on ? `0 0 14px ${c}, 0 0 28px ${c}` : "none",
                     animationDelay: `${i * 90}ms`,
                   }}
                 />

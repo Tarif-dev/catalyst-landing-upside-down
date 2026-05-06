@@ -26,7 +26,6 @@ function RegisterPage() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) nav({ to: "/dashboard" });
@@ -53,20 +52,23 @@ function RegisterPage() {
       toast.error(
         error.message.toLowerCase().includes("already")
           ? "This email is already registered. Please sign in instead."
-          : error.message
+          : error.message,
       );
       return;
     }
 
     // Supabase returns a user with empty identities when the email is already
     // registered and email confirmation is enabled (prevents email enumeration).
-    if (data.user && data.user.identities && data.user.identities.length === 0) {
+    if (
+      data.user &&
+      data.user.identities &&
+      data.user.identities.length === 0
+    ) {
       setLoading(false);
       toast.error("This email is already registered. Please sign in instead.");
       nav({ to: "/login" });
       return;
     }
-
 
     setLoading(false);
     if (data.session) {
@@ -82,16 +84,19 @@ function RegisterPage() {
     }
   };
 
-
   return (
     <PortalShell title="Create your account">
       <div className="mx-auto max-w-xl">
         <p className="mb-6 font-serif italic text-bone/70 text-lg">
-          One account per participant. The team leader registers first, then adds 1–4 teammates.
+          One account per participant. The team leader registers first, then
+          adds 1–4 teammates.
         </p>
         <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
           <div>
-            <label htmlFor="email" className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
+            <label
+              htmlFor="email"
+              className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2"
+            >
               Email
             </label>
             <input
@@ -107,8 +112,14 @@ function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
-              Password <span className="text-bone/40 normal-case tracking-normal">(min 8)</span>
+            <label
+              htmlFor="password"
+              className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2"
+            >
+              Password{" "}
+              <span className="text-bone/40 normal-case tracking-normal">
+                (min 8)
+              </span>
             </label>
             <div className="relative">
               <input
@@ -127,7 +138,11 @@ function RegisterPage() {
                 aria-label={showPw ? "Hide password" : "Show password"}
                 className="absolute inset-y-0 right-0 flex items-center px-4 text-bone/50 hover:text-blood transition-colors"
               >
-                {showPw ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showPw ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
               </button>
             </div>
           </div>
@@ -141,11 +156,12 @@ function RegisterPage() {
             {loading ? "Creating…" : "Create account"}
           </button>
 
-
-
           <p className="text-center text-base font-serif italic text-bone/70 mt-6">
             Already have an account?{" "}
-            <Link to="/login" className="text-blood hover:text-glow-blood transition-all underline-offset-4 hover:underline">
+            <Link
+              to="/login"
+              className="text-blood hover:text-glow-blood transition-all underline-offset-4 hover:underline"
+            >
               Sign in
             </Link>
           </p>

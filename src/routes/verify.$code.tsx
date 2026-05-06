@@ -31,7 +31,9 @@ function VerifyPage() {
         <p className="text-bone/50">Checking the gate…</p>
       ) : team ? (
         <div className="panel panel-blood p-8 max-w-md">
-          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan">✓ Valid</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan">
+            ✓ Valid
+          </p>
           <h2 className="mt-2 font-display text-3xl text-bone">{team.name}</h2>
           <p className="mt-1 font-mono text-xs uppercase tracking-[0.3em] text-blood">
             {team.track}
@@ -42,11 +44,15 @@ function VerifyPage() {
         </div>
       ) : (
         <div className="panel p-8 max-w-md">
-          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood">✗ Invalid</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood">
+            ✗ Invalid
+          </p>
           <p className="mt-2 text-bone/60">No team matches this pass code.</p>
         </div>
       )}
-      <Link to="/" className="mt-6 inline-block text-blood underline">← Home</Link>
+      <Link to="/" className="mt-6 inline-block text-blood underline">
+        ← Home
+      </Link>
     </PortalShell>
   );
 }

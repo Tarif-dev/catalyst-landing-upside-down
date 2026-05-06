@@ -1,9 +1,9 @@
 import { SectionTitle } from "./SectionTitle";
-import dustin from "@/assets/dustin.png";
-import hopper from "@/assets/hopper.png";
-import eleven from "@/assets/eleven.png";
-import will from "@/assets/will.png";
-import steve from "@/assets/steve.png";
+import dustin from "@/assets/dustin.webp";
+import hopper from "@/assets/hopper.webp";
+import eleven from "@/assets/eleven.webp";
+import will from "@/assets/will.webp";
+import steve from "@/assets/steve.webp";
 
 const tracks = [
   {
@@ -70,11 +70,7 @@ const tracks = [
     role: "The Wildcard — shows up with a bat, a plan, and the right friends.",
     image: steve,
     desc: "No rules. No vertical. Agents, robotics, creative AI, dev-tools, hardware hybrids, anything that surprises the jury.",
-    looking: [
-      "Originality",
-      "Technical ambition",
-      "A demo that lands",
-    ],
+    looking: ["Originality", "Technical ambition", "A demo that lands"],
   },
 ];
 
@@ -83,7 +79,10 @@ export function Tracks() {
     <section id="tracks" className="relative px-5 sm:px-6 py-24 md:py-44">
       <div className="pointer-events-none absolute left-1/2 top-32 h-96 w-96 -translate-x-1/2 blob-blood opacity-40" />
       <div className="relative mx-auto max-w-6xl">
-        <SectionTitle eyebrow="Channels — Five Frequencies, Five Patrons" italic>
+        <SectionTitle
+          eyebrow="Channels — Five Frequencies, Five Patrons"
+          italic
+        >
           The Tracks.
         </SectionTitle>
 

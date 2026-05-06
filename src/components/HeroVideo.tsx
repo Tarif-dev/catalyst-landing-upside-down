@@ -13,7 +13,7 @@ export function HeroVideo() {
         nohotkeys
         thumbnailTime={0}
         style={{
-          // @ts-ignore - mux css vars
+          // @ts-expect-error - mux css vars
           "--controls": "none",
           "--media-object-fit": "cover",
           width: "100%",

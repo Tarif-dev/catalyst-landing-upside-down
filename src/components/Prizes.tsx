@@ -9,7 +9,10 @@ const breakdown = [
 
 export function Prizes() {
   return (
-    <section id="prizes" className="relative overflow-hidden px-5 sm:px-6 py-24 md:py-44 border-t border-blood/10">
+    <section
+      id="prizes"
+      className="relative overflow-hidden px-5 sm:px-6 py-24 md:py-44 border-t border-blood/10"
+    >
       <div className="pointer-events-none absolute left-1/2 top-1/3 h-[28rem] w-[28rem] max-w-[90vw] -translate-x-1/2 blob-blood opacity-60" />
       <div className="pointer-events-none absolute right-10 bottom-10 h-72 w-72 blob-rose opacity-40" />
 
@@ -34,7 +37,10 @@ export function Prizes() {
 
         <div className="grid gap-px bg-blood/15 grid-cols-2 md:grid-cols-4 reveal reveal-delay-2">
           {breakdown.map((item) => (
-            <div key={item.k} className="bracket relative bg-black px-3 sm:px-4 py-8 sm:py-10 text-center">
+            <div
+              key={item.k}
+              className="bracket relative bg-black px-3 sm:px-4 py-8 sm:py-10 text-center"
+            >
               <div className="font-mono text-[9px] uppercase tracking-[0.35em] sm:tracking-[0.4em] text-bone/45">
                 {item.k}
               </div>
@@ -49,7 +55,8 @@ export function Prizes() {
         </div>
 
         <p className="mt-12 sm:mt-16 text-center font-italic-display text-sm sm:text-base text-bone/50 italic px-2">
-          + track-wise swag · sponsor goodies · internship interviews · bragging rights until ’27
+          + track-wise swag · sponsor goodies · internship interviews · bragging
+          rights until ’27
         </p>
       </div>
     </section>

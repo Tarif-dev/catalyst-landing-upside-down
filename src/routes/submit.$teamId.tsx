@@ -13,21 +13,73 @@ export const Route = createFileRoute("/submit/$teamId")({
 });
 
 const TECH_OPTIONS = [
-  "Python", "JavaScript", "TypeScript", "React", "Next.js", "Node.js",
-  "FastAPI", "Flask", "Django", "TensorFlow", "PyTorch", "LangChain",
-  "OpenAI API", "Gemini API", "Hugging Face", "Scikit-learn", "PostgreSQL",
-  "MongoDB", "Firebase", "Supabase", "Docker", "AWS", "GCP", "Azure",
-  "Tailwind CSS", "Other",
+  "Python",
+  "JavaScript",
+  "TypeScript",
+  "React",
+  "Next.js",
+  "Node.js",
+  "FastAPI",
+  "Flask",
+  "Django",
+  "TensorFlow",
+  "PyTorch",
+  "LangChain",
+  "OpenAI API",
+  "Gemini API",
+  "Hugging Face",
+  "Scikit-learn",
+  "PostgreSQL",
+  "MongoDB",
+  "Firebase",
+  "Supabase",
+  "Docker",
+  "AWS",
+  "GCP",
+  "Azure",
+  "Tailwind CSS",
+  "Other",
 ];
 
 const schema = z.object({
-  title: z.string().trim().min(3, "Title must be at least 3 characters").max(120),
-  description: z.string().trim().min(50, "Please write at least 50 characters describing your project").max(3000),
-  problem_statement: z.string().trim().min(20, "Briefly describe the problem you solved").max(1000),
-  solution_approach: z.string().trim().min(20, "Describe your approach and how AI is used").max(1000),
-  repo_url: z.string().trim().url("Must be a valid URL").max(500).or(z.literal("")),
-  demo_url: z.string().trim().url("Must be a valid URL").max(500).or(z.literal("")),
-  video_url: z.string().trim().url("Must be a valid URL").max(500).or(z.literal("")),
+  title: z
+    .string()
+    .trim()
+    .min(3, "Title must be at least 3 characters")
+    .max(120),
+  description: z
+    .string()
+    .trim()
+    .min(50, "Please write at least 50 characters describing your project")
+    .max(3000),
+  problem_statement: z
+    .string()
+    .trim()
+    .min(20, "Briefly describe the problem you solved")
+    .max(1000),
+  solution_approach: z
+    .string()
+    .trim()
+    .min(20, "Describe your approach and how AI is used")
+    .max(1000),
+  repo_url: z
+    .string()
+    .trim()
+    .url("Must be a valid URL")
+    .max(500)
+    .or(z.literal("")),
+  demo_url: z
+    .string()
+    .trim()
+    .url("Must be a valid URL")
+    .max(500)
+    .or(z.literal("")),
+  video_url: z
+    .string()
+    .trim()
+    .url("Must be a valid URL")
+    .max(500)
+    .or(z.literal("")),
   tech_stack: z.string().optional(),
   screenshots: z.array(z.string()).optional(),
 });
@@ -57,12 +109,22 @@ function Submit() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { nav({ to: "/login" }); return; }
+    if (!user) {
+      nav({ to: "/login" });
+      return;
+    }
     (async () => {
       const [{ data: t }, { data: s }, { count }] = await Promise.all([
         supabase.from("teams").select("*").eq("id", teamId).maybeSingle(),
-        supabase.from("submissions").select("*").eq("team_id", teamId).maybeSingle(),
-        supabase.from("team_members").select("*", { count: "exact", head: true }).eq("team_id", teamId),
+        supabase
+          .from("submissions")
+          .select("*")
+          .eq("team_id", teamId)
+          .maybeSingle(),
+        supabase
+          .from("team_members")
+          .select("*", { count: "exact", head: true })
+          .eq("team_id", teamId),
       ]);
       setTeam(t);
       setMemberCount(count ?? 0);
@@ -77,7 +139,12 @@ function Submit() {
           video_url: s.video_url ?? "",
         });
         if ((s as any).tech_stack) {
-          setTechStack((s as any).tech_stack.split(",").map((t: string) => t.trim()).filter(Boolean));
+          setTechStack(
+            (s as any).tech_stack
+              .split(",")
+              .map((t: string) => t.trim())
+              .filter(Boolean),
+          );
         }
         if ((s as any).screenshots?.length) {
           setScreenshots((s as any).screenshots);
@@ -88,15 +155,15 @@ function Submit() {
   }, [user, loading, teamId, nav]);
 
   const toggleTech = (tech: string) => {
-    setTechStack(prev =>
-      prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]
+    setTechStack((prev) =>
+      prev.includes(tech) ? prev.filter((t) => t !== tech) : [...prev, tech],
     );
   };
 
   const addCustomTech = () => {
     const trimmed = customTech.trim();
     if (trimmed && !techStack.includes(trimmed)) {
-      setTechStack(prev => [...prev, trimmed]);
+      setTechStack((prev) => [...prev, trimmed]);
       setCustomTech("");
     }
   };
@@ -119,21 +186,25 @@ function Submit() {
         return;
       }
     }
-    setScreenshotFiles(prev => [...prev, ...files]);
+    setScreenshotFiles((prev) => [...prev, ...files]);
     // Generate local preview URLs
-    const previews = files.map(f => URL.createObjectURL(f));
-    setScreenshots(prev => [...prev, ...previews]);
+    const previews = files.map((f) => URL.createObjectURL(f));
+    setScreenshots((prev) => [...prev, ...previews]);
     e.target.value = "";
   };
 
   const removeScreenshot = (idx: number) => {
-    setScreenshots(prev => prev.filter((_, i) => i !== idx));
-    setScreenshotFiles(prev => prev.filter((_, i) => i !== idx));
+    setScreenshots((prev) => prev.filter((_, i) => i !== idx));
+    setScreenshotFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse({ ...form, tech_stack: techStack.join(", "), screenshots });
+    const parsed = schema.safeParse({
+      ...form,
+      tech_stack: techStack.join(", "),
+      screenshots,
+    });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
@@ -145,17 +216,21 @@ function Submit() {
     setSaving(true);
     try {
       // Upload new screenshots to Supabase Storage
-      let uploadedUrls: string[] = [];
+      const uploadedUrls: string[] = [];
       for (const file of screenshotFiles) {
         const path = `${teamId}/${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-        const { error: upErr } = await supabase.storage.from("submissions").upload(path, file, { upsert: true });
+        const { error: upErr } = await supabase.storage
+          .from("submissions")
+          .upload(path, file, { upsert: true });
         if (upErr) throw upErr;
-        const { data: { publicUrl } } = supabase.storage.from("submissions").getPublicUrl(path);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("submissions").getPublicUrl(path);
         uploadedUrls.push(publicUrl);
       }
       // Keep existing remote URLs (not blob:// previews) + new uploads
       const finalScreenshots = [
-        ...screenshots.filter(s => s.startsWith("http")),
+        ...screenshots.filter((s) => s.startsWith("http")),
         ...uploadedUrls,
       ];
 
@@ -172,7 +247,9 @@ function Submit() {
         screenshots: finalScreenshots.length ? finalScreenshots : null,
       };
 
-      const { error } = await supabase.from("submissions").upsert(payload, { onConflict: "team_id" });
+      const { error } = await supabase
+        .from("submissions")
+        .upsert(payload, { onConflict: "team_id" });
       if (error) throw error;
       toast.success("🚀 Submission saved successfully!");
       nav({ to: "/dashboard" });
@@ -183,36 +260,59 @@ function Submit() {
     }
   };
 
-  if (busy) return <PortalShell title="Loading…"><div /></PortalShell>;
-  if (!team) return <PortalShell title="Not found"><Link to="/dashboard" className="text-blood">← Dashboard</Link></PortalShell>;
+  if (busy)
+    return (
+      <PortalShell title="Loading…">
+        <div />
+      </PortalShell>
+    );
+  if (!team)
+    return (
+      <PortalShell title="Not found">
+        <Link to="/dashboard" className="text-blood">
+          ← Dashboard
+        </Link>
+      </PortalShell>
+    );
   const isLeader = team.leader_id === user?.id;
   if (!isLeader) {
     return (
       <PortalShell title="Leader only">
-        <p className="text-bone/60">Only your team leader can edit the project submission.</p>
+        <p className="text-bone/60">
+          Only your team leader can edit the project submission.
+        </p>
       </PortalShell>
     );
   }
   if (memberCount < 2) {
     return (
       <PortalShell title="Add members first">
-        <p className="text-bone/60 mb-4">You need at least 2 members on your team before submitting.</p>
-        <Link to="/team/$teamId" params={{ teamId }} className="text-blood underline">Manage team →</Link>
+        <p className="text-bone/60 mb-4">
+          You need at least 2 members on your team before submitting.
+        </p>
+        <Link
+          to="/team/$teamId"
+          params={{ teamId }}
+          className="text-blood underline"
+        >
+          Manage team →
+        </Link>
       </PortalShell>
     );
   }
 
   const field = (label: string, required = false) => (
     <label className="block font-mono text-[10px] uppercase tracking-[0.35em] text-bone/60 mb-2">
-      {label}{required && <span className="text-blood ml-1">*</span>}
+      {label}
+      {required && <span className="text-blood ml-1">*</span>}
     </label>
   );
-  const inputClass = "w-full bg-black/60 border border-bone/15 px-4 py-3 text-bone placeholder:text-bone/30 focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/30 transition-colors text-sm";
+  const inputClass =
+    "w-full bg-black/60 border border-bone/15 px-4 py-3 text-bone placeholder:text-bone/30 focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/30 transition-colors text-sm";
 
   return (
     <PortalShell title="Submit your project">
       <form onSubmit={submit} className="mx-auto max-w-3xl space-y-8">
-
         {/* — Section 1: Project Identity — */}
         <div className="panel p-6 sm:p-8 space-y-6">
           <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood font-bold border-b border-blood/20 pb-3">
@@ -222,9 +322,10 @@ function Submit() {
           <div>
             {field("Project Title", true)}
             <input
-              required maxLength={120}
+              required
+              maxLength={120}
               value={form.title}
-              onChange={e => setForm({ ...form, title: e.target.value })}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
               className={inputClass}
               placeholder="e.g. MindBridge — AI Mental Health Companion"
             />
@@ -233,37 +334,55 @@ function Submit() {
           <div>
             {field("Problem Statement", true)}
             <textarea
-              required maxLength={1000} rows={3}
+              required
+              maxLength={1000}
+              rows={3}
               value={form.problem_statement}
-              onChange={e => setForm({ ...form, problem_statement: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, problem_statement: e.target.value })
+              }
               className={inputClass}
               placeholder="What problem does your project solve? Why does it matter?"
             />
-            <p className="mt-1 font-mono text-[10px] text-bone/30">{form.problem_statement.length}/1000</p>
+            <p className="mt-1 font-mono text-[10px] text-bone/30">
+              {form.problem_statement.length}/1000
+            </p>
           </div>
 
           <div>
             {field("Solution & AI Usage", true)}
             <textarea
-              required maxLength={1000} rows={3}
+              required
+              maxLength={1000}
+              rows={3}
               value={form.solution_approach}
-              onChange={e => setForm({ ...form, solution_approach: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, solution_approach: e.target.value })
+              }
               className={inputClass}
               placeholder="How did you build it? Which AI models/APIs did you use and why?"
             />
-            <p className="mt-1 font-mono text-[10px] text-bone/30">{form.solution_approach.length}/1000</p>
+            <p className="mt-1 font-mono text-[10px] text-bone/30">
+              {form.solution_approach.length}/1000
+            </p>
           </div>
 
           <div>
             {field("Full Project Description", true)}
             <textarea
-              required maxLength={3000} rows={6}
+              required
+              maxLength={3000}
+              rows={6}
               value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
               className={inputClass}
               placeholder="Comprehensive description: features, architecture, challenges, learnings..."
             />
-            <p className="mt-1 font-mono text-[10px] text-bone/30">{form.description.length}/3000</p>
+            <p className="mt-1 font-mono text-[10px] text-bone/30">
+              {form.description.length}/3000
+            </p>
           </div>
         </div>
 
@@ -272,10 +391,12 @@ function Submit() {
           <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] text-cyan font-bold border-b border-cyan/20 pb-3">
             Tech Stack <span className="text-blood ml-1">*</span>
           </h2>
-          <p className="font-serif italic text-bone/60 text-sm">Select all technologies you used. You can also add custom ones.</p>
+          <p className="font-serif italic text-bone/60 text-sm">
+            Select all technologies you used. You can also add custom ones.
+          </p>
 
           <div className="flex flex-wrap gap-2">
-            {TECH_OPTIONS.map(tech => (
+            {TECH_OPTIONS.map((tech) => (
               <button
                 key={tech}
                 type="button"
@@ -295,8 +416,13 @@ function Submit() {
           <div className="flex gap-3">
             <input
               value={customTech}
-              onChange={e => setCustomTech(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addCustomTech(); }}}
+              onChange={(e) => setCustomTech(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCustomTech();
+                }
+              }}
               className={`${inputClass} flex-1`}
               placeholder="Add a custom technology..."
             />
@@ -311,12 +437,21 @@ function Submit() {
 
           {techStack.length > 0 && (
             <div>
-              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-bone/40 mb-2">Selected:</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-bone/40 mb-2">
+                Selected:
+              </p>
               <div className="flex flex-wrap gap-2">
-                {techStack.map(t => (
-                  <span key={t} className="flex items-center gap-1.5 px-3 py-1 bg-blood/10 border border-blood/30 font-mono text-[10px] text-blood">
+                {techStack.map((t) => (
+                  <span
+                    key={t}
+                    className="flex items-center gap-1.5 px-3 py-1 bg-blood/10 border border-blood/30 font-mono text-[10px] text-blood"
+                  >
                     {t}
-                    <button type="button" onClick={() => toggleTech(t)} className="hover:text-bone">
+                    <button
+                      type="button"
+                      onClick={() => toggleTech(t)}
+                      className="hover:text-bone"
+                    >
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -331,12 +466,22 @@ function Submit() {
           <h2 className="font-mono text-[10px] uppercase tracking-[0.5em] text-amber font-bold border-b border-amber/20 pb-3">
             Screenshots / Demo Images
           </h2>
-          <p className="font-serif italic text-bone/60 text-sm">Upload up to 5 images (max 5MB each). These will be visible to judges.</p>
+          <p className="font-serif italic text-bone/60 text-sm">
+            Upload up to 5 images (max 5MB each). These will be visible to
+            judges.
+          </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {screenshots.map((src, i) => (
-              <div key={i} className="relative aspect-video bg-black/40 border border-bone/15 overflow-hidden group">
-                <img src={src} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+              <div
+                key={i}
+                className="relative aspect-video bg-black/40 border border-bone/15 overflow-hidden group"
+              >
+                <img
+                  src={src}
+                  alt={`Screenshot ${i + 1}`}
+                  className="w-full h-full object-cover"
+                />
                 <button
                   type="button"
                   onClick={() => removeScreenshot(i)}
@@ -349,8 +494,17 @@ function Submit() {
             {screenshots.length < 5 && (
               <label className="aspect-video border border-dashed border-bone/25 flex flex-col items-center justify-center cursor-pointer hover:border-blood hover:bg-blood/5 transition-all">
                 <UploadCloud className="h-6 w-6 text-bone/40 mb-2" />
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-bone/40">Add image</span>
-                <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleScreenshots} />
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-bone/40">
+                  Add image
+                </span>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleScreenshots}
+                />
               </label>
             )}
           </div>
@@ -362,16 +516,28 @@ function Submit() {
             Project Links
           </h2>
           {[
-            { k: "repo_url", l: "Repository URL", p: "https://github.com/your-team/project" },
-            { k: "demo_url", l: "Live Demo URL", p: "https://your-demo.vercel.app" },
-            { k: "video_url", l: "Video Walkthrough (YouTube / Loom)", p: "https://youtube.com/watch?v=..." },
-          ].map(f => (
+            {
+              k: "repo_url",
+              l: "Repository URL",
+              p: "https://github.com/your-team/project",
+            },
+            {
+              k: "demo_url",
+              l: "Live Demo URL",
+              p: "https://your-demo.vercel.app",
+            },
+            {
+              k: "video_url",
+              l: "Video Walkthrough (YouTube / Loom)",
+              p: "https://youtube.com/watch?v=...",
+            },
+          ].map((f) => (
             <div key={f.k}>
               {field(f.l)}
               <input
                 type="url"
                 value={(form as any)[f.k]}
-                onChange={e => setForm({ ...form, [f.k]: e.target.value })}
+                onChange={(e) => setForm({ ...form, [f.k]: e.target.value })}
                 className={inputClass}
                 placeholder={f.p}
               />

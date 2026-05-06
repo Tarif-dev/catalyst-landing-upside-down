@@ -1,4 +1,6 @@
-export const getWelcomeEmailTemplate = (dashboardUrl: string) => `<!DOCTYPE html>
+export const getWelcomeEmailTemplate = (
+  dashboardUrl: string,
+) => `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">

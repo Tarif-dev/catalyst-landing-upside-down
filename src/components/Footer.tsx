@@ -13,11 +13,12 @@ export function Footer() {
           ▸ Final Transmission
         </p>
         <h2 className="font-display text-5xl sm:text-6xl md:text-8xl text-bone italic mb-8 sm:mb-10 leading-[1] reveal reveal-delay-1">
-          Will you <span className="title-outline not-italic font-display">answer</span>?
+          Will you{" "}
+          <span className="title-outline not-italic font-display">answer</span>?
         </h2>
         <p className="mx-auto max-w-xl font-serif text-lg leading-relaxed text-bone/60 mb-14 reveal reveal-delay-2">
-          Registrations open soon. Drop a line to the organizing team and be first
-          through the gate when it cracks.
+          Registrations open soon. Drop a line to the organizing team and be
+          first through the gate when it cracks.
         </p>
 
         <a
@@ -38,7 +39,10 @@ export function Footer() {
           <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/40 text-center">
             Amity University Kolkata · 21–22 May 2026
           </p>
-          <Link to="/admin-login" className="font-mono text-[8px] uppercase tracking-[0.4em] text-bone/20 hover:text-blood transition mt-4">
+          <Link
+            to="/admin-login"
+            className="font-mono text-[8px] uppercase tracking-[0.4em] text-bone/20 hover:text-blood transition mt-4"
+          >
             Admin Access
           </Link>
         </div>

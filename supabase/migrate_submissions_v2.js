@@ -1,9 +1,9 @@
 import pg from "pg";
+import { getDatabaseUrl } from "./db-url.js";
 const { Client } = pg;
 
 const client = new Client({
-  connectionString:
-    "postgresql://postgres:Catalyst_2k26()@db.cflowfufdavtjvxrewqd.supabase.co:5432/postgres",
+  connectionString: getDatabaseUrl(),
   ssl: { rejectUnauthorized: false },
 });
 
@@ -36,7 +36,10 @@ async function run() {
       await client.query(sql);
       console.log("✓ " + sql.slice(0, 70));
     } catch (e) {
-      if (e.message.includes("already exists") || e.message.includes("duplicate")) {
+      if (
+        e.message.includes("already exists") ||
+        e.message.includes("duplicate")
+      ) {
         console.log("↷ Skipped (exists): " + sql.slice(0, 60));
       } else {
         console.error("✗ Error: " + e.message + "\n  SQL: " + sql.slice(0, 80));

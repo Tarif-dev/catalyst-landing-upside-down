@@ -1,19 +1,62 @@
 import { SectionTitle } from "./SectionTitle";
 
 const events = [
-  { time: "09:00", day: "MAY 21", title: "Gates Open", note: "Check-in & breakfast." },
-  { time: "10:30", day: "MAY 21", title: "Opening Ceremony", note: "Tracks revealed. Clock starts." },
-  { time: "11:00", day: "MAY 21", title: "Hacking Begins", note: "Twenty-four hours on the wire." },
-  { time: "20:00", day: "MAY 21", title: "Mentor Hours", note: "Industry experts on the floor." },
-  { time: "03:00", day: "MAY 22", title: "Midnight Run", note: "Energy. Music. Beautiful chaos." },
-  { time: "11:00", day: "MAY 22", title: "Submissions Close", note: "Pencils down. Eyes up." },
-  { time: "13:00", day: "MAY 22", title: "Final Demos", note: "Pitch to the jury." },
-  { time: "17:00", day: "MAY 22", title: "Awards", note: "Champions of Hawkins crowned." },
+  {
+    time: "09:00",
+    day: "MAY 21",
+    title: "Gates Open",
+    note: "Check-in & breakfast.",
+  },
+  {
+    time: "10:30",
+    day: "MAY 21",
+    title: "Opening Ceremony",
+    note: "Tracks revealed. Clock starts.",
+  },
+  {
+    time: "11:00",
+    day: "MAY 21",
+    title: "Hacking Begins",
+    note: "Twenty-four hours on the wire.",
+  },
+  {
+    time: "20:00",
+    day: "MAY 21",
+    title: "Mentor Hours",
+    note: "Industry experts on the floor.",
+  },
+  {
+    time: "03:00",
+    day: "MAY 22",
+    title: "Midnight Run",
+    note: "Energy. Music. Beautiful chaos.",
+  },
+  {
+    time: "11:00",
+    day: "MAY 22",
+    title: "Submissions Close",
+    note: "Pencils down. Eyes up.",
+  },
+  {
+    time: "13:00",
+    day: "MAY 22",
+    title: "Final Demos",
+    note: "Pitch to the jury.",
+  },
+  {
+    time: "17:00",
+    day: "MAY 22",
+    title: "Awards",
+    note: "Champions of Hawkins crowned.",
+  },
 ];
 
 export function Timeline() {
   return (
-    <section id="timeline" className="relative px-5 sm:px-6 py-24 md:py-44 border-t border-blood/10">
+    <section
+      id="timeline"
+      className="relative px-5 sm:px-6 py-24 md:py-44 border-t border-blood/10"
+    >
       <div className="mx-auto max-w-4xl">
         <SectionTitle eyebrow="Transmission — 21 / 22 May 2026" italic>
           The Schedule.
@@ -41,7 +84,9 @@ export function Timeline() {
                 <h3 className="font-display text-xl sm:text-2xl md:text-3xl text-bone italic leading-tight transition-colors group-hover:text-blood">
                   {e.title}
                 </h3>
-                <p className="mt-2 text-sm sm:text-base text-bone/55 font-serif">{e.note}</p>
+                <p className="mt-2 text-sm sm:text-base text-bone/55 font-serif">
+                  {e.note}
+                </p>
               </div>
             </li>
           ))}

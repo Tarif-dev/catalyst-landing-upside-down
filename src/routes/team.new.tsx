@@ -20,8 +20,19 @@ const TRACKS = [
 ];
 
 const schema = z.object({
-  name: z.string().trim().min(2).max(50).regex(/^[\w\s\-\.\&]+$/, "Letters, numbers, spaces, - . & only"),
-  track: z.enum(["healthcare", "fintech", "sustainability", "education", "open"]),
+  name: z
+    .string()
+    .trim()
+    .min(2)
+    .max(50)
+    .regex(/^[\w\s.&-]+$/, "Letters, numbers, spaces, - . & only"),
+  track: z.enum([
+    "healthcare",
+    "fintech",
+    "sustainability",
+    "education",
+    "open",
+  ]),
   tagline: z.string().trim().max(120).optional(),
 });
 
@@ -74,7 +85,11 @@ function NewTeam() {
       .single();
     setBusy(false);
     if (error) {
-      toast.error(error.message.includes("unique") ? "Team name already taken." : error.message);
+      toast.error(
+        error.message.includes("unique")
+          ? "Team name already taken."
+          : error.message,
+      );
       return;
     }
     toast.success("Team created. Now add your members.");
@@ -86,7 +101,9 @@ function NewTeam() {
       <div className="mx-auto max-w-xl">
         <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
           <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">Team name</label>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
+              Team name
+            </label>
             <input
               required
               maxLength={50}
@@ -97,19 +114,25 @@ function NewTeam() {
             />
           </div>
           <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">Track</label>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
+              Track
+            </label>
             <select
               value={form.track}
               onChange={(e) => setForm({ ...form, track: e.target.value })}
               className="input-styled appearance-none cursor-pointer"
             >
               {TRACKS.map((t) => (
-                <option key={t.v} value={t.v} className="bg-void text-bone">{t.l}</option>
+                <option key={t.v} value={t.v} className="bg-void text-bone">
+                  {t.l}
+                </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">Tagline (optional)</label>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2">
+              Tagline (optional)
+            </label>
             <input
               maxLength={120}
               value={form.tagline}
@@ -123,11 +146,14 @@ function NewTeam() {
             disabled={busy}
             className="btn-primary w-full flex items-center justify-center gap-3 mt-4"
           >
-            {busy && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
+            {busy && (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            )}
             {busy ? "Creating…" : "Create team"}
           </button>
           <p className="text-center text-sm font-serif italic text-bone/60 mt-4">
-            You'll be set as leader. After this, add 1–4 more members (each must already have a Catalyst account).
+            You'll be set as leader. After this, add 1–4 more members (each must
+            already have a Catalyst account).
           </p>
         </form>
       </div>

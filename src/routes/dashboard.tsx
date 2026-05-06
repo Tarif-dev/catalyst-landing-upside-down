@@ -43,7 +43,7 @@ function Dashboard() {
       nav({ to: "/onboarding" });
       return;
     }
-    
+
     (async () => {
       const { data: tm } = await supabase
         .from("team_members")
@@ -57,7 +57,11 @@ function Dashboard() {
       if (t) {
         const [{ data: ms }, { data: sub }] = await Promise.all([
           supabase.from("team_members").select("*").eq("team_id", t.id),
-          supabase.from("submissions").select("*").eq("team_id", t.id).maybeSingle(),
+          supabase
+            .from("submissions")
+            .select("*")
+            .eq("team_id", t.id)
+            .maybeSingle(),
         ]);
         setMembers(ms ?? []);
         setSubmission(sub);
@@ -83,10 +87,15 @@ function Dashboard() {
     <PortalShell title={`Welcome, ${user?.email?.split("@")[0]}`}>
       {!team ? (
         <div className="panel p-8 sm:p-12 text-center reveal">
-          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood text-glow-blood mb-6 font-bold">No team yet</p>
-          <h2 className="font-display text-4xl sm:text-5xl text-bone mb-4 drop-shadow-md">Assemble your party</h2>
+          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood text-glow-blood mb-6 font-bold">
+            No team yet
+          </p>
+          <h2 className="font-display text-4xl sm:text-5xl text-bone mb-4 drop-shadow-md">
+            Assemble your party
+          </h2>
           <p className="font-serif italic text-bone/80 max-w-lg mx-auto mb-8 text-lg">
-            Teams of 2–5. You'll be the leader. Invite your members by email after creation.
+            Teams of 2–5. You'll be the leader. Invite your members by email
+            after creation.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
@@ -109,33 +118,61 @@ function Dashboard() {
           <div className="panel p-6 sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood">Team</p>
-                <h2 className="font-display text-3xl sm:text-4xl text-bone mt-1">{team.name}</h2>
-                <p className="mt-1 font-serif italic text-bone/60">{TRACK_LABEL[team.track]}</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood">
+                  Team
+                </p>
+                <h2 className="font-display text-3xl sm:text-4xl text-bone mt-1">
+                  {team.name}
+                </h2>
+                <p className="mt-1 font-serif italic text-bone/60">
+                  {TRACK_LABEL[team.track]}
+                </p>
                 {team.tagline && (
-                  <p className="mt-2 text-bone/70 font-serif italic">"{team.tagline}"</p>
+                  <p className="mt-2 text-bone/70 font-serif italic">
+                    "{team.tagline}"
+                  </p>
                 )}
               </div>
               <div className="text-right">
-                <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-bone/50">Status</p>
-                <p className={`mt-1 font-mono text-sm uppercase tracking-[0.3em] ${STATUS_LABEL[team.payment_status].tone}`}>
+                <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-bone/50">
+                  Status
+                </p>
+                <p
+                  className={`mt-1 font-mono text-sm uppercase tracking-[0.3em] ${STATUS_LABEL[team.payment_status].tone}`}
+                >
                   {STATUS_LABEL[team.payment_status].label}
                 </p>
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-bone/40">Pass code</p>
-                <p className="font-display text-xl text-blood">{team.pass_code}</p>
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-bone/40">
+                  Pass code
+                </p>
+                <p className="font-display text-xl text-blood">
+                  {team.pass_code}
+                </p>
               </div>
             </div>
 
             <div className="hairline my-6" />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link to="/team/$teamId" params={{ teamId: team.id }} className="btn-secondary text-center px-4 py-3 border-white/20">
+              <Link
+                to="/team/$teamId"
+                params={{ teamId: team.id }}
+                className="btn-secondary text-center px-4 py-3 border-white/20"
+              >
                 Manage team
               </Link>
-              <Link to="/pass/$teamId" params={{ teamId: team.id }} className="btn-secondary text-center px-4 py-3 border-white/20">
+              <Link
+                to="/pass/$teamId"
+                params={{ teamId: team.id }}
+                className="btn-secondary text-center px-4 py-3 border-white/20"
+              >
                 Event Pass
               </Link>
-              <Link to="/submit/$teamId" params={{ teamId: team.id }} className="btn-secondary text-center px-4 py-3 border-white/20">
+              <Link
+                to="/submit/$teamId"
+                params={{ teamId: team.id }}
+                className="btn-secondary text-center px-4 py-3 border-white/20"
+              >
                 {submission ? "Edit submission" : "Submit project"}
               </Link>
               {team.payment_status !== "paid" && (
@@ -148,15 +185,22 @@ function Dashboard() {
 
           {/* Members */}
           <div className="panel p-6 sm:p-8">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-4">Roster · {members.length}/5</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-4">
+              Roster · {members.length}/5
+            </p>
             <ul className="divide-y divide-bone/10">
               {members.map((m) => (
-                <li key={m.id} className="py-3 flex items-center justify-between">
+                <li
+                  key={m.id}
+                  className="py-3 flex items-center justify-between"
+                >
                   <div>
                     <p className="text-bone">{m.full_name}</p>
                     <p className="text-xs text-bone/50 font-mono">{m.email}</p>
                   </div>
-                  <span className={`font-mono text-[10px] uppercase tracking-[0.3em] ${m.role === "leader" ? "text-blood" : "text-bone/50"}`}>
+                  <span
+                    className={`font-mono text-[10px] uppercase tracking-[0.3em] ${m.role === "leader" ? "text-blood" : "text-bone/50"}`}
+                  >
                     {m.role}
                   </span>
                 </li>
@@ -167,21 +211,35 @@ function Dashboard() {
           {/* Submission */}
           {submission && (
             <div className="panel p-6 sm:p-8">
-              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-2">Submission</p>
-              <h3 className="font-display text-2xl text-bone">{submission.title}</h3>
-              <p className="mt-2 text-bone/70 font-serif">{submission.description}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-2">
+                Submission
+              </p>
+              <h3 className="font-display text-2xl text-bone">
+                {submission.title}
+              </h3>
+              <p className="mt-2 text-bone/70 font-serif">
+                {submission.description}
+              </p>
             </div>
           )}
 
           {/* Certs */}
           {certs.length > 0 && (
             <div className="panel p-6 sm:p-8">
-              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-4">Your certificates</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-4">
+                Your certificates
+              </p>
               <ul className="space-y-2">
                 {certs.map((c) => (
                   <li key={c.id} className="flex items-center justify-between">
-                    <span className="text-bone capitalize">{c.kind} — {c.recipient_name}</span>
-                    <Link to="/certificate/$code" params={{ code: c.certificate_code }} className="font-mono text-[10px] uppercase tracking-[0.3em] text-blood hover:underline">
+                    <span className="text-bone capitalize">
+                      {c.kind} — {c.recipient_name}
+                    </span>
+                    <Link
+                      to="/certificate/$code"
+                      params={{ code: c.certificate_code }}
+                      className="font-mono text-[10px] uppercase tracking-[0.3em] text-blood hover:underline"
+                    >
                       View →
                     </Link>
                   </li>

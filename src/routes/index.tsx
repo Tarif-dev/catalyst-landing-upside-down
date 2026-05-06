@@ -71,7 +71,10 @@ function Details() {
             A 24-hour AI hackathon
           </span>
           <span className="mt-3 sm:mt-4 block text-2xl sm:text-3xl md:text-5xl">
-            at <span className="title-outline not-italic">Amity University Kolkata</span>
+            at{" "}
+            <span className="title-outline not-italic">
+              Amity University Kolkata
+            </span>
           </span>
         </h1>
 
