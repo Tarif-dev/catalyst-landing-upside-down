@@ -7,7 +7,6 @@ const CHARACTER_URLS = [
   "/src/assets/dustin.webp",
   "/src/assets/eleven.webp",
   "/src/assets/hopper.webp",
-  "/src/assets/steve.webp",
   "/src/assets/will.webp",
 ];
 

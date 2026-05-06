@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
 import { useAuth } from "@/lib/auth";
+import { useServerFn } from "@tanstack/react-start";
+import { sendPaymentInfoEmail } from "@/lib/email";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Catalyst 2K26" }] }),
@@ -14,7 +17,6 @@ const TRACK_LABEL: Record<string, string> = {
   fintech: "AI for Fintech",
   sustainability: "AI for Sustainability",
   education: "AI for Education",
-  open: "Open Innovation",
 };
 
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
@@ -32,6 +34,8 @@ function Dashboard() {
   const [submission, setSubmission] = useState<any>(null);
   const [certs, setCerts] = useState<any[]>([]);
   const [busy, setBusy] = useState(true);
+  const [emailBusy, setEmailBusy] = useState(false);
+  const sendPaymentInfoFn = useServerFn(sendPaymentInfoEmail);
 
   useEffect(() => {
     if (loading) return;
@@ -125,7 +129,7 @@ function Dashboard() {
                   {team.name}
                 </h2>
                 <p className="mt-1 font-serif italic text-bone/60">
-                  {TRACK_LABEL[team.track]}
+                  {TRACK_LABEL[team.track] || "Retired track"}
                 </p>
                 {team.tagline && (
                   <p className="mt-2 text-bone/70 font-serif italic">
@@ -138,9 +142,9 @@ function Dashboard() {
                   Status
                 </p>
                 <p
-                  className={`mt-1 font-mono text-sm uppercase tracking-[0.3em] ${STATUS_LABEL[team.payment_status].tone}`}
+                  className={`mt-1 font-mono text-sm uppercase tracking-[0.3em] ${STATUS_LABEL[profile?.payment_status || "unpaid"].tone}`}
                 >
-                  {STATUS_LABEL[team.payment_status].label}
+                  {STATUS_LABEL[profile?.payment_status || "unpaid"].label}
                 </p>
                 <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-bone/40">
                   Pass code
@@ -175,10 +179,29 @@ function Dashboard() {
               >
                 {submission ? "Edit submission" : "Submit project"}
               </Link>
-              {team.payment_status !== "paid" && (
-                <div className="btn-secondary text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-default">
-                  Pay at venue
-                </div>
+              {profile?.payment_status !== "paid" && (
+                <button
+                  disabled={emailBusy}
+                  onClick={async () => {
+                    if (!session?.access_token) return;
+                    setEmailBusy(true);
+                    try {
+                      await sendPaymentInfoFn({
+                        data: { accessToken: session.access_token },
+                      });
+                      toast.success("Payment details sent to your email!");
+                    } catch (err: any) {
+                      toast.error(
+                        err?.message || "Failed to send payment email.",
+                      );
+                    } finally {
+                      setEmailBusy(false);
+                    }
+                  }}
+                  className="btn-secondary text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-pointer transition-colors"
+                >
+                  {emailBusy ? "Sending…" : "📧 Get Payment Details"}
+                </button>
               )}
             </div>
           </div>

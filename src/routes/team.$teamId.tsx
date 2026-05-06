@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
 import { useAuth } from "@/lib/auth";
@@ -16,7 +16,6 @@ const TRACKS = [
   { v: "fintech", l: "AI for Fintech · Dustin" },
   { v: "sustainability", l: "AI for Sustainability · Will" },
   { v: "education", l: "AI for Education · Eleven" },
-  { v: "open", l: "Open Innovation · Steve" },
 ];
 
 function TeamPage() {
@@ -29,7 +28,7 @@ function TeamPage() {
 
   const isLeader = team?.leader_id === user?.id;
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const [{ data: t }, { data: ms }] = await Promise.all([
       supabase.from("teams").select("*").eq("id", teamId).maybeSingle(),
       supabase
@@ -38,7 +37,7 @@ function TeamPage() {
         .eq("team_id", teamId)
         .order("created_at"),
     ]);
-    if (!t && !busy) {
+    if (!t) {
       // Team might have been deleted
       nav({ to: "/dashboard" });
       return;
@@ -46,7 +45,7 @@ function TeamPage() {
     setTeam(t);
     setMembers(ms ?? []);
     setBusy(false);
-  };
+  }, [teamId, nav]);
 
   useEffect(() => {
     if (loading) return;
@@ -59,7 +58,7 @@ function TeamPage() {
       return;
     }
     load();
-  }, [user, profile, loading, teamId, nav]);
+  }, [user, profile, loading, nav, load]);
 
   const removeMember = async (id: string) => {
     if (!confirm("Remove this member from the team?")) return;
@@ -185,6 +184,15 @@ function TeamPage() {
                   onChange={(e) => changeTrack(e.target.value)}
                   className="input-styled appearance-none cursor-pointer mt-2"
                 >
+                  {!TRACKS.some((t) => t.v === team.track) && (
+                    <option
+                      value={team.track}
+                      disabled
+                      className="bg-void text-bone"
+                    >
+                      Retired track - choose a current track
+                    </option>
+                  )}
                   {TRACKS.map((t) => (
                     <option key={t.v} value={t.v} className="bg-void text-bone">
                       {t.l}
@@ -193,7 +201,7 @@ function TeamPage() {
                 </select>
               ) : (
                 <div className="input-styled bg-black/40 text-bone/70 mt-2 cursor-not-allowed">
-                  {TRACKS.find((t) => t.v === team.track)?.l || team.track}
+                  {TRACKS.find((t) => t.v === team.track)?.l || "Retired track"}
                 </div>
               )}
             </div>

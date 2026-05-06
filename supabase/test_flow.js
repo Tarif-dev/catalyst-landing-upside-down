@@ -37,7 +37,7 @@ async function testFlow() {
     .from("teams")
     .insert({
       name: "Hellfire Club",
-      track: "open",
+      track: "healthcare",
       tagline: "We don't do sports.",
       leader_id: userAData.user.id,
     })

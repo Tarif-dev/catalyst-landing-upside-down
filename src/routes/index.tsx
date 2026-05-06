@@ -20,13 +20,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Catalyst 2K26: a 24-hour AI hackathon hosted by Amity University Kolkata on 21–22 May 2026. ₹50,000+ prize pool. Five tracks. One Upside Down.",
+          "Catalyst 2K26: a 24-hour AI hackathon hosted by Amity University Kolkata on 21–22 May 2026. ₹50,000 worth of prize pool. Four tracks. One Upside Down.",
       },
       { property: "og:title", content: "Catalyst 2K26 — AI Hackathon" },
       {
         property: "og:description",
         content:
-          "24 hours. 5 tracks. ₹50,000+ prize pool. Step through the gate at Amity Kolkata, May 21–22, 2026.",
+          "24 hours. 4 tracks. ₹50,000 worth of prize pool. Step through the gate at Amity Kolkata, May 21–22, 2026.",
       },
     ],
   }),
@@ -80,7 +80,7 @@ function Details() {
 
         {/* Subhead */}
         <p className="mx-auto mt-10 sm:mt-12 max-w-2xl text-center font-serif text-base sm:text-lg md:text-xl leading-relaxed text-bone/65 reveal reveal-delay-2 px-2">
-          Five tracks. One gate. Build something the Upside Down hasn't seen —
+          Four tracks. One gate. Build something the Upside Down hasn't seen —
           on the floor at Amity Kolkata, the night the world flickers.
         </p>
 
@@ -89,8 +89,8 @@ function Details() {
           {[
             { k: "Date", v: "21–22", sub: "May 2026" },
             { k: "Format", v: "24h", sub: "On-campus" },
-            { k: "Tracks", v: "05", sub: "AI verticals" },
-            { k: "Prize Pool", v: "₹50K+", sub: "INR" },
+            { k: "Tracks", v: "04", sub: "AI verticals" },
+            { k: "Prize Pool", v: "₹50K", sub: "Worth" },
           ].map((item) => (
             <div
               key={item.k}
@@ -145,9 +145,9 @@ function MarqueeStrip() {
   const items = [
     "MAY 21 — 22, 2026",
     "AMITY UNIVERSITY KOLKATA",
-    "₹50,000+ PRIZE POOL",
+    "₹50,000 WORTH OF PRIZE POOL",
     "24 HOURS",
-    "5 TRACKS",
+    "4 TRACKS",
     "ONE GATE",
   ];
   return (

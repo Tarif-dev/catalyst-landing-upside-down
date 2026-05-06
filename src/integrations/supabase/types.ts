@@ -87,6 +87,9 @@ export type Database = {
           is_complete: boolean | null;
           last_name: string | null;
           linkedin_url: string | null;
+          pass_code: string;
+          payment_ref: string | null;
+          payment_status: Database["public"]["Enums"]["payment_status"];
           phone: string | null;
           resume_url: string | null;
           tshirt_size: string | null;
@@ -110,6 +113,9 @@ export type Database = {
           is_complete?: boolean | null;
           last_name?: string | null;
           linkedin_url?: string | null;
+          pass_code?: string;
+          payment_ref?: string | null;
+          payment_status?: Database["public"]["Enums"]["payment_status"];
           phone?: string | null;
           resume_url?: string | null;
           tshirt_size?: string | null;
@@ -133,6 +139,9 @@ export type Database = {
           is_complete?: boolean | null;
           last_name?: string | null;
           linkedin_url?: string | null;
+          pass_code?: string;
+          payment_ref?: string | null;
+          payment_status?: Database["public"]["Enums"]["payment_status"];
           phone?: string | null;
           resume_url?: string | null;
           tshirt_size?: string | null;
@@ -348,17 +357,22 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
+      verify_participant_pass: {
+        Args: { p_code: string };
+        Returns: {
+          issued_at: string | null;
+          participant_name: string | null;
+          payment_status: Database["public"]["Enums"]["payment_status"];
+          team_name: string | null;
+          track: Database["public"]["Enums"]["track_kind"] | null;
+        }[];
+      };
     };
     Enums: {
       app_role: "admin" | "participant";
       member_role: "leader" | "member";
       payment_status: "unpaid" | "pending" | "paid" | "refunded";
-      track_kind:
-        | "healthcare"
-        | "fintech"
-        | "sustainability"
-        | "education"
-        | "open";
+      track_kind: "healthcare" | "fintech" | "sustainability" | "education";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -492,13 +506,7 @@ export const Constants = {
       app_role: ["admin", "participant"],
       member_role: ["leader", "member"],
       payment_status: ["unpaid", "pending", "paid", "refunded"],
-      track_kind: [
-        "healthcare",
-        "fintech",
-        "sustainability",
-        "education",
-        "open",
-      ],
+      track_kind: ["healthcare", "fintech", "sustainability", "education"],
     },
   },
 } as const;

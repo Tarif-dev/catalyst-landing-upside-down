@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { sendPaymentConfirmedEmails } from "@/lib/email";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Console — Catalyst 2K26" }] }),
@@ -12,7 +14,7 @@ export const Route = createFileRoute("/admin")({
 type Tab = "teams" | "participants";
 
 function Admin() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, session } = useAuth();
   const nav = useNavigate();
 
   const [activeTab, setActiveTab] = useState<Tab>("teams");
@@ -22,6 +24,7 @@ function Admin() {
     null,
   );
   const [busy, setBusy] = useState(true);
+  const sendPaymentConfirmedFn = useServerFn(sendPaymentConfirmedEmails);
 
   const load = async () => {
     const [teamsRes, participantsRes] = await Promise.all([
@@ -56,16 +59,35 @@ function Admin() {
   }, [user, isAdmin, loading, nav]);
 
   /* ── Actions ── */
-  const setPaymentStatus = async (
+  const participantByUserId = new Map(participants.map((p) => [p.user_id, p]));
+
+  const setParticipantPaymentStatus = async (
     id: string,
     payment_status: "unpaid" | "paid",
   ) => {
     const { error } = await supabase
-      .from("teams")
+      .from("profiles")
       .update({ payment_status })
       .eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success(`Payment marked as ${payment_status}.`);
+    toast.success(`Participant payment marked as ${payment_status}.`);
+
+    // Send payment confirmed + congratulations emails when marking paid
+    if (payment_status === "paid" && session?.access_token) {
+      try {
+        await sendPaymentConfirmedFn({
+          data: {
+            adminAccessToken: session.access_token,
+            participantProfileId: id,
+          },
+        });
+        toast.success("Confirmation emails sent to participant.");
+      } catch (emailErr: any) {
+        console.error("Failed to send payment emails:", emailErr);
+        toast.error("Payment marked, but email sending failed.");
+      }
+    }
+
     void load();
   };
 
@@ -120,22 +142,30 @@ function Admin() {
 
   const downloadTeamsCSV = () => {
     let csv =
-      "Team Name,Track,Pass Code,Payment Status,Winner,Members,Submission\n";
+      "Team Name,Track,Team Code,Winner,Members,Paid Participants,Submission\n";
     teams.forEach((t) => {
       const members = t.team_members
-        .map((m: any) => `${m.full_name}(${m.role})`)
+        .map((m: any) => {
+          const payment =
+            participantByUserId.get(m.user_id)?.payment_status ?? "unpaid";
+          return `${m.full_name}(${m.role}, ${payment})`;
+        })
         .join("; ");
+      const paidCount = t.team_members.filter(
+        (m: any) =>
+          participantByUserId.get(m.user_id)?.payment_status === "paid",
+      ).length;
       const sub = t.submissions?.[0]?.title ?? "";
-      csv += `"${t.name}","${t.track}","${t.pass_code}","${t.payment_status}","${t.is_winner ? "Yes" : "No"}","${members}","${sub}"\n`;
+      csv += `"${t.name}","${t.track}","${t.pass_code}","${t.is_winner ? "Yes" : "No"}","${members}","${paidCount}/${t.team_members.length}","${sub}"\n`;
     });
     downloadCSV(csv, "catalyst-teams.csv");
   };
 
   const downloadParticipantsCSV = () => {
     let csv =
-      "Full Name,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,T-Shirt,Profile Status\n";
+      "Full Name,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,T-Shirt,Profile Status,Payment Status,Pass Code\n";
     participants.forEach((p) => {
-      csv += `"${p.full_name || ""}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.tshirt_size || ""}","${p.is_complete ? "Complete" : "Incomplete"}"\n`;
+      csv += `"${p.full_name || ""}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.tshirt_size || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${p.payment_status || "unpaid"}","${p.pass_code || ""}"\n`;
     });
     downloadCSV(csv, "catalyst-participants.csv");
   };
@@ -143,7 +173,9 @@ function Admin() {
   /* ── Derived stats ── */
   const totalParticipants = participants.length;
   const totalTeams = teams.length;
-  const paidTeams = teams.filter((t) => t.payment_status === "paid").length;
+  const paidParticipants = participants.filter(
+    (p) => p.payment_status === "paid",
+  ).length;
   const completeProfiles = participants.filter((p) => p.is_complete).length;
 
   if (busy) {
@@ -363,7 +395,7 @@ function Admin() {
           {[
             { label: "Total Teams", value: totalTeams },
             { label: "Total Participants", value: totalParticipants },
-            { label: "Paid Teams", value: paidTeams },
+            { label: "Paid Participants", value: paidParticipants },
             { label: "Complete Profiles", value: completeProfiles },
           ].map((s) => (
             <div
@@ -440,7 +472,7 @@ function Admin() {
                       "Team / Track",
                       "Members",
                       "Submission",
-                      "Payment",
+                      "Payment Progress",
                       "Winner",
                       "Actions",
                     ].map((h) => (
@@ -504,6 +536,16 @@ function Admin() {
                             <span style={{ color: "#9ca3af", fontSize: 11 }}>
                               ({m.role})
                             </span>
+                            <span style={{ marginLeft: 6 }}>
+                              {badge(
+                                participantByUserId.get(m.user_id)
+                                  ?.payment_status ?? "unpaid",
+                                participantByUserId.get(m.user_id)
+                                  ?.payment_status === "paid"
+                                  ? "green"
+                                  : "yellow",
+                              )}
+                            </span>
                           </div>
                         ))}
                       </td>
@@ -517,10 +559,20 @@ function Admin() {
                         {t.submissions?.[0]?.title ?? "—"}
                       </td>
                       <td style={{ padding: "12px 16px" }}>
-                        {badge(
-                          t.payment_status,
-                          t.payment_status === "paid" ? "green" : "yellow",
-                        )}
+                        {(() => {
+                          const paidCount = t.team_members.filter(
+                            (m: any) =>
+                              participantByUserId.get(m.user_id)
+                                ?.payment_status === "paid",
+                          ).length;
+                          const total = t.team_members.length;
+                          return badge(
+                            `${paidCount}/${total} paid`,
+                            total > 0 && paidCount === total
+                              ? "green"
+                              : "yellow",
+                          );
+                        })()}
                       </td>
                       <td style={{ padding: "12px 16px" }}>
                         {t.is_winner ? (
@@ -533,17 +585,6 @@ function Admin() {
                         <div
                           style={{ display: "flex", gap: 6, flexWrap: "wrap" }}
                         >
-                          {t.payment_status !== "paid"
-                            ? btn(
-                                "Mark Paid",
-                                () => setPaymentStatus(t.id, "paid"),
-                                "green",
-                              )
-                            : btn(
-                                "Mark Unpaid",
-                                () => setPaymentStatus(t.id, "unpaid"),
-                                "yellow",
-                              )}
                           {btn(
                             t.is_winner ? "Revoke Winner" : "Make Winner",
                             () => toggleWinner(t),
@@ -573,6 +614,8 @@ function Admin() {
                       "Institution",
                       "Course",
                       "Profile",
+                      "Payment",
+                      "Pass Code",
                       "Actions",
                     ].map((h) => (
                       <th
@@ -597,7 +640,7 @@ function Admin() {
                   {participants.length === 0 && (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={7}
                         style={{
                           padding: "32px 16px",
                           textAlign: "center",
@@ -646,11 +689,42 @@ function Admin() {
                         )}
                       </td>
                       <td style={{ padding: "12px 16px" }}>
-                        {btn(
-                          "View Details",
-                          () => setSelectedParticipant(p),
-                          "blue",
+                        {badge(
+                          p.payment_status || "unpaid",
+                          p.payment_status === "paid" ? "green" : "yellow",
                         )}
+                      </td>
+                      <td
+                        style={{
+                          padding: "12px 16px",
+                          fontFamily: "ui-monospace, SFMono-Regular, monospace",
+                          fontSize: 13,
+                        }}
+                      >
+                        {p.pass_code || "—"}
+                      </td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <div
+                          style={{ display: "flex", gap: 6, flexWrap: "wrap" }}
+                        >
+                          {p.payment_status !== "paid"
+                            ? btn(
+                                "Mark Paid",
+                                () => setParticipantPaymentStatus(p.id, "paid"),
+                                "green",
+                              )
+                            : btn(
+                                "Mark Unpaid",
+                                () =>
+                                  setParticipantPaymentStatus(p.id, "unpaid"),
+                                "yellow",
+                              )}
+                          {btn(
+                            "View Details",
+                            () => setSelectedParticipant(p),
+                            "blue",
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -756,6 +830,8 @@ function Admin() {
                   }}
                 >
                   {[
+                    ["Payment Status", selectedParticipant.payment_status],
+                    ["Pass Code", selectedParticipant.pass_code],
                     ["Phone", selectedParticipant.phone],
                     ["Date of Birth", selectedParticipant.dob],
                     [

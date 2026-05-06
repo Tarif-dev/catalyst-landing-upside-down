@@ -7,7 +7,6 @@ import hopperImg from "@/assets/hopper.webp";
 import dustinImg from "@/assets/dustin.webp";
 import willImg from "@/assets/will.webp";
 import elevenImg from "@/assets/eleven.webp";
-import steveImg from "@/assets/steve.webp";
 import { toast } from "sonner";
 
 const TRACK_CONFIG: Record<
@@ -22,19 +21,21 @@ const TRACK_CONFIG: Record<
     theme: "magenta",
   },
   education: { label: "AI · EDUCATION", img: elevenImg, theme: "amber" },
-  open: { label: "OPEN INNOVATION", img: steveImg, theme: "blood" },
 };
 
 export function EventPass({
   team,
   members,
   currentUser,
+  participantProfile,
 }: {
   team: any;
   members: any[];
   currentUser?: any;
+  participantProfile?: any;
 }) {
-  const isPaid = team.payment_status === "paid";
+  const isPaid = participantProfile?.payment_status === "paid";
+  const passCode = participantProfile?.pass_code ?? team.pass_code;
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
   const [qr, setQr] = useState<string>("");
@@ -42,14 +43,14 @@ export function EventPass({
   const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
-    const verifyUrl = `${window.location.origin}/verify/${team.pass_code}`;
+    const verifyUrl = `${window.location.origin}/verify/${passCode}`;
     QRCode.toDataURL(verifyUrl, {
       margin: 1,
       width: 400,
       color: { dark: "#000000", light: "#ffffff" },
       errorCorrectionLevel: "H",
     }).then(setQr);
-  }, [team.pass_code]);
+  }, [passCode]);
 
   const download = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -161,7 +162,7 @@ export function EventPass({
   };
 
   const leader = members.find((m) => m.role === "leader");
-  const track = TRACK_CONFIG[team.track] || TRACK_CONFIG.open;
+  const track = TRACK_CONFIG[team.track] || TRACK_CONFIG.healthcare;
 
   return (
     <div className="w-full flex flex-col items-center space-y-8 px-4">
@@ -272,7 +273,7 @@ export function EventPass({
                       Pass Code
                     </p>
                     <p className="font-mono text-3xl text-red-500 font-bold tracking-widest drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">
-                      {team.pass_code}
+                      {passCode}
                     </p>
                   </div>
                   <div className="flex flex-col text-right max-w-[40%]">
@@ -372,7 +373,7 @@ export function EventPass({
 
                 <div className="mt-8 text-center w-full">
                   <p className="font-mono text-red-500 text-glow-blood text-2xl sm:text-3xl font-bold tracking-[0.3em]">
-                    {team.pass_code}
+                    {passCode}
                   </p>
                   <p className="font-mono text-[9px] uppercase tracking-[0.1em] text-white/40 mt-4 leading-relaxed max-w-[200px] mx-auto">
                     Present to dimensional gate security for authorization.

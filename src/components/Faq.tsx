@@ -3,11 +3,11 @@ import { SectionTitle } from "./SectionTitle";
 const faqs = [
   {
     q: "Who can participate?",
-    a: "Any student — undergrad, postgrad, or final-year — from any college across India. Form teams of 2 to 4.",
+    a: "Any student — undergrad, postgrad, or final-year — from any college across India. Form teams of 2 to 5.",
   },
   {
     q: "Is there a registration fee?",
-    a: "No. Catalyst 2K26 is completely free to enter. Bring your laptop and your wildest idea.",
+    a: "Yes. Registration is charged per participant individually, and each participant's payment is confirmed separately by the admin team.",
   },
   {
     q: "Do I need an AI background?",

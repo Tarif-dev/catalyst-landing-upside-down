@@ -3,15 +3,14 @@ import dustin from "@/assets/dustin.webp";
 import hopper from "@/assets/hopper.webp";
 import eleven from "@/assets/eleven.webp";
 import will from "@/assets/will.webp";
-import steve from "@/assets/steve.webp";
 
 const tracks = [
   {
     code: "I",
     name: "AI for Healthcare",
     patron: "Hopper",
-    quote: "“Mornings are for coffee and contemplation.”",
-    role: "The Chief — steady under pressure, the one who runs toward the dark.",
+    quote: '"Mornings are for coffee and contemplation."',
+    role: "The Chief - steady under pressure, the one who runs toward the dark.",
     image: hopper,
     desc: "Diagnostic intelligence, predictive care, patient triage, medical imaging, drug discovery copilots, mental-health companions.",
     looking: [
@@ -24,8 +23,8 @@ const tracks = [
     code: "II",
     name: "AI for Fintech",
     patron: "Dustin",
-    quote: "“Curiosity Voyager.”",
-    role: "The Strategist — reads the patterns, breaks the code, beats the system.",
+    quote: '"Curiosity Voyager."',
+    role: "The Strategist - reads the patterns, breaks the code, beats the system.",
     image: dustin,
     desc: "Fraud detection, risk modelling, autonomous trading agents, credit intelligence for the underbanked, embedded finance copilots.",
     looking: [
@@ -38,8 +37,8 @@ const tracks = [
     code: "III",
     name: "AI for Sustainability",
     patron: "Will",
-    quote: "“I made it eighty-five days.”",
-    role: "The Sensitive — attuned to what others miss, the first to feel the shift.",
+    quote: '"I made it eighty-five days."',
+    role: "The Sensitive - attuned to what others miss, the first to feel the shift.",
     image: will,
     desc: "Climate intelligence, carbon accounting, biodiversity monitoring, energy-grid optimisation, circular supply chains, disaster prediction.",
     looking: [
@@ -52,8 +51,8 @@ const tracks = [
     code: "IV",
     name: "AI for Education",
     patron: "Eleven",
-    quote: "“Friends don't lie.”",
-    role: "The Prodigy — raw power shaped into purpose, learning in public.",
+    quote: '"Friends don\'t lie."',
+    role: "The Prodigy - raw power shaped into purpose, learning in public.",
     image: eleven,
     desc: "Adaptive tutors, accessibility tools, regional-language learning, assessment copilots, skill-gap mapping, teacher augmentation.",
     looking: [
@@ -61,16 +60,6 @@ const tracks = [
       "Accessibility by default",
       "Low-bandwidth delivery",
     ],
-  },
-  {
-    code: "V",
-    name: "Open Innovation",
-    patron: "Steve",
-    quote: "“I have no idea what I'm doing — but I'm doing it.”",
-    role: "The Wildcard — shows up with a bat, a plan, and the right friends.",
-    image: steve,
-    desc: "No rules. No vertical. Agents, robotics, creative AI, dev-tools, hardware hybrids, anything that surprises the jury.",
-    looking: ["Originality", "Technical ambition", "A demo that lands"],
   },
 ];
 
@@ -80,7 +69,7 @@ export function Tracks() {
       <div className="pointer-events-none absolute left-1/2 top-32 h-96 w-96 -translate-x-1/2 blob-blood opacity-40" />
       <div className="relative mx-auto max-w-6xl">
         <SectionTitle
-          eyebrow="Channels — Five Frequencies, Five Patrons"
+          eyebrow="Channels - Four Frequencies, Four Patrons"
           italic
         >
           The Tracks.
@@ -89,7 +78,10 @@ export function Tracks() {
         <p className="mx-auto -mt-6 mb-20 max-w-2xl text-center font-serif text-base md:text-lg italic text-bone/55 reveal">
           Each track is guarded by a resident of Hawkins. Pick your patron.
           Build your case. One winner per track takes home{" "}
-          <span className="text-blood not-italic font-medium">₹10,000</span>.
+          <span className="text-blood not-italic font-medium">
+            ₹10,000 worth of prizes
+          </span>
+          .
         </p>
 
         <div className="flex flex-col gap-px bg-blood/10">
@@ -106,7 +98,6 @@ export function Tracks() {
                     reverse ? "md:[&>div:first-child]:order-2" : ""
                   }`}
                 >
-                  {/* Portrait */}
                   <div className="relative md:col-span-4 overflow-hidden border-b md:border-b-0 md:border-r border-blood/10 bg-gradient-to-b from-blood/[0.06] to-black aspect-[4/5] md:aspect-auto">
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(200,40,40,0.15),transparent_70%)]" />
                     <img
@@ -115,7 +106,6 @@ export function Tracks() {
                       loading="lazy"
                       className="absolute inset-0 h-full w-full object-cover object-top grayscale contrast-110 opacity-80 transition-all duration-700 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-[1.02]"
                     />
-                    {/* Scanline veil */}
                     <div
                       className="pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay"
                       style={{
@@ -123,13 +113,11 @@ export function Tracks() {
                           "repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 3px)",
                       }}
                     />
-                    {/* Gradient fade to black */}
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-                    {/* Name plate */}
                     <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
                       <div>
                         <div className="font-mono text-[9px] uppercase tracking-[0.45em] text-blood/80 mb-1">
-                          Patron · {t.code.padStart(2, "0")}/05
+                          Patron · {t.code.padStart(2, "0")}/04
                         </div>
                         <div className="font-display text-3xl italic text-bone leading-none">
                           {t.patron}
@@ -137,15 +125,13 @@ export function Tracks() {
                       </div>
                       <span className="block h-2 w-2 rounded-full bg-blood pulse-dot" />
                     </div>
-                    {/* Corner brackets */}
                     <span className="absolute top-3 left-3 h-3 w-3 border-t border-l border-blood/60" />
                     <span className="absolute top-3 right-3 h-3 w-3 border-t border-r border-blood/60" />
                   </div>
 
-                  {/* Content */}
                   <div className="md:col-span-8 p-6 sm:p-8 md:p-12 flex flex-col justify-center">
                     <div className="mb-4 flex flex-wrap items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] font-mono">
-                      <span className="text-bone/40">Track {t.code} / 05</span>
+                      <span className="text-bone/40">Track {t.code} / 04</span>
                       <span className="h-px w-6 sm:w-8 bg-blood/40" />
                       <span className="text-bone/40">Single Winner</span>
                     </div>
@@ -158,7 +144,7 @@ export function Tracks() {
                       {t.quote}
                     </p>
                     <p className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.35em] text-bone/40 mb-6">
-                      — {t.role}
+                      - {t.role}
                     </p>
 
                     <div className="hairline-bone w-16 mb-6" />
@@ -178,14 +164,16 @@ export function Tracks() {
                       ))}
                     </div>
 
-                    {/* Prominent prize block */}
                     <div className="bracket relative border border-blood/30 bg-gradient-to-r from-blood/10 via-blood/5 to-transparent px-4 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div>
                         <div className="font-mono text-[9px] uppercase tracking-[0.4em] sm:tracking-[0.45em] text-blood/80 mb-2">
-                          Champion's Purse
+                          Champion's Prize
                         </div>
                         <div className="font-display text-4xl sm:text-5xl md:text-6xl text-bone italic leading-none text-glow-blood">
                           ₹10,000
+                        </div>
+                        <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.3em] sm:tracking-[0.35em] text-bone/40">
+                          Worth of prizes
                         </div>
                       </div>
                       <div className="sm:text-right">
@@ -209,7 +197,7 @@ export function Tracks() {
 
         <div className="mt-12 flex flex-col items-center gap-4 text-center reveal">
           <p className="font-serif italic text-bone/55 text-lg">
-            Five tracks. Five winners. ₹50,000 guaranteed across the channels.
+            Four tracks. Four winners. ₹50,000 worth of prize pool.
           </p>
           <a
             href="#register"

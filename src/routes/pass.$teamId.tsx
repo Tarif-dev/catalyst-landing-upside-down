@@ -12,10 +12,11 @@ export const Route = createFileRoute("/pass/$teamId")({
 
 function PassPage() {
   const { teamId } = Route.useParams();
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const nav = useNavigate();
   const [team, setTeam] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
+  const [participantProfile, setParticipantProfile] = useState<any>(null);
   const [busy, setBusy] = useState(true);
 
   useEffect(() => {
@@ -25,19 +26,25 @@ function PassPage() {
       return;
     }
     (async () => {
-      const [{ data: t }, { data: ms }] = await Promise.all([
+      const [{ data: t }, { data: ms }, { data: p }] = await Promise.all([
         supabase.from("teams").select("*").eq("id", teamId).maybeSingle(),
         supabase
           .from("team_members")
           .select("*")
           .eq("team_id", teamId)
           .order("created_at"),
+        supabase
+          .from("profiles")
+          .select("payment_status, pass_code")
+          .eq("user_id", user.id)
+          .maybeSingle(),
       ]);
       setTeam(t);
       setMembers(ms ?? []);
+      setParticipantProfile(p ?? profile);
       setBusy(false);
     })();
-  }, [user, loading, teamId, nav]);
+  }, [user, profile, loading, teamId, nav]);
 
   if (busy)
     return (
@@ -67,10 +74,11 @@ function PassPage() {
   }
 
   const currentUser = members.find((m) => m.user_id === user?.id) || members[0];
+  const isPaid = participantProfile?.payment_status === "paid";
 
   return (
     <PortalShell title="Your Event Pass">
-      {team.payment_status !== "paid" && (
+      {!isPaid && (
         <div className="mb-6 flex items-start gap-3 panel p-4 border-amber/40">
           <span className="text-amber text-xl mt-0.5">⚠</span>
           <div>
@@ -78,8 +86,8 @@ function PassPage() {
               Payment Pending
             </p>
             <p className="mt-1 font-serif italic text-bone/70">
-              Your QR code is locked until payment is confirmed by the admin.
-              The pass design is yours to keep!
+              Your QR code is locked until your individual registration fee is
+              confirmed by the admin. The pass design is yours to keep!
             </p>
           </div>
         </div>
@@ -89,7 +97,12 @@ function PassPage() {
         or Instagram — the Upside Down loves a good entrance.
       </p>
       <div className="mx-auto max-w-md">
-        <EventPass team={team} members={members} currentUser={currentUser} />
+        <EventPass
+          team={team}
+          members={members}
+          currentUser={currentUser}
+          participantProfile={participantProfile}
+        />
       </div>
     </PortalShell>
   );

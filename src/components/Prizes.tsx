@@ -1,10 +1,10 @@
 import { SectionTitle } from "./SectionTitle";
 
 const breakdown = [
-  { k: "Per Track", v: "₹10,000", sub: "× 5 channels" },
-  { k: "Winners", v: "05", sub: "One per track" },
-  { k: "Guaranteed", v: "₹50,000", sub: "Cash pool" },
-  { k: "Beyond Cash", v: "∞", sub: "Swag · Offers" },
+  { k: "Per Track", v: "₹10,000", sub: "Worth of prizes" },
+  { k: "Winners", v: "04", sub: "One per track" },
+  { k: "Total Pool", v: "₹50,000", sub: "Worth of prize pool" },
+  { k: "Includes", v: "Non-cash", sub: "Swag · Offers" },
 ];
 
 export function Prizes() {
@@ -17,21 +17,22 @@ export function Prizes() {
       <div className="pointer-events-none absolute right-10 bottom-10 h-72 w-72 blob-rose opacity-40" />
 
       <div className="relative mx-auto max-w-5xl">
-        <SectionTitle eyebrow="Reward — For Those Who Survive" italic>
+        <SectionTitle eyebrow="Reward - For Those Who Survive" italic>
           The Spoils.
         </SectionTitle>
 
         <div className="mb-16 sm:mb-20 text-center reveal reveal-delay-1">
           <p className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.5em] text-bone/45 mb-5 sm:mb-6">
-            Total Pool · INR
+            Total Pool · Worth of prizes
           </p>
           <div className="font-display text-6xl sm:text-7xl md:text-[10rem] title-outline breathe leading-[0.9] tracking-tight">
-            ₹50,000<span className="text-blood/60">+</span>
+            ₹50,000
           </div>
           <div className="mx-auto mt-6 sm:mt-8 h-px w-24 sm:w-32 bg-blood/40" />
           <p className="mt-6 sm:mt-8 font-italic-display text-base sm:text-lg md:text-xl text-bone/65 italic max-w-2xl mx-auto px-2">
-            No podium. No runners-up. Every track crowns a single champion — and
-            the Upside Down pays each one the same respect.
+            ₹50,000 worth of prize pool across cash and non-cash rewards. Every
+            track crowns a single champion, with ₹10,000 worth of prizes per
+            track.
           </p>
         </div>
 
@@ -55,8 +56,8 @@ export function Prizes() {
         </div>
 
         <p className="mt-12 sm:mt-16 text-center font-italic-display text-sm sm:text-base text-bone/50 italic px-2">
-          + track-wise swag · sponsor goodies · internship interviews · bragging
-          rights until ’27
+          Track-wise rewards · sponsor goodies · internship interviews ·
+          bragging rights until '27
         </p>
       </div>
     </section>

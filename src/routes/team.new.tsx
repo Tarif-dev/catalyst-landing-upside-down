@@ -16,7 +16,6 @@ const TRACKS = [
   { v: "fintech", l: "AI for Fintech · Dustin" },
   { v: "sustainability", l: "AI for Sustainability · Will" },
   { v: "education", l: "AI for Education · Eleven" },
-  { v: "open", l: "Open Innovation · Steve" },
 ];
 
 const schema = z.object({
@@ -26,20 +25,18 @@ const schema = z.object({
     .min(2)
     .max(50)
     .regex(/^[\w\s.&-]+$/, "Letters, numbers, spaces, - . & only"),
-  track: z.enum([
-    "healthcare",
-    "fintech",
-    "sustainability",
-    "education",
-    "open",
-  ]),
+  track: z.enum(["healthcare", "fintech", "sustainability", "education"]),
   tagline: z.string().trim().max(120).optional(),
 });
 
 function NewTeam() {
   const { user, profile, loading } = useAuth();
   const nav = useNavigate();
-  const [form, setForm] = useState({ name: "", track: "open", tagline: "" });
+  const [form, setForm] = useState({
+    name: "",
+    track: "healthcare",
+    tagline: "",
+  });
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
