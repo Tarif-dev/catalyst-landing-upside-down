@@ -330,6 +330,7 @@ export type Database = {
         Args: { p_new_track: Database["public"]["Enums"]["track_kind"] }
         Returns: undefined
       }
+      delete_team: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
