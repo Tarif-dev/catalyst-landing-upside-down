@@ -81,10 +81,10 @@ export function getPaymentInfoEmailTemplate(opts: {
   participantName: string;
   passCode: string;
   dashboardUrl: string;
-  upiId?: string;
+  upiId: string;
   amount?: number;
 }) {
-  const upiId = opts.upiId || "vyapar.170698866218@hdfcbank";
+  const upiId = opts.upiId;
   const amount = opts.amount ?? 200;
   const upiUri =
     `upi://pay?pa=${encodeURIComponent(upiId)}` +

@@ -33,6 +33,7 @@ function Dashboard() {
   const [members, setMembers] = useState<any[]>([]);
   const [submission, setSubmission] = useState<any>(null);
   const [certs, setCerts] = useState<any[]>([]);
+  const [participantProfile, setParticipantProfile] = useState<any>(null);
   const [busy, setBusy] = useState(true);
   const [emailBusy, setEmailBusy] = useState(false);
   const sendPaymentInfoFn = useServerFn(sendPaymentInfoEmail);
@@ -49,13 +50,18 @@ function Dashboard() {
     }
 
     (async () => {
-      const { data: tm } = await supabase
-        .from("team_members")
-        .select("team_id, teams(*)")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const [{ data: tm }, { data: freshProfile }] = await Promise.all([
+        supabase
+          .from("team_members")
+          .select("team_id, teams(*)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase.from("profiles").select("*").eq("user_id", user.id).single(),
+      ]);
+      const currentProfile = freshProfile ?? profile;
+      setParticipantProfile(currentProfile);
       const t = (tm as any)?.teams ?? null;
       setTeam(t);
       if (t) {
@@ -142,9 +148,12 @@ function Dashboard() {
                   Status
                 </p>
                 <p
-                  className={`mt-1 font-mono text-sm uppercase tracking-[0.3em] ${STATUS_LABEL[profile?.payment_status || "unpaid"].tone}`}
+                  className={`mt-1 font-mono text-sm uppercase tracking-[0.3em] ${STATUS_LABEL[participantProfile?.payment_status || "unpaid"].tone}`}
                 >
-                  {STATUS_LABEL[profile?.payment_status || "unpaid"].label}
+                  {
+                    STATUS_LABEL[participantProfile?.payment_status || "unpaid"]
+                      .label
+                  }
                 </p>
                 <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-bone/40">
                   Pass code
@@ -179,7 +188,7 @@ function Dashboard() {
               >
                 {submission ? "Edit submission" : "Submit project"}
               </Link>
-              {profile?.payment_status !== "paid" && (
+              {participantProfile?.payment_status !== "paid" && (
                 <button
                   disabled={emailBusy}
                   onClick={async () => {

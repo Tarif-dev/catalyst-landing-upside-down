@@ -39,8 +39,14 @@ function PassPage() {
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
+      const memberRows = ms ?? [];
+      const isMember = memberRows.some((m) => m.user_id === user.id);
+      if (!isMember) {
+        nav({ to: "/dashboard" });
+        return;
+      }
       setTeam(t);
-      setMembers(ms ?? []);
+      setMembers(memberRows);
       setParticipantProfile(p ?? profile);
       setBusy(false);
     })();

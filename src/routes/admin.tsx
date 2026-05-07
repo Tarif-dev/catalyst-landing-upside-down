@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { sendPaymentConfirmedEmails } from "@/lib/email";
+import { setParticipantPaymentStatus as setParticipantPaymentStatusFn } from "@/lib/email";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Console — Catalyst 2K26" }] }),
@@ -24,7 +24,9 @@ function Admin() {
     null,
   );
   const [busy, setBusy] = useState(true);
-  const sendPaymentConfirmedFn = useServerFn(sendPaymentConfirmedEmails);
+  const setParticipantPaymentStatusServer = useServerFn(
+    setParticipantPaymentStatusFn,
+  );
 
   const load = async () => {
     const [teamsRes, participantsRes] = await Promise.all([
@@ -65,30 +67,35 @@ function Admin() {
     id: string,
     payment_status: "unpaid" | "paid",
   ) => {
-    const { error } = await supabase
-      .from("profiles")
-      .update({ payment_status })
-      .eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success(`Participant payment marked as ${payment_status}.`);
-
-    // Send payment confirmed + congratulations emails when marking paid
-    if (payment_status === "paid" && session?.access_token) {
-      try {
-        await sendPaymentConfirmedFn({
-          data: {
-            adminAccessToken: session.access_token,
-            participantProfileId: id,
-          },
-        });
-        toast.success("Confirmation emails sent to participant.");
-      } catch (emailErr: any) {
-        console.error("Failed to send payment emails:", emailErr);
-        toast.error("Payment marked, but email sending failed.");
-      }
+    if (!session?.access_token) {
+      toast.error("Please sign in again.");
+      return;
     }
 
-    void load();
+    try {
+      const result = await setParticipantPaymentStatusServer({
+        data: {
+          adminAccessToken: session.access_token,
+          participantProfileId: id,
+          paymentStatus: payment_status,
+        },
+      });
+
+      toast.success(`Participant payment marked as ${payment_status}.`);
+      if (payment_status === "paid") {
+        if (result.sent) {
+          toast.success("Confirmation emails sent to participant.");
+        } else {
+          toast.error("Payment marked, but email sending failed.");
+        }
+      }
+    } catch (err: any) {
+      console.error("Failed to update participant payment:", err);
+      toast.error(err?.message || "Failed to update payment status.");
+      return;
+    }
+
+    await load();
   };
 
   const toggleWinner = async (team: any) => {

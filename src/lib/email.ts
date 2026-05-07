@@ -49,6 +49,12 @@ function requestOrigin() {
   return new URL(request.url).origin;
 }
 
+function paymentUpiId() {
+  const upiId = process.env.UPI_ID;
+  if (!upiId) throw new Error("UPI_ID is not configured.");
+  return upiId;
+}
+
 /** Create a Supabase client authenticated as the calling user. */
 function authedClient(accessToken: string) {
   const url = process.env.SUPABASE_URL;
@@ -146,6 +152,7 @@ export const sendPaymentInfoEmail = createServerFn({ method: "POST" })
         participantName: profile?.full_name || "",
         passCode: profile?.pass_code || "N/A",
         dashboardUrl,
+        upiId: paymentUpiId(),
       }),
     });
 
@@ -160,11 +167,12 @@ export const sendPaymentInfoEmail = createServerFn({ method: "POST" })
  *
  * Uses the service-role key so the admin can trigger emails for any user.
  */
-export const sendPaymentConfirmedEmails = createServerFn({ method: "POST" })
+export const setParticipantPaymentStatus = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       adminAccessToken: z.string().min(20),
       participantProfileId: z.string().uuid(),
+      paymentStatus: z.enum(["unpaid", "paid"]),
     }),
   )
   .handler(async ({ data }) => {
@@ -186,13 +194,18 @@ export const sendPaymentConfirmedEmails = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!adminRow) throw new Error("Unauthorized: not an admin.");
 
-    // Fetch participant profile
-    const { data: profile } = await supa
+    const { data: profile, error: updateErr } = await supa
       .from("profiles")
-      .select("user_id, full_name, pass_code")
+      .update({ payment_status: data.paymentStatus })
       .eq("id", data.participantProfileId)
+      .select("id, user_id, full_name, pass_code, payment_status")
       .maybeSingle();
+    if (updateErr) throw updateErr;
     if (!profile) throw new Error("Participant not found.");
+
+    if (data.paymentStatus !== "paid") {
+      return { sent: false, skipped: true, profile };
+    }
 
     // Get participant email from auth
     const { data: authData } = await supa.auth.admin.getUserById(
@@ -203,7 +216,7 @@ export const sendPaymentConfirmedEmails = createServerFn({ method: "POST" })
       console.warn(
         `[Email] Cannot send payment emails — no email for user ${profile.user_id}`,
       );
-      return { sent: false, reason: "no-email" };
+      return { sent: false, reason: "no-email", profile };
     }
 
     // Fetch team info for congratulations email
@@ -248,5 +261,7 @@ export const sendPaymentConfirmedEmails = createServerFn({ method: "POST" })
       console.error("[Email] Some payment emails failed:", failures);
     }
 
-    return { sent: allOk, email: participantEmail };
+    return { sent: allOk, email: participantEmail, profile };
   });
+
+export const sendPaymentConfirmedEmails = setParticipantPaymentStatus;
