@@ -87,7 +87,7 @@ function TeamPage() {
   const changeTrack = async (newTrack: string) => {
     setBusy(true);
     const { error } = await supabase.rpc("change_team_track", {
-      p_new_track: newTrack,
+      p_new_track: newTrack as "education" | "fintech" | "healthcare" | "sustainability",
     });
     if (error) {
       toast.error(error.message);

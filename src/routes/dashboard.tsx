@@ -27,7 +27,7 @@ const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
 };
 
 function Dashboard() {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, session, loading } = useAuth();
   const nav = useNavigate();
   const [team, setTeam] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
@@ -183,13 +183,18 @@ function Dashboard() {
                 <button
                   disabled={emailBusy}
                   onClick={async () => {
-                    if (!session?.access_token) return;
+                    if (!session?.access_token) {
+                      toast.error("Please sign in again.");
+                      return;
+                    }
                     setEmailBusy(true);
                     try {
                       await sendPaymentInfoFn({
                         data: { accessToken: session.access_token },
                       });
-                      toast.success("Payment details sent to your email!");
+                      toast.success(
+                        "Payment instructions sent! Check your email (and spam folder).",
+                      );
                     } catch (err: any) {
                       toast.error(
                         err?.message || "Failed to send payment email.",
@@ -198,9 +203,9 @@ function Dashboard() {
                       setEmailBusy(false);
                     }
                   }}
-                  className="btn-secondary text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-pointer transition-colors"
+                  className="btn-secondary text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-pointer transition-colors disabled:opacity-50"
                 >
-                  {emailBusy ? "Sending…" : "📧 Get Payment Details"}
+                  {emailBusy ? "Sending…" : "📧 Email Payment Details (₹200)"}
                 </button>
               )}
             </div>

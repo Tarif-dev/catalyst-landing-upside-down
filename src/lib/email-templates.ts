@@ -82,8 +82,17 @@ export function getPaymentInfoEmailTemplate(opts: {
   passCode: string;
   dashboardUrl: string;
   upiId?: string;
+  amount?: number;
 }) {
-  const upiId = opts.upiId || "catalyst.auk@oksbi";
+  const upiId = opts.upiId || "vyapar.170698866218@hdfcbank";
+  const amount = opts.amount ?? 200;
+  const upiUri =
+    `upi://pay?pa=${encodeURIComponent(upiId)}` +
+    `&pn=${encodeURIComponent("Catalyst 2K26")}` +
+    `&am=${amount}` +
+    `&cu=INR` +
+    `&tn=${encodeURIComponent("CAT-" + opts.passCode)}`;
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(upiUri)}`;
 
   return wrap(`
     <div style="margin-bottom:30px">
@@ -93,37 +102,46 @@ export function getPaymentInfoEmailTemplate(opts: {
 
     <div class="body-text">
       <p>Hey ${opts.participantName || "Initiate"},</p>
-      <p>To complete your entry into <strong>Catalyst 2K26</strong>, you need to pay the individual registration fee. Each participant pays separately — no team-level payment required.</p>
+      <p>To complete your entry into <strong>Catalyst 2K26</strong>, every participant pays an individual registration fee of <strong>₹${amount}</strong>.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Amount</div>
+      <div class="card-value" style="color:#cc2222">₹${amount}.00</div>
+      <div class="card-sub">Per participant. Pay individually — not as a team.</div>
     </div>
 
     <div class="card">
       <div class="card-label">Your Personal Pass Code</div>
       <div class="card-value" style="font-family:monospace;letter-spacing:0.2em;color:#cc2222">${opts.passCode}</div>
-      <div class="card-sub">Mention this code in your payment note/reference.</div>
+      <div class="card-sub">Use <strong>CAT-${opts.passCode}</strong> as the payment note / reference.</div>
     </div>
 
     <div class="card">
-      <div class="card-label">UPI Payment Details</div>
-      <div class="card-value">${upiId}</div>
-      <div class="card-sub">Scan the QR code below or use the UPI ID to pay via any UPI app (GPay, PhonePe, Paytm, etc.).</div>
+      <div class="card-label">UPI ID</div>
+      <div class="card-value" style="font-family:monospace;font-size:15px;word-break:break-all">${upiId}</div>
+      <div class="card-sub">Pay via GPay, PhonePe, Paytm, BHIM, or any UPI app.</div>
     </div>
 
     <div style="text-align:center;margin:24px 0">
       <div class="qr-frame">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${encodeURIComponent(upiId)}%26pn=Catalyst%202K26%26tn=${encodeURIComponent(opts.passCode)}" alt="UPI QR Code" width="250" height="250" style="display:block" />
+        <img src="${qrSrc}" alt="UPI QR Code — ₹${amount}" width="260" height="260" style="display:block" />
       </div>
       <div style="font-family:monospace;font-size:10px;color:#666;margin-top:8px;text-transform:uppercase;letter-spacing:0.2em">
-        Scan with any UPI app
+        Scan • Pay ₹${amount} • Reply with screenshot
       </div>
     </div>
 
     <div class="divider"></div>
 
-    <div class="body-text">
-      <p><strong>After payment:</strong></p>
-      <p>1. The admin team will verify and confirm your payment.<br>
-         2. Once confirmed, your QR pass code will be unlocked.<br>
-         3. You'll receive a confirmation email.</p>
+    <div class="card" style="border-color:#aa2222">
+      <div class="card-label" style="color:#cc2222">⚠ Action Required After Payment</div>
+      <div class="body-text" style="padding:8px 0 0;margin:0">
+        <p style="margin:8px 0"><strong>1.</strong> Pay <strong>₹${amount}</strong> to the UPI ID above (note: <strong>CAT-${opts.passCode}</strong>).</p>
+        <p style="margin:8px 0"><strong>2.</strong> <strong>Reply to this email</strong> with a <strong>screenshot</strong> of the successful payment + your UPI transaction reference ID.</p>
+        <p style="margin:8px 0"><strong>3.</strong> Our admin team will verify within 24 hours and mark you as paid.</p>
+        <p style="margin:8px 0"><strong>4.</strong> You'll get a confirmation email and your Event Pass QR will unlock on the dashboard.</p>
+      </div>
     </div>
 
     <div style="margin:40px 0">
