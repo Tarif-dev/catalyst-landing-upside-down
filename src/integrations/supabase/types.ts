@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_code: string
@@ -54,40 +72,79 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           college: string | null
           course: string | null
           created_at: string
+          dietary_restrictions: string | null
+          dob: string | null
           email: string | null
+          first_name: string | null
           full_name: string | null
+          github_url: string | null
           id: string
+          is_complete: boolean
+          last_name: string | null
+          linkedin_url: string | null
+          pass_code: string
+          payment_ref: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
           phone: string | null
+          resume_url: string | null
+          tshirt_size: string | null
           updated_at: string
           user_id: string
           year_of_study: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           college?: string | null
           course?: string | null
           created_at?: string
+          dietary_restrictions?: string | null
+          dob?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
+          github_url?: string | null
           id?: string
+          is_complete?: boolean
+          last_name?: string | null
+          linkedin_url?: string | null
+          pass_code?: string
+          payment_ref?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
           phone?: string | null
+          resume_url?: string | null
+          tshirt_size?: string | null
           updated_at?: string
           user_id: string
           year_of_study?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           college?: string | null
           course?: string | null
           created_at?: string
+          dietary_restrictions?: string | null
+          dob?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
+          github_url?: string | null
           id?: string
+          is_complete?: boolean
+          last_name?: string | null
+          linkedin_url?: string | null
+          pass_code?: string
+          payment_ref?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
           phone?: string | null
+          resume_url?: string | null
+          tshirt_size?: string | null
           updated_at?: string
           user_id?: string
           year_of_study?: string | null
@@ -100,9 +157,13 @@ export type Database = {
           demo_url: string | null
           description: string
           id: string
+          problem_statement: string | null
           repo_url: string | null
+          screenshots: string[] | null
+          solution_approach: string | null
           submitted_at: string
           team_id: string
+          tech_stack: string | null
           title: string
           updated_at: string
           video_url: string | null
@@ -112,9 +173,13 @@ export type Database = {
           demo_url?: string | null
           description: string
           id?: string
+          problem_statement?: string | null
           repo_url?: string | null
+          screenshots?: string[] | null
+          solution_approach?: string | null
           submitted_at?: string
           team_id: string
+          tech_stack?: string | null
           title: string
           updated_at?: string
           video_url?: string | null
@@ -124,9 +189,13 @@ export type Database = {
           demo_url?: string | null
           description?: string
           id?: string
+          problem_statement?: string | null
           repo_url?: string | null
+          screenshots?: string[] | null
+          solution_approach?: string | null
           submitted_at?: string
           team_id?: string
+          tech_stack?: string | null
           title?: string
           updated_at?: string
           video_url?: string | null
@@ -189,6 +258,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_winner: boolean
           leader_id: string
           name: string
           pass_code: string
@@ -201,6 +271,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_winner?: boolean
           leader_id: string
           name: string
           pass_code?: string
@@ -213,6 +284,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_winner?: boolean
           leader_id?: string
           name?: string
           pass_code?: string
@@ -250,6 +322,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      change_team_leader: {
+        Args: { p_new_leader_id: string }
+        Returns: undefined
+      }
+      change_team_track: {
+        Args: { p_new_track: Database["public"]["Enums"]["track_kind"] }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -264,6 +344,18 @@ export type Database = {
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      join_team_by_code: { Args: { p_code: string }; Returns: string }
+      leave_team: { Args: never; Returns: undefined }
+      verify_participant_pass: {
+        Args: { p_code: string }
+        Returns: {
+          issued_at: string
+          participant_name: string
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          team_name: string
+          track: Database["public"]["Enums"]["track_kind"]
+        }[]
       }
     }
     Enums: {
