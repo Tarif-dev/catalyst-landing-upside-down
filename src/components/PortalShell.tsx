@@ -15,10 +15,10 @@ export function PortalShell({
   const nav = useNavigate();
 
   return (
-    <div className="min-h-screen portal-bg theme-portal overflow-x-hidden flex flex-col relative text-bone font-body">
+    <div className="min-h-dvh portal-bg theme-portal overflow-x-clip flex flex-col relative text-bone font-body">
       {/* Cinematic Background Elements */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] blob-blood opacity-60 pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] blob-upside-down opacity-50 pointer-events-none" />
+      <div className="fixed top-[-20%] left-[-10%] w-[60vw] h-[60dvh] blob-blood opacity-60 pointer-events-none" />
+      <div className="fixed bottom-[-20%] right-[-10%] w-[60vw] h-[60dvh] blob-upside-down opacity-50 pointer-events-none" />
 
       <header className="sticky top-0 z-40 border-b border-border bg-background/60 backdrop-blur-2xl">
         <div className="mx-auto w-full flex max-w-6xl items-center justify-between px-5 sm:px-6 py-4">

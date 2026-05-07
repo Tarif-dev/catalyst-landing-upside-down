@@ -17,16 +17,16 @@ export function Footer() {
           <span className="title-outline not-italic font-display">answer</span>?
         </h2>
         <p className="mx-auto max-w-xl font-serif text-lg leading-relaxed text-bone/60 mb-14 reveal reveal-delay-2">
-          Registrations open soon. Drop a line to the organizing team and be
-          first through the gate when it cracks.
+          Registrations are open. Create your account, complete the application,
+          and step through the gate.
         </p>
 
-        <a
-          href="mailto:catalyst.auk@gmail.com"
+        <Link
+          to="/register"
           className="bracket relative inline-block border border-blood bg-blood px-10 sm:px-14 py-4 font-mono text-[10px] uppercase tracking-[0.5em] text-black transition-all duration-500 hover:bg-transparent hover:text-blood reveal reveal-delay-3"
         >
-          Register Interest
-        </a>
+          Register Now
+        </Link>
 
         <div className="mt-24 flex flex-col items-center gap-3 border-t border-bone/10 pt-10">
           <div className="flex items-center gap-3">

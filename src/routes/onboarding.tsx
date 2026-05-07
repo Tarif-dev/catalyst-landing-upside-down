@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalShell } from "@/components/PortalShell";
@@ -38,24 +38,41 @@ const schema = z.object({
   }),
 });
 
+const emptyOnboardingForm = {
+  firstName: "",
+  lastName: "",
+  phone: "",
+  college: "Amity University Kolkata",
+  course: "",
+  yearOfStudy: "",
+  address: "",
+  dob: "",
+  linkedinUrl: "",
+  githubUrl: "",
+  dietaryRestrictions: "None",
+  tshirtSize: "M" as any,
+};
+
+const onboardingDraftKey = (userId: string) =>
+  `catalyst:onboarding-draft:${userId}`;
+
+function readOnboardingDraft(userId: string) {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const saved = window.sessionStorage.getItem(onboardingDraftKey(userId));
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+}
+
 function OnboardingPage() {
   const { user, profile, loading, session } = useAuth();
   const nav = useNavigate();
 
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    college: "Amity University Kolkata",
-    course: "",
-    yearOfStudy: "",
-    address: "",
-    dob: "",
-    linkedinUrl: "",
-    githubUrl: "",
-    dietaryRestrictions: "None",
-    tshirtSize: "M" as any,
-  });
+  const [form, setForm] = useState(emptyOnboardingForm);
+  const didHydrateDraft = useRef(false);
 
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -71,28 +88,42 @@ function OnboardingPage() {
       nav({ to: "/dashboard" });
     }
 
-    // Auto-fill existing data if any
-    if (profile) {
-      setForm((prev) => ({
-        ...prev,
-        firstName: profile.first_name || profile.full_name?.split(" ")[0] || "",
-        lastName:
-          profile.last_name ||
-          profile.full_name?.split(" ").slice(1).join(" ") ||
-          "",
-        phone: profile.phone || "",
-        college: profile.college || "Amity University Kolkata",
-        course: profile.course || "",
-        yearOfStudy: profile.year_of_study || "",
-        address: profile.address || "",
-        dob: profile.dob || "",
-        linkedinUrl: profile.linkedin_url || "",
-        githubUrl: profile.github_url || "",
-        dietaryRestrictions: profile.dietary_restrictions || "None",
-        tshirtSize: profile.tshirt_size || "M",
-      }));
+    if (user) {
+      const profileForm = profile
+        ? {
+            ...emptyOnboardingForm,
+            firstName:
+              profile.first_name || profile.full_name?.split(" ")[0] || "",
+            lastName:
+              profile.last_name ||
+              profile.full_name?.split(" ").slice(1).join(" ") ||
+              "",
+            phone: profile.phone || "",
+            college: profile.college || "Amity University Kolkata",
+            course: profile.course || "",
+            yearOfStudy: profile.year_of_study || "",
+            address: profile.address || "",
+            dob: profile.dob || "",
+            linkedinUrl: profile.linkedin_url || "",
+            githubUrl: profile.github_url || "",
+            dietaryRestrictions: profile.dietary_restrictions || "None",
+            tshirtSize: profile.tshirt_size || "M",
+          }
+        : emptyOnboardingForm;
+      const draft = readOnboardingDraft(user.id);
+      setForm({ ...profileForm, ...(draft ?? {}) });
+      didHydrateDraft.current = true;
     }
   }, [user, profile, loading, nav]);
+
+  useEffect(() => {
+    if (!user || !didHydrateDraft.current) return;
+
+    window.sessionStorage.setItem(
+      onboardingDraftKey(user.id),
+      JSON.stringify(form),
+    );
+  }, [form, user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -169,6 +200,8 @@ function OnboardingPage() {
         .eq("user_id", user.id);
 
       if (profileError) throw profileError;
+
+      window.sessionStorage.removeItem(onboardingDraftKey(user.id));
 
       // 3. Send Welcome Email via server function. This keeps the Resend
       // API key out of the browser bundle.

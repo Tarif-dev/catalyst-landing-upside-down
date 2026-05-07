@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,12 +17,28 @@ const schema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
 });
 
+const REGISTER_DRAFT_KEY = "catalyst:register-draft";
+const emptyRegisterForm = {
+  email: "",
+  password: "",
+};
+
+function readRegisterDraft() {
+  if (typeof window === "undefined") return emptyRegisterForm;
+
+  try {
+    const saved = window.sessionStorage.getItem(REGISTER_DRAFT_KEY);
+    if (!saved) return emptyRegisterForm;
+    return { ...emptyRegisterForm, ...JSON.parse(saved) };
+  } catch {
+    return emptyRegisterForm;
+  }
+}
+
 function RegisterPage() {
   const nav = useNavigate();
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [form, setForm] = useState(readRegisterDraft);
+  const didMount = useRef(false);
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -31,6 +47,15 @@ function RegisterPage() {
       if (data.session) nav({ to: "/dashboard" });
     });
   }, [nav]);
+
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+
+    window.sessionStorage.setItem(REGISTER_DRAFT_KEY, JSON.stringify(form));
+  }, [form]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +89,7 @@ function RegisterPage() {
       data.user.identities &&
       data.user.identities.length === 0
     ) {
+      window.sessionStorage.removeItem(REGISTER_DRAFT_KEY);
       setLoading(false);
       toast.error("This email is already registered. Please sign in instead.");
       nav({ to: "/login" });
@@ -71,6 +97,7 @@ function RegisterPage() {
     }
 
     setLoading(false);
+    window.sessionStorage.removeItem(REGISTER_DRAFT_KEY);
     if (data.session) {
       toast.success("Account created. Welcome to Hawkins.", {
         description: "You're signed in. Let's build your team.",

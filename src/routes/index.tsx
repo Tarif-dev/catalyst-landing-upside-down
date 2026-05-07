@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { HeroVideo } from "@/components/HeroVideo";
 import { Nav } from "@/components/Nav";
 import { Tracks } from "@/components/Tracks";
@@ -111,12 +111,12 @@ function Details() {
 
         {/* CTAs */}
         <div className="mt-12 sm:mt-16 flex flex-col items-center justify-center gap-4 sm:flex-row reveal reveal-delay-4">
-          <a
-            href="#register"
+          <Link
+            to="/register"
             className="bracket relative w-full sm:w-auto text-center border border-blood bg-blood px-8 sm:px-12 py-4 font-mono text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.45em] text-black transition-all duration-500 hover:bg-transparent hover:text-blood"
           >
-            Enter the Gate
-          </a>
+            Register Now
+          </Link>
           <a
             href="#tracks"
             className="bracket relative w-full sm:w-auto text-center border border-bone/20 bg-transparent px-8 sm:px-12 py-4 font-mono text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.45em] text-bone/80 transition-all duration-500 hover:border-blood/60 hover:text-blood"
