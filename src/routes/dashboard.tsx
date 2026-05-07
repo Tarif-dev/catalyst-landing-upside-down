@@ -27,7 +27,7 @@ const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
 };
 
 function Dashboard() {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, session, loading } = useAuth();
   const nav = useNavigate();
   const [team, setTeam] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
