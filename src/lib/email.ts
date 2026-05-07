@@ -265,3 +265,49 @@ export const setParticipantPaymentStatus = createServerFn({ method: "POST" })
   });
 
 export const sendPaymentConfirmedEmails = setParticipantPaymentStatus;
+
+export const deleteParticipantAccount = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      adminAccessToken: z.string().min(20),
+      participantProfileId: z.string().uuid(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const callerSupa = authedClient(data.adminAccessToken);
+    const { data: callerUser, error: callerErr } =
+      await callerSupa.auth.getUser(data.adminAccessToken);
+    if (callerErr || !callerUser.user) {
+      throw new Error("Unauthorized.");
+    }
+
+    const supa = adminClient();
+    const { data: adminRow } = await supa
+      .from("admins")
+      .select("id")
+      .eq("id", callerUser.user.id)
+      .maybeSingle();
+    if (!adminRow) throw new Error("Unauthorized: not an admin.");
+
+    const { data: profile } = await supa
+      .from("profiles")
+      .select("id, user_id, full_name, email")
+      .eq("id", data.participantProfileId)
+      .maybeSingle();
+    if (!profile) throw new Error("Participant not found.");
+
+    if (profile.user_id === callerUser.user.id) {
+      throw new Error("You cannot delete your own admin account here.");
+    }
+
+    const { error: deleteErr } = await supa.auth.admin.deleteUser(
+      profile.user_id,
+    );
+    if (deleteErr) throw deleteErr;
+
+    return {
+      deleted: true,
+      participantProfileId: profile.id,
+      participantName: profile.full_name || profile.email || "Participant",
+    };
+  });

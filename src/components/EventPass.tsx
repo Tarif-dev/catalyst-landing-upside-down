@@ -35,7 +35,7 @@ export function EventPass({
   participantProfile?: any;
 }) {
   const isPaid = participantProfile?.payment_status === "paid";
-  const passCode = participantProfile?.pass_code ?? team.pass_code;
+  const passCode = String(participantProfile?.pass_code ?? team.pass_code);
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
   const [qr, setQr] = useState<string>("");
@@ -272,7 +272,7 @@ export function EventPass({
                     <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/40 mb-1">
                       Pass Code
                     </p>
-                    <p className="font-mono text-3xl text-red-500 font-bold tracking-widest drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">
+                    <p className="font-mono text-2xl sm:text-3xl text-red-500 font-bold tracking-[0.18em] sm:tracking-widest drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">
                       {passCode}
                     </p>
                   </div>
@@ -321,8 +321,8 @@ export function EventPass({
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent z-0 pointer-events-none" />
 
-              <div className="relative z-10 w-full max-w-[220px] flex flex-col items-center">
-                <h2 className="font-display text-xl sm:text-2xl text-white tracking-[0.2em] uppercase mb-8 drop-shadow-md text-center leading-snug">
+              <div className="relative z-10 flex w-full max-w-[230px] flex-1 flex-col items-center justify-center pb-8">
+                <h2 className="mb-6 text-center font-display text-xl sm:text-2xl uppercase leading-snug tracking-[0.2em] text-white drop-shadow-md">
                   Dimensional
                   <br />
                   Access
@@ -371,8 +371,8 @@ export function EventPass({
                   <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-red-500" />
                 </div>
 
-                <div className="mt-8 text-center w-full">
-                  <p className="font-mono text-red-500 text-glow-blood text-2xl sm:text-3xl font-bold tracking-[0.3em]">
+                <div className="mt-7 flex w-full flex-col items-center text-center">
+                  <p className="max-w-full font-mono text-red-500 text-glow-blood text-3xl sm:text-4xl font-bold tracking-[0.2em] tabular-nums leading-none">
                     {passCode}
                   </p>
                   <p className="font-mono text-[9px] uppercase tracking-[0.1em] text-white/40 mt-4 leading-relaxed max-w-[200px] mx-auto">

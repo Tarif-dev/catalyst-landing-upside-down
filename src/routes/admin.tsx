@@ -4,7 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { setParticipantPaymentStatus as setParticipantPaymentStatusFn } from "@/lib/email";
+import {
+  deleteParticipantAccount,
+  setParticipantPaymentStatus as setParticipantPaymentStatusFn,
+} from "@/lib/email";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Console — Catalyst 2K26" }] }),
@@ -23,10 +26,14 @@ function Admin() {
   const [selectedParticipant, setSelectedParticipant] = useState<any | null>(
     null,
   );
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const [busy, setBusy] = useState(true);
   const setParticipantPaymentStatusServer = useServerFn(
     setParticipantPaymentStatusFn,
   );
+  const deleteParticipantAccountFn = useServerFn(deleteParticipantAccount);
 
   const load = async () => {
     const [teamsRes, participantsRes] = await Promise.all([
@@ -96,6 +103,48 @@ function Admin() {
     }
 
     await load();
+  };
+
+  const beginDeleteParticipant = (participant: any) => {
+    setDeleteTarget(participant);
+    setDeleteConfirmText("");
+  };
+
+  const confirmDeleteParticipant = async () => {
+    if (!deleteTarget || !session?.access_token) {
+      toast.error("Please sign in again.");
+      return;
+    }
+
+    const expected = deleteTarget.full_name || deleteTarget.email || "DELETE";
+    if (deleteConfirmText.trim() !== expected) {
+      toast.error(`Type "${expected}" exactly to confirm deletion.`);
+      return;
+    }
+
+    const secondConfirm = window.confirm(
+      `Final confirmation: permanently delete ${expected}? This removes their account, profile, team membership, and related auth record.`,
+    );
+    if (!secondConfirm) return;
+
+    setDeleteBusy(true);
+    try {
+      await deleteParticipantAccountFn({
+        data: {
+          adminAccessToken: session.access_token,
+          participantProfileId: deleteTarget.id,
+        },
+      });
+      toast.success("Participant deleted.");
+      setDeleteTarget(null);
+      setDeleteConfirmText("");
+      await load();
+    } catch (err: any) {
+      console.error("Failed to delete participant:", err);
+      toast.error(err?.message || "Failed to delete participant.");
+    } finally {
+      setDeleteBusy(false);
+    }
   };
 
   const toggleWinner = async (team: any) => {
@@ -170,9 +219,9 @@ function Admin() {
 
   const downloadParticipantsCSV = () => {
     let csv =
-      "Full Name,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,T-Shirt,Profile Status,Payment Status,Pass Code\n";
+      "Full Name,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,Profile Status,Payment Status,Pass Code\n";
     participants.forEach((p) => {
-      csv += `"${p.full_name || ""}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.tshirt_size || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${p.payment_status || "unpaid"}","${p.pass_code || ""}"\n`;
+      csv += `"${p.full_name || ""}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${p.payment_status || "unpaid"}","${p.pass_code || ""}"\n`;
     });
     downloadCSV(csv, "catalyst-participants.csv");
   };
@@ -198,6 +247,7 @@ function Admin() {
         }}
       >
         <div
+          className="admin-topbar"
           style={{
             width: 32,
             height: 32,
@@ -265,7 +315,7 @@ function Admin() {
   const btn = (
     label: string,
     onClick: () => void,
-    variant: "green" | "yellow" | "blue" | "gray",
+    variant: "green" | "yellow" | "blue" | "gray" | "red",
   ) => {
     const map: Record<
       string,
@@ -294,6 +344,12 @@ function Admin() {
         bg: "#f9fafb",
         text: "#374151",
         hoverBg: "#f3f4f6",
+      },
+      red: {
+        border: "#fecaca",
+        bg: "#fef2f2",
+        text: "#b91c1c",
+        hoverBg: "#fee2e2",
       },
     };
     const v = map[variant];
@@ -389,9 +445,13 @@ function Admin() {
         </div>
       </div>
 
-      <main style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 24px" }}>
+      <main
+        className="admin-main"
+        style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 24px" }}
+      >
         {/* ── Stats Row ── */}
         <div
+          className="admin-stats"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
@@ -731,6 +791,11 @@ function Admin() {
                             () => setSelectedParticipant(p),
                             "blue",
                           )}
+                          {btn(
+                            "Delete",
+                            () => beginDeleteParticipant(p),
+                            "red",
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -845,7 +910,6 @@ function Admin() {
                       "Dietary Restrictions",
                       selectedParticipant.dietary_restrictions,
                     ],
-                    ["T-Shirt Size", selectedParticipant.tshirt_size],
                   ].map(([label, value]) => (
                     <div key={label}>
                       <div
@@ -1087,6 +1151,155 @@ function Admin() {
           </div>
         </div>
       )}
+      {deleteTarget && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.55)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 60,
+            padding: 16,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !deleteBusy) {
+              setDeleteTarget(null);
+            }
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 520,
+              background: "#fff",
+              borderRadius: 12,
+              boxShadow: "0 24px 70px rgba(0,0,0,0.24)",
+              border: "1px solid #fee2e2",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ padding: 24, borderBottom: "1px solid #fee2e2" }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "#b91c1c",
+                  marginBottom: 8,
+                }}
+              >
+                Delete participant
+              </div>
+              <h3 style={{ margin: 0, fontSize: 20, color: "#111827" }}>
+                {deleteTarget.full_name || deleteTarget.email || "Participant"}
+              </h3>
+              <p style={{ margin: "8px 0 0", color: "#6b7280", fontSize: 14 }}>
+                Step 1: type the participant name exactly. Step 2: confirm the
+                browser warning. This permanently removes the auth account and
+                cascades their profile and team membership.
+              </p>
+            </div>
+            <div style={{ padding: 24 }}>
+              <label
+                htmlFor="delete-confirm"
+                style={{
+                  display: "block",
+                  fontSize: 12,
+                  color: "#6b7280",
+                  fontWeight: 600,
+                  marginBottom: 8,
+                }}
+              >
+                Type: {deleteTarget.full_name || deleteTarget.email || "DELETE"}
+              </label>
+              <input
+                id="delete-confirm"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                disabled={deleteBusy}
+                style={{
+                  width: "100%",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  padding: "10px 12px",
+                  fontSize: 14,
+                  color: "#111827",
+                  outline: "none",
+                }}
+              />
+            </div>
+            <div
+              style={{
+                padding: "16px 24px",
+                borderTop: "1px solid #e5e7eb",
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 10,
+              }}
+            >
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleteBusy}
+                style={{
+                  padding: "8px 16px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  background: "#fff",
+                  cursor: deleteBusy ? "not-allowed" : "pointer",
+                  color: "#374151",
+                  fontWeight: 500,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteParticipant}
+                disabled={deleteBusy}
+                style={{
+                  padding: "8px 16px",
+                  border: "1px solid #dc2626",
+                  borderRadius: 6,
+                  background: "#dc2626",
+                  cursor: deleteBusy ? "not-allowed" : "pointer",
+                  color: "#fff",
+                  fontWeight: 600,
+                }}
+              >
+                {deleteBusy ? "Deleting..." : "Delete permanently"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <style>{`
+        @media (max-width: 760px) {
+          .admin-topbar {
+            height: auto !important;
+            min-height: 64px;
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 12px;
+            padding-top: 14px !important;
+            padding-bottom: 14px !important;
+          }
+          .admin-main {
+            padding: 20px 12px 32px !important;
+          }
+          .admin-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 10px !important;
+          }
+          .admin-stats > div {
+            padding: 14px !important;
+          }
+          .admin-stats > div > div:last-child {
+            font-size: 24px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -37,6 +37,11 @@ function Dashboard() {
   const [busy, setBusy] = useState(true);
   const [emailBusy, setEmailBusy] = useState(false);
   const sendPaymentInfoFn = useServerFn(sendPaymentInfoEmail);
+  const displayName =
+    participantProfile?.first_name ||
+    participantProfile?.full_name?.split(" ")[0] ||
+    user?.email?.split("@")[0] ||
+    "Builder";
 
   useEffect(() => {
     if (loading) return;
@@ -94,9 +99,9 @@ function Dashboard() {
   }
 
   return (
-    <PortalShell title={`Welcome, ${user?.email?.split("@")[0]}`}>
+    <PortalShell title={`Welcome, ${displayName}`}>
       {!team ? (
-        <div className="panel p-8 sm:p-12 text-center reveal">
+        <div className="panel p-6 sm:p-12 text-center reveal">
           <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood text-glow-blood mb-6 font-bold">
             No team yet
           </p>
@@ -107,16 +112,16 @@ function Dashboard() {
             Teams of 2–5. You'll be the leader. Invite your members by email
             after creation.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4">
             <Link
               to="/team/new"
-              className="btn-primary inline-flex items-center justify-center min-w-[200px]"
+              className="btn-primary inline-flex items-center justify-center min-w-0 sm:min-w-[200px]"
             >
               Create team
             </Link>
             <Link
               to="/team/join"
-              className="btn-secondary inline-flex items-center justify-center min-w-[200px]"
+              className="btn-secondary inline-flex items-center justify-center min-w-0 sm:min-w-[200px]"
             >
               Join via Code
             </Link>
@@ -125,13 +130,13 @@ function Dashboard() {
       ) : (
         <div className="space-y-8">
           {/* Team card */}
-          <div className="panel p-6 sm:p-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
+          <div className="panel p-5 sm:p-8">
+            <div className="grid gap-5 sm:grid-cols-[1fr_auto] sm:items-start">
+              <div className="min-w-0">
                 <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood">
                   Team
                 </p>
-                <h2 className="font-display text-3xl sm:text-4xl text-bone mt-1">
+                <h2 className="font-display text-3xl sm:text-4xl text-bone mt-1 break-words">
                   {team.name}
                 </h2>
                 <p className="mt-1 font-serif italic text-bone/60">
@@ -143,7 +148,7 @@ function Dashboard() {
                   </p>
                 )}
               </div>
-              <div className="text-right">
+              <div className="rounded-sm border border-bone/10 bg-black/25 p-4 text-left sm:min-w-[190px] sm:text-right">
                 <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-bone/50">
                   Status
                 </p>
@@ -166,25 +171,25 @@ function Dashboard() {
 
             <div className="hairline my-6" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <Link
                 to="/team/$teamId"
                 params={{ teamId: team.id }}
-                className="btn-secondary text-center px-4 py-3 border-white/20"
+                className="btn-secondary flex min-h-12 items-center justify-center text-center px-4 py-3 border-white/20"
               >
                 Manage team
               </Link>
               <Link
                 to="/pass/$teamId"
                 params={{ teamId: team.id }}
-                className="btn-secondary text-center px-4 py-3 border-white/20"
+                className="btn-secondary flex min-h-12 items-center justify-center text-center px-4 py-3 border-white/20"
               >
                 Event Pass
               </Link>
               <Link
                 to="/submit/$teamId"
                 params={{ teamId: team.id }}
-                className="btn-secondary text-center px-4 py-3 border-white/20"
+                className="btn-secondary flex min-h-12 items-center justify-center text-center px-4 py-3 border-white/20"
               >
                 {submission ? "Edit submission" : "Submit project"}
               </Link>
@@ -212,7 +217,7 @@ function Dashboard() {
                       setEmailBusy(false);
                     }
                   }}
-                  className="btn-secondary text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-pointer transition-colors disabled:opacity-50"
+                  className="btn-secondary flex min-h-12 items-center justify-center text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-pointer transition-colors disabled:opacity-50"
                 >
                   {emailBusy ? "Sending…" : "📧 Email Payment Details (₹200)"}
                 </button>
@@ -221,7 +226,7 @@ function Dashboard() {
           </div>
 
           {/* Members */}
-          <div className="panel p-6 sm:p-8">
+          <div className="panel p-5 sm:p-8">
             <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-4">
               Roster · {members.length}/5
             </p>
@@ -229,14 +234,16 @@ function Dashboard() {
               {members.map((m) => (
                 <li
                   key={m.id}
-                  className="py-3 flex items-center justify-between"
+                  className="py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
-                    <p className="text-bone">{m.full_name}</p>
-                    <p className="text-xs text-bone/50 font-mono">{m.email}</p>
+                  <div className="min-w-0">
+                    <p className="text-bone break-words">{m.full_name}</p>
+                    <p className="break-all text-xs text-bone/50 font-mono">
+                      {m.email}
+                    </p>
                   </div>
                   <span
-                    className={`font-mono text-[10px] uppercase tracking-[0.3em] ${m.role === "leader" ? "text-blood" : "text-bone/50"}`}
+                    className={`w-fit font-mono text-[10px] uppercase tracking-[0.3em] ${m.role === "leader" ? "text-blood" : "text-bone/50"}`}
                   >
                     {m.role}
                   </span>
@@ -247,7 +254,7 @@ function Dashboard() {
 
           {/* Submission */}
           {submission && (
-            <div className="panel p-6 sm:p-8">
+            <div className="panel p-5 sm:p-8">
               <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood mb-2">
                 Submission
               </p>
@@ -268,7 +275,10 @@ function Dashboard() {
               </p>
               <ul className="space-y-2">
                 {certs.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between">
+                  <li
+                    key={c.id}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <span className="text-bone capitalize">
                       {c.kind} — {c.recipient_name}
                     </span>

@@ -21,7 +21,7 @@ export function PortalShell({
       <div className="fixed bottom-[-20%] right-[-10%] w-[60vw] h-[60dvh] blob-upside-down opacity-50 pointer-events-none" />
 
       <header className="sticky top-0 z-40 border-b border-border bg-background/60 backdrop-blur-2xl">
-        <div className="mx-auto w-full flex max-w-6xl items-center justify-between px-5 sm:px-6 py-4">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:flex-nowrap sm:px-6">
           <Link to="/" className="flex items-center gap-3 group">
             <img
               src={amityLogo}
@@ -38,7 +38,7 @@ export function PortalShell({
               decoding="async"
             />
           </Link>
-          <nav className="flex items-center gap-5 text-[14px]">
+          <nav className="flex flex-wrap items-center justify-end gap-3 text-[14px] sm:gap-5">
             {user ? (
               <>
                 <Link
@@ -81,7 +81,7 @@ export function PortalShell({
         </div>
       </header>
 
-      <main className="relative mx-auto w-full max-w-6xl px-5 sm:px-6 py-12 sm:py-16 z-10 flex-1">
+      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 sm:py-16">
         {title && (
           <div className="mb-10 sm:mb-14 reveal">
             <div className="mb-4 flex items-center gap-3">
@@ -90,7 +90,7 @@ export function PortalShell({
                 Hawkins Log
               </span>
             </div>
-            <h1 className="font-display text-4xl sm:text-6xl text-bone tracking-wide">
+            <h1 className="break-words font-display text-4xl tracking-wide text-bone sm:text-6xl">
               {title}
             </h1>
           </div>

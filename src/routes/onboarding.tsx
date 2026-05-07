@@ -33,9 +33,6 @@ const schema = z.object({
     z.undefined(),
   ]),
   dietaryRestrictions: z.string().optional(),
-  tshirtSize: z.enum(["XS", "S", "M", "L", "XL", "XXL"], {
-    errorMap: () => ({ message: "Select a valid size" }),
-  }),
 });
 
 const emptyOnboardingForm = {
@@ -50,7 +47,6 @@ const emptyOnboardingForm = {
   linkedinUrl: "",
   githubUrl: "",
   dietaryRestrictions: "None",
-  tshirtSize: "M" as any,
 };
 
 const onboardingDraftKey = (userId: string) =>
@@ -107,7 +103,6 @@ function OnboardingPage() {
             linkedinUrl: profile.linkedin_url || "",
             githubUrl: profile.github_url || "",
             dietaryRestrictions: profile.dietary_restrictions || "None",
-            tshirtSize: profile.tshirt_size || "M",
           }
         : emptyOnboardingForm;
       const draft = readOnboardingDraft(user.id);
@@ -193,7 +188,6 @@ function OnboardingPage() {
           linkedin_url: parsed.data.linkedinUrl,
           github_url: parsed.data.githubUrl || null,
           dietary_restrictions: parsed.data.dietaryRestrictions,
-          tshirt_size: parsed.data.tshirtSize,
           resume_url: resumeUrl,
           is_complete: true,
         })
@@ -439,26 +433,7 @@ function OnboardingPage() {
             Logistics
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-            <div>
-              <label className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70 mb-2">
-                T-Shirt Size
-              </label>
-              <select
-                value={form.tshirtSize}
-                onChange={(e) =>
-                  setForm({ ...form, tshirtSize: e.target.value })
-                }
-                className="input-styled appearance-none cursor-pointer"
-              >
-                <option value="XS">XS</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="XXL">XXL</option>
-              </select>
-            </div>
-            <div>
+            <div className="sm:col-span-2">
               <label className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70 mb-2">
                 Dietary Restrictions
               </label>
