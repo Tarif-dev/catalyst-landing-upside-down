@@ -22,7 +22,7 @@ const TRACK_LABEL: Record<string, string> = {
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
   unpaid: { label: "Awaiting Payment", tone: "text-amber" },
   pending: { label: "Verifying Payment", tone: "text-amber" },
-  paid: { label: "Confirmed", tone: "text-cyan" },
+  paid: { label: "Verified", tone: "text-cyan" },
   refunded: { label: "Refunded", tone: "text-bone/50" },
 };
 
@@ -129,6 +129,83 @@ function Dashboard() {
         </div>
       ) : (
         <div className="space-y-8">
+          {/* Participant card */}
+          <div className="panel p-5 sm:p-8">
+            <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan">
+                  Participant
+                </p>
+                <h2 className="mt-1 font-display text-3xl sm:text-4xl text-bone break-words">
+                  {participantProfile?.full_name || displayName}
+                </h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="border border-white/10 bg-black/20 p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                      Status
+                    </p>
+                    <p
+                      className={`mt-2 font-mono text-sm uppercase tracking-[0.25em] ${STATUS_LABEL[participantProfile?.payment_status || "unpaid"].tone}`}
+                    >
+                      {
+                        STATUS_LABEL[
+                          participantProfile?.payment_status || "unpaid"
+                        ].label
+                      }
+                    </p>
+                  </div>
+                  <div className="border border-white/10 bg-black/20 p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                      Individual event pass code
+                    </p>
+                    <p className="mt-2 font-display text-2xl text-blood tracking-wide">
+                      {participantProfile?.pass_code || "Pending"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {participantProfile?.payment_status !== "paid" && (
+                <div className="border border-amber/25 bg-amber/5 p-5">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber">
+                    Payment
+                  </p>
+                  <p className="mt-3 font-serif text-base leading-relaxed text-bone/70">
+                    Request the payment instructions by email. Once the admin
+                    verifies your payment, your event pass unlocks.
+                  </p>
+                  <button
+                    disabled={emailBusy}
+                    onClick={async () => {
+                      if (!session?.access_token) {
+                        toast.error("Please sign in again.");
+                        return;
+                      }
+                      setEmailBusy(true);
+                      try {
+                        await sendPaymentInfoFn({
+                          data: { accessToken: session.access_token },
+                        });
+                        toast.success(
+                          "Payment instructions sent! Check your email (and spam folder).",
+                        );
+                      } catch (err: any) {
+                        toast.error(
+                          err?.message || "Failed to send payment email.",
+                        );
+                      } finally {
+                        setEmailBusy(false);
+                      }
+                    }}
+                    className="btn-secondary mt-5 flex w-full min-h-12 items-center justify-center text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-pointer transition-colors disabled:opacity-50"
+                  >
+                    {emailBusy ? "Sending..." : "Email Payment Details"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Team card */}
           <div className="panel p-5 sm:p-8">
             <div className="grid gap-5 sm:grid-cols-[1fr_auto] sm:items-start">
@@ -150,20 +227,9 @@ function Dashboard() {
               </div>
               <div className="rounded-sm border border-bone/10 bg-black/25 p-4 text-left sm:min-w-[190px] sm:text-right">
                 <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-bone/50">
-                  Status
+                  Team code
                 </p>
-                <p
-                  className={`mt-1 font-mono text-sm uppercase tracking-[0.3em] ${STATUS_LABEL[participantProfile?.payment_status || "unpaid"].tone}`}
-                >
-                  {
-                    STATUS_LABEL[participantProfile?.payment_status || "unpaid"]
-                      .label
-                  }
-                </p>
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-bone/40">
-                  Pass code
-                </p>
-                <p className="font-display text-xl text-blood">
+                <p className="mt-1 font-display text-2xl text-blood tracking-wide">
                   {team.pass_code}
                 </p>
               </div>
@@ -171,7 +237,7 @@ function Dashboard() {
 
             <div className="hairline my-6" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <Link
                 to="/team/$teamId"
                 params={{ teamId: team.id }}
@@ -193,35 +259,6 @@ function Dashboard() {
               >
                 {submission ? "Edit submission" : "Submit project"}
               </Link>
-              {participantProfile?.payment_status !== "paid" && (
-                <button
-                  disabled={emailBusy}
-                  onClick={async () => {
-                    if (!session?.access_token) {
-                      toast.error("Please sign in again.");
-                      return;
-                    }
-                    setEmailBusy(true);
-                    try {
-                      await sendPaymentInfoFn({
-                        data: { accessToken: session.access_token },
-                      });
-                      toast.success(
-                        "Payment instructions sent! Check your email (and spam folder).",
-                      );
-                    } catch (err: any) {
-                      toast.error(
-                        err?.message || "Failed to send payment email.",
-                      );
-                    } finally {
-                      setEmailBusy(false);
-                    }
-                  }}
-                  className="btn-secondary flex min-h-12 items-center justify-center text-center px-4 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-pointer transition-colors disabled:opacity-50"
-                >
-                  {emailBusy ? "Sending…" : "📧 Email Payment Details (₹200)"}
-                </button>
-              )}
             </div>
           </div>
 

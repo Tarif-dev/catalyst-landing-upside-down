@@ -41,7 +41,8 @@ function VerifyPage() {
             {pass.track || "No track"}
           </p>
           <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.3em] text-bone/50">
-            Status - {pass.payment_status}
+            Status -{" "}
+            {pass.payment_status === "paid" ? "verified" : pass.payment_status}
           </p>
         </div>
       ) : (

@@ -85,10 +85,18 @@ export function Nav() {
         <div className="flex items-center gap-3">
           <Link
             to={authed ? "/dashboard" : "/register"}
-            className="bracket hidden sm:inline-flex group relative items-center gap-2.5 border border-blood/40 bg-blood/5 px-5 md:px-6 py-2 md:py-2.5 text-[13px] italic text-blood transition-all duration-500 hover:border-blood hover:bg-blood hover:text-black"
+            className={`bracket hidden sm:inline-flex group relative items-center gap-2.5 border px-5 md:px-6 py-2 md:py-2.5 text-[13px] italic transition-all duration-500 hover:border-blood hover:bg-blood hover:text-black ${
+              authed
+                ? "border-blood bg-blood text-black shadow-[0_0_18px_oklch(0.56_0.26_25/0.35)]"
+                : "border-blood/40 bg-blood/5 text-blood"
+            }`}
             style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
-            <span className="block h-1 w-1 rounded-full bg-blood transition-colors group-hover:bg-black" />
+            <span
+              className={`block h-1 w-1 rounded-full transition-colors group-hover:bg-black ${
+                authed ? "bg-black" : "bg-blood"
+              }`}
+            />
             {authed ? "Dashboard" : "Register"}
           </Link>
 

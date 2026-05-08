@@ -34,7 +34,7 @@ export function PortalShell({
             <img
               src={catalystLogo}
               alt="Catalyst 2K26"
-              className="h-7 w-auto brightness-200 transition-transform group-hover:scale-105"
+              className="h-8 w-auto brightness-200 transition-transform group-hover:scale-105 sm:h-10"
               decoding="async"
             />
           </Link>
@@ -43,7 +43,7 @@ export function PortalShell({
               <>
                 <Link
                   to="/dashboard"
-                  className="font-serif italic text-bone/80 hover:text-white hover:text-glow-cyan transition-all duration-300"
+                  className="font-serif italic text-bone drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:text-white hover:text-glow-cyan transition-all duration-300"
                 >
                   Dashboard
                 </Link>

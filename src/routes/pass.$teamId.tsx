@@ -99,8 +99,8 @@ function PassPage() {
         </div>
       )}
       <p className="mb-6 font-serif italic text-bone/60 max-w-xl">
-        Show this at the venue. Download it as a PNG and post it on LinkedIn, X,
-        or Instagram — the Upside Down loves a good entrance.
+        Show this at the venue for verification and meal coupons. Download it as
+        a PNG and post it on LinkedIn, X, or Instagram.
       </p>
       <div className="mx-auto max-w-md">
         <EventPass

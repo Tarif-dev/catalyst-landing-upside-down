@@ -11,7 +11,80 @@ import { Venue } from "@/components/Venue";
 import { Sponsors } from "@/components/Sponsors";
 import { Contact } from "@/components/Contact";
 import { Loader } from "@/components/Loader";
+import { Mail, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+
+const socialLinks = {
+  instagram:
+    "https://www.instagram.com/hack_catalyst?utm_source=qr&igsh=OXBla2kyeDg5ZzRw",
+  discord: "https://discord.gg/TCRccCKF",
+  linkedin: "https://www.linkedin.com/in/catalyst-admin-b49136407",
+  email: "mailto:catalyst.auk@gmail.com",
+};
+
+type SocialIconProps = {
+  className?: string;
+};
+
+function InstagramLogo({ className }: SocialIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+    >
+      <rect
+        x="3"
+        y="3"
+        width="18"
+        height="18"
+        rx="5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <circle cx="17.3" cy="6.8" r="1.2" fill="currentColor" />
+    </svg>
+  );
+}
+
+function DiscordLogo({ className }: SocialIconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+    >
+      <path
+        d="M7.4 7.1A11 11 0 0 1 10 6.2l.5 1a9.8 9.8 0 0 1 3 0l.5-1a11 11 0 0 1 2.6.9c1.7 2.5 2.4 5 2.1 7.5a10.8 10.8 0 0 1-3.3 1.7l-.8-1.3c.5-.2 1-.4 1.4-.7a7.8 7.8 0 0 1-8 0c.4.3.9.5 1.4.7l-.8 1.3a10.8 10.8 0 0 1-3.3-1.7c-.3-2.5.4-5 2.1-7.5Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="9.5" cy="12" r="1" fill="currentColor" />
+      <circle cx="14.5" cy="12" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function LinkedInLogo({ className }: SocialIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        fill="currentColor"
+        d="M5.6 8.8h3.1v9.8H5.6V8.8Zm1.6-4.9a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6Zm3.4 4.9h3v1.3h.1c.4-.8 1.5-1.6 3-1.6 3.2 0 3.8 2.1 3.8 4.9v5.2h-3.1V14c0-1.1 0-2.5-1.5-2.5s-1.8 1.2-1.8 2.4v4.7h-3.1V8.8Z"
+      />
+    </svg>
+  );
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,6 +119,33 @@ function Hero() {
 }
 
 function Details() {
+  const socialItems = [
+    {
+      label: "Instagram",
+      href: socialLinks.instagram,
+      icon: InstagramLogo,
+      accent: "hover:border-[#e4405f]/70 hover:text-[#ff6f8c]",
+    },
+    {
+      label: "Discord",
+      href: socialLinks.discord,
+      icon: DiscordLogo,
+      accent: "hover:border-[#5865f2]/70 hover:text-[#8ea0ff]",
+    },
+    {
+      label: "LinkedIn",
+      href: socialLinks.linkedin,
+      icon: LinkedInLogo,
+      accent: "hover:border-[#0a66c2]/70 hover:text-[#64b5ff]",
+    },
+    {
+      label: "Email",
+      href: socialLinks.email,
+      icon: Mail,
+      accent: "hover:border-blood/60 hover:text-blood",
+    },
+  ];
+
   return (
     <section
       id="details"
@@ -118,11 +218,59 @@ function Details() {
             Register Now
           </Link>
           <a
+            href={socialLinks.discord}
+            target="_blank"
+            rel="noreferrer"
+            className="bracket relative inline-flex w-full items-center justify-center gap-3 border border-cyan/50 bg-cyan/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.35em] text-cyan transition-all duration-500 hover:border-cyan hover:bg-cyan hover:text-black sm:w-auto sm:px-10"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Join Discord
+          </a>
+          <a
             href="#tracks"
             className="bracket relative w-full sm:w-auto text-center border border-bone/20 bg-transparent px-8 sm:px-12 py-4 font-mono text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.45em] text-bone/80 transition-all duration-500 hover:border-blood/60 hover:text-blood"
           >
             Explore Tracks ↓
           </a>
+        </div>
+
+        <div
+          className="mx-auto mt-8 max-w-3xl border-y border-bone/10 py-5 reveal reveal-delay-4"
+          aria-label="Catalyst social links"
+        >
+          <div className="mb-4 flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-blood/40" />
+            <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/45">
+              Follow the signal
+            </p>
+            <span className="h-px w-8 bg-blood/40" />
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {socialItems.map((item) => {
+              const Icon = item.icon;
+              const isExternal = item.href.startsWith("http");
+
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target={isExternal ? "_blank" : undefined}
+                  rel={isExternal ? "noreferrer" : undefined}
+                  className={`group inline-flex h-14 items-center justify-center gap-3 border border-bone/10 bg-black/35 px-4 font-mono text-[9px] uppercase tracking-[0.26em] text-bone/65 transition-all duration-300 hover:bg-black/70 ${item.accent}`}
+                  aria-label={
+                    item.label === "Email"
+                      ? "Email Catalyst"
+                      : `Follow Catalyst on ${item.label}`
+                  }
+                >
+                  <span className="grid h-8 w-8 place-items-center rounded-full border border-current/20 bg-bone/[0.03] transition-transform duration-300 group-hover:-translate-y-0.5">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span>{item.label}</span>
+                </a>
+              );
+            })}
+          </div>
         </div>
 
         {/* Countdown */}

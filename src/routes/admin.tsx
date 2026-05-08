@@ -69,6 +69,8 @@ function Admin() {
 
   /* ── Actions ── */
   const participantByUserId = new Map(participants.map((p) => [p.user_id, p]));
+  const statusLabel = (status?: string | null) =>
+    status === "paid" ? "verified" : status || "unpaid";
 
   const setParticipantPaymentStatus = async (
     id: string,
@@ -88,7 +90,9 @@ function Admin() {
         },
       });
 
-      toast.success(`Participant payment marked as ${payment_status}.`);
+      toast.success(
+        `Participant status marked as ${statusLabel(payment_status)}.`,
+      );
       if (payment_status === "paid") {
         if (result.sent) {
           toast.success("Confirmation emails sent to participant.");
@@ -98,7 +102,7 @@ function Admin() {
       }
     } catch (err: any) {
       console.error("Failed to update participant payment:", err);
-      toast.error(err?.message || "Failed to update payment status.");
+      toast.error(err?.message || "Failed to update participant status.");
       return;
     }
 
@@ -198,13 +202,13 @@ function Admin() {
 
   const downloadTeamsCSV = () => {
     let csv =
-      "Team Name,Track,Team Code,Winner,Members,Paid Participants,Submission\n";
+      "Team Name,Track,Team Code,Winner,Members,Verified Participants,Submission\n";
     teams.forEach((t) => {
       const members = t.team_members
         .map((m: any) => {
           const payment =
             participantByUserId.get(m.user_id)?.payment_status ?? "unpaid";
-          return `${m.full_name}(${m.role}, ${payment})`;
+          return `${m.full_name}(${m.role}, ${statusLabel(payment)})`;
         })
         .join("; ");
       const paidCount = t.team_members.filter(
@@ -219,9 +223,9 @@ function Admin() {
 
   const downloadParticipantsCSV = () => {
     let csv =
-      "Full Name,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,Profile Status,Payment Status,Pass Code\n";
+      "Full Name,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,Profile Status,Status,Individual Pass Code\n";
     participants.forEach((p) => {
-      csv += `"${p.full_name || ""}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${p.payment_status || "unpaid"}","${p.pass_code || ""}"\n`;
+      csv += `"${p.full_name || ""}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${statusLabel(p.payment_status)}","${p.pass_code || ""}"\n`;
     });
     downloadCSV(csv, "catalyst-participants.csv");
   };
@@ -462,7 +466,7 @@ function Admin() {
           {[
             { label: "Total Teams", value: totalTeams },
             { label: "Total Participants", value: totalParticipants },
-            { label: "Paid Participants", value: paidParticipants },
+            { label: "Verified Participants", value: paidParticipants },
             { label: "Complete Profiles", value: completeProfiles },
           ].map((s) => (
             <div
@@ -539,7 +543,7 @@ function Admin() {
                       "Team / Track",
                       "Members",
                       "Submission",
-                      "Payment Progress",
+                      "Status Progress",
                       "Winner",
                       "Actions",
                     ].map((h) => (
@@ -605,8 +609,10 @@ function Admin() {
                             </span>
                             <span style={{ marginLeft: 6 }}>
                               {badge(
-                                participantByUserId.get(m.user_id)
-                                  ?.payment_status ?? "unpaid",
+                                statusLabel(
+                                  participantByUserId.get(m.user_id)
+                                    ?.payment_status,
+                                ),
                                 participantByUserId.get(m.user_id)
                                   ?.payment_status === "paid"
                                   ? "green"
@@ -634,7 +640,7 @@ function Admin() {
                           ).length;
                           const total = t.team_members.length;
                           return badge(
-                            `${paidCount}/${total} paid`,
+                            `${paidCount}/${total} verified`,
                             total > 0 && paidCount === total
                               ? "green"
                               : "yellow",
@@ -682,7 +688,7 @@ function Admin() {
                       "Course",
                       "Profile",
                       "Payment",
-                      "Pass Code",
+                      "Individual Pass Code",
                       "Actions",
                     ].map((h) => (
                       <th
@@ -757,7 +763,7 @@ function Admin() {
                       </td>
                       <td style={{ padding: "12px 16px" }}>
                         {badge(
-                          p.payment_status || "unpaid",
+                          statusLabel(p.payment_status),
                           p.payment_status === "paid" ? "green" : "yellow",
                         )}
                       </td>
@@ -776,12 +782,12 @@ function Admin() {
                         >
                           {p.payment_status !== "paid"
                             ? btn(
-                                "Mark Paid",
+                                "Mark Verified",
                                 () => setParticipantPaymentStatus(p.id, "paid"),
                                 "green",
                               )
                             : btn(
-                                "Mark Unpaid",
+                                "Mark Unverified",
                                 () =>
                                   setParticipantPaymentStatus(p.id, "unpaid"),
                                 "yellow",
@@ -902,8 +908,8 @@ function Admin() {
                   }}
                 >
                   {[
-                    ["Payment Status", selectedParticipant.payment_status],
-                    ["Pass Code", selectedParticipant.pass_code],
+                    ["Status", statusLabel(selectedParticipant.payment_status)],
+                    ["Individual Pass Code", selectedParticipant.pass_code],
                     ["Phone", selectedParticipant.phone],
                     ["Date of Birth", selectedParticipant.dob],
                     [

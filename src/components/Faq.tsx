@@ -2,24 +2,32 @@ import { SectionTitle } from "./SectionTitle";
 
 const faqs = [
   {
-    q: "Who can participate?",
-    a: "Any student — undergrad, postgrad, or final-year — from any college across India. Form teams of 2 to 5.",
+    q: "Is there any registration fee?",
+    a: "Yes, the registration fee is ₹200 per participant.",
   },
   {
-    q: "Is there a registration fee?",
-    a: "Yes. Registration is charged per participant individually, and each participant's payment is confirmed separately by the admin team.",
+    q: "Can we change our track after selecting it?",
+    a: "Yes, teams can change their track even on the day of the event.",
   },
   {
-    q: "Do I need an AI background?",
-    a: "Not at all. Beginners are welcome. Mentors and starter kits will be available across every track.",
+    q: "Will basic facilities like internet, power, and food be provided?",
+    a: "Yes, internet access, charging points, and food will be provided throughout the event. Detailed information will be shared with team leaders via email.",
   },
   {
-    q: "Where will it happen?",
-    a: "On-campus at Amity University Kolkata. Food, beverages, and a hacking floor that runs all night are provided.",
+    q: "Are participants required to stay at the venue for the full duration?",
+    a: "Yes, participants must remain at the venue for the entire duration of the hackathon.",
   },
   {
-    q: "What should I bring?",
-    a: "Laptop, charger, college ID, and the will to survive 24 hours in the Upside Down.",
+    q: "Will certificates be provided to all team members?",
+    a: "Yes, certificates will be issued to all registered team members.",
+  },
+  {
+    q: "What happens if a team cancels or does not show up? Will there be a refund?",
+    a: "No refunds will be provided. Refunds will only be issued if decided by the organizing team.",
+  },
+  {
+    q: "Will mentors or support be available during the hackathon?",
+    a: "Yes, support will be available to guide participants during the event.",
   },
 ];
 
@@ -30,14 +38,14 @@ export function Faq() {
       className="px-5 sm:px-6 py-24 md:py-44 border-t border-blood/10"
     >
       <div className="mx-auto max-w-3xl">
-        <SectionTitle eyebrow="Transmissions — Decoded" italic>
+        <SectionTitle eyebrow="Transmissions - Decoded" italic>
           Questions.
         </SectionTitle>
 
         <ul className="border-t border-bone/10">
           {faqs.map((f, i) => (
             <li
-              key={i}
+              key={f.q}
               className="border-b border-bone/10 reveal"
               style={{ animationDelay: `${i * 0.06}s` }}
             >
@@ -55,9 +63,13 @@ export function Faq() {
                     +
                   </span>
                 </summary>
-                <p className="pb-6 sm:pb-7 pl-10 sm:pl-14 pr-2 sm:pr-10 font-serif text-sm sm:text-base leading-relaxed text-bone/65">
-                  {f.a}
-                </p>
+                <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-open:grid-rows-[1fr]">
+                  <div className="overflow-hidden">
+                    <p className="pb-6 sm:pb-7 pl-10 sm:pl-14 pr-2 sm:pr-10 font-serif text-sm sm:text-base leading-relaxed text-bone/65 opacity-0 translate-y-2 transition-all duration-500 group-open:opacity-100 group-open:translate-y-0">
+                      {f.a}
+                    </p>
+                  </div>
+                </div>
               </details>
             </li>
           ))}

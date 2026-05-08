@@ -234,7 +234,7 @@ export const setParticipantPaymentStatus = createServerFn({ method: "POST" })
     const results = await Promise.allSettled([
       sendMail({
         to: participantEmail,
-        subject: "✅ Payment Confirmed — Catalyst 2K26",
+        subject: "Payment Verified - Catalyst 2K26",
         html: getPaymentConfirmedEmailTemplate({
           participantName: profile.full_name || "",
           passCode: profile.pass_code || "",

@@ -23,7 +23,7 @@ const schema = z.object({
   yearOfStudy: z
     .string()
     .trim()
-    .min(4, "Batch/Year of Study is required (e.g. 2026)"),
+    .regex(/^\d{4}$/, "Please select your batch year"),
   address: z.string().trim().min(10, "Full address is required"),
   dob: z.string().trim().min(8, "Date of Birth is required"),
   linkedinUrl: z.string().url("Valid LinkedIn URL required"),
@@ -48,6 +48,8 @@ const emptyOnboardingForm = {
   githubUrl: "",
   dietaryRestrictions: "None",
 };
+
+const batchYears = Array.from({ length: 9 }, (_, i) => String(2023 + i));
 
 const onboardingDraftKey = (userId: string) =>
   `catalyst:onboarding-draft:${userId}`;
@@ -341,15 +343,21 @@ function OnboardingPage() {
               <label className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70 mb-2">
                 Batch / Year of Study
               </label>
-              <input
+              <select
                 required
                 value={form.yearOfStudy}
                 onChange={(e) =>
                   setForm({ ...form, yearOfStudy: e.target.value })
                 }
-                className="input-styled"
-                placeholder="2026"
-              />
+                className="input-styled [color-scheme:dark]"
+              >
+                <option value="">Select year</option>
+                {batchYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="sm:col-span-2">
               <label className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70 mb-2">

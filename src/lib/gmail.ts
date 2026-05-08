@@ -7,6 +7,8 @@
  *   GMAIL_APP_PASSWORD  – 16-char App Password from Google Account
  */
 import nodemailer from "nodemailer";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 const GMAIL_USER = () => process.env.GMAIL_USER || "catalyst.auk@gmail.com";
 
@@ -39,13 +41,48 @@ export interface SendMailOptions {
   to: string;
   subject: string;
   html: string;
+  attachments?: nodemailer.SendMailOptions["attachments"];
+}
+
+const DEFAULT_ATTACHMENT_FILES = [
+  {
+    filename: "Catalyst Brochure.pdf",
+    diskName: "catalyst-brochure.pdf",
+  },
+  {
+    filename: "AI Hackathon Rulebook.pdf",
+    diskName: "ai-hackathon-rulebook.pdf",
+  },
+];
+
+function attachmentPath(diskName: string) {
+  const candidates = [
+    join(process.cwd(), "public", "attachments", diskName),
+    join(process.cwd(), ".output", "public", "attachments", diskName),
+  ];
+  return candidates.find((candidate) => existsSync(candidate));
+}
+
+function emailAttachments(
+  attachments?: nodemailer.SendMailOptions["attachments"],
+) {
+  const bundledAttachments = DEFAULT_ATTACHMENT_FILES.flatMap((attachment) => {
+    const path = attachmentPath(attachment.diskName);
+    return path ? [{ filename: attachment.filename, path }] : [];
+  });
+  return [...bundledAttachments, ...(attachments ?? [])];
 }
 
 /**
  * Send an email from catalyst.auk@gmail.com via Gmail SMTP.
  * Throws on failure.
  */
-export async function sendMail({ to, subject, html }: SendMailOptions) {
+export async function sendMail({
+  to,
+  subject,
+  html,
+  attachments,
+}: SendMailOptions) {
   const transporter = getTransporter();
 
   const result = await transporter.sendMail({
@@ -53,6 +90,7 @@ export async function sendMail({ to, subject, html }: SendMailOptions) {
     to,
     subject,
     html,
+    attachments: emailAttachments(attachments),
   });
 
   console.log(

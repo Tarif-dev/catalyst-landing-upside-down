@@ -83,6 +83,32 @@ export function Contact() {
                   </a>
                 </div>
                 <div>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/45 mb-2">
+                    Coordinators
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { name: "Sriparna Das", phone: "+91-8961086320" },
+                      { name: "Tarif Hussain", phone: "+91-7044989162" },
+                    ].map((contact) => (
+                      <div
+                        key={contact.phone}
+                        className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between"
+                      >
+                        <span className="font-display italic text-lg text-bone">
+                          {contact.name}
+                        </span>
+                        <a
+                          href={`tel:${contact.phone.replace(/-/g, "")}`}
+                          className="font-serif text-base text-bone/70 transition-colors hover:text-blood"
+                        >
+                          {contact.phone}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
                   <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/45 mb-1">
                     Campus
                   </div>

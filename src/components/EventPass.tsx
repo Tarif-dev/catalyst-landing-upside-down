@@ -35,7 +35,8 @@ export function EventPass({
   participantProfile?: any;
 }) {
   const isPaid = participantProfile?.payment_status === "paid";
-  const passCode = String(participantProfile?.pass_code ?? team.pass_code);
+  const passCode = String(participantProfile?.pass_code ?? "");
+  const visiblePassCode = passCode || "Pending";
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
   const [qr, setQr] = useState<string>("");
@@ -43,6 +44,7 @@ export function EventPass({
   const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
+    if (!passCode) return;
     const verifyUrl = `${window.location.origin}/verify/${passCode}`;
     QRCode.toDataURL(verifyUrl, {
       margin: 1,
@@ -270,10 +272,10 @@ export function EventPass({
                 <div className="flex justify-between items-end">
                   <div className="flex flex-col">
                     <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/40 mb-1">
-                      Pass Code
+                      Individual Pass Code
                     </p>
                     <p className="font-mono text-2xl sm:text-3xl text-red-500 font-bold tracking-[0.18em] sm:tracking-widest drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">
-                      {passCode}
+                      {visiblePassCode}
                     </p>
                   </div>
                   <div className="flex flex-col text-right max-w-[40%]">
@@ -373,10 +375,10 @@ export function EventPass({
 
                 <div className="mt-7 flex w-full flex-col items-center text-center">
                   <p className="max-w-full font-mono text-red-500 text-glow-blood text-3xl sm:text-4xl font-bold tracking-[0.2em] tabular-nums leading-none">
-                    {passCode}
+                    {visiblePassCode}
                   </p>
                   <p className="font-mono text-[9px] uppercase tracking-[0.1em] text-white/40 mt-4 leading-relaxed max-w-[200px] mx-auto">
-                    Present to dimensional gate security for authorization.
+                    Used for venue verification and meal coupons.
                   </p>
                 </div>
               </div>

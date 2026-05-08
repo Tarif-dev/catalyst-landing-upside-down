@@ -122,6 +122,12 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  input,
+  textarea,
+  select {
+    font-family: var(--font-serif);
+  }
+
   /* Very subtle film grain only — no scanlines, keep it editorial */
   body::after {
     content: "";
@@ -495,7 +501,7 @@ nav {
   }
 
   .input-styled {
-    @apply w-full bg-black/40 border border-white/10 px-4 py-3 rounded-md text-bone text-base placeholder:text-white/30 focus:outline-none focus:border-blood focus:ring-2 focus:ring-blood/30 transition-all shadow-inner;
+    @apply w-full bg-black/40 border border-white/10 px-4 py-3 rounded-md text-bone text-base font-serif placeholder:text-white/30 focus:outline-none focus:border-blood focus:ring-2 focus:ring-blood/30 transition-all shadow-inner;
   }
   .btn-primary {
     @apply relative overflow-hidden bg-blood text-white font-mono text-[12px] uppercase tracking-[0.3em] px-8 py-3.5 rounded-md border border-blood/50 shadow-[0_0_15px_oklch(0.6_0.25_25/0.4)] hover:shadow-[0_0_25px_oklch(0.6_0.25_25/0.8)] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed;
