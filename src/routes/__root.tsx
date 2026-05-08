@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth";
 
 import appCss from "../styles.css?url";
+import catalystFavicon from "@/assets/catalyst_logo_white.png?url";
 
 function NotFoundComponent() {
   return (
@@ -50,6 +51,9 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: catalystFavicon },
+      { rel: "shortcut icon", type: "image/png", href: catalystFavicon },
+      { rel: "apple-touch-icon", href: catalystFavicon },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
