@@ -6,7 +6,7 @@ type Tier = {
   tag: string;
   note: string;
   size: "xl" | "lg" | "md" | "sm";
-  sponsors: { name: string; desc?: string; logo?: string }[];
+  sponsors: { name: string; desc?: string; logo?: string; href?: string }[];
 };
 
 const tiers: Tier[] = [
@@ -29,7 +29,14 @@ const tiers: Tier[] = [
     tag: "Tier 03 · Infrastructure",
     note: "Compute, storage, and the grid beneath it all.",
     size: "md",
-    sponsors: [{ name: "Utho", desc: "Cloud Partner", logo: cloudPartnerLogo }],
+    sponsors: [
+      {
+        name: "Utho",
+        desc: "Cloud Partner",
+        logo: cloudPartnerLogo,
+        href: "https://utho.com/",
+      },
+    ],
   },
   {
     tier: "AI Partner",
@@ -115,36 +122,65 @@ export function Sponsors() {
               </div>
 
               {/* Sponsor grid */}
-              <div className={`grid gap-px bg-blood/10 ${colsMap[t.size]}`}>
-                {t.sponsors.map((s, si) => (
-                  <div
-                    key={s.name}
-                    className="bracket group relative bg-black px-4 py-8 md:py-12 text-center transition-all duration-500 hover:bg-blood/[0.04]"
-                    style={{ animationDelay: `${si * 0.04}s` }}
-                  >
-                    {s.logo ? (
-                      <div className="flex min-h-24 flex-col items-center justify-center">
-                        <img
-                          src={s.logo}
-                          alt={s.name}
-                          className="max-h-20 w-auto max-w-[220px] object-contain opacity-90 drop-shadow-[0_0_22px_rgba(240,230,230,0.2)] transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
-                          loading="lazy"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className={`font-display italic text-bone/85 leading-tight transition-all duration-500 group-hover:text-blood group-hover:text-glow-blood ${sizeMap[t.size]}`}
-                      >
-                        {s.name}
-                      </div>
-                    )}
-                    {s.desc && (
-                      <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.4em] text-blood/70">
-                        {s.desc}
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div
+                className={`grid gap-px bg-blood/10 ${
+                  t.sponsors.length === 1
+                    ? "mx-auto w-full max-w-lg grid-cols-1"
+                    : colsMap[t.size]
+                }`}
+              >
+                {t.sponsors.map((s, si) => {
+                  const content = (
+                    <>
+                      {s.logo ? (
+                        <div className="flex min-h-24 flex-col items-center justify-center">
+                          <img
+                            src={s.logo}
+                            alt={s.name}
+                            className="max-h-20 w-auto max-w-[240px] object-contain opacity-95 drop-shadow-[0_0_22px_rgba(240,230,230,0.22)] transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className={`font-display italic text-bone/85 leading-tight transition-all duration-500 group-hover:text-blood group-hover:text-glow-blood ${sizeMap[t.size]}`}
+                        >
+                          {s.name}
+                        </div>
+                      )}
+                      {s.desc && (
+                        <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.4em] text-blood/70">
+                          {s.desc}
+                        </div>
+                      )}
+                    </>
+                  );
+
+                  const className =
+                    "bracket group relative block bg-black px-4 py-8 text-center transition-all duration-500 hover:bg-blood/[0.04] md:py-12";
+
+                  return s.href ? (
+                    <a
+                      key={s.name}
+                      href={s.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={className}
+                      style={{ animationDelay: `${si * 0.04}s` }}
+                      aria-label={`Visit ${s.name}`}
+                    >
+                      {content}
+                    </a>
+                  ) : (
+                    <div
+                      key={s.name}
+                      className={className}
+                      style={{ animationDelay: `${si * 0.04}s` }}
+                    >
+                      {content}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
