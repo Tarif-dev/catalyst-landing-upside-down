@@ -191,6 +191,14 @@ function Dashboard() {
                 <h2 className="mt-1 font-display text-3xl sm:text-4xl text-bone break-words">
                   {participantProfile?.full_name || displayName}
                 </h2>
+                <div className="mt-4">
+                  <Link
+                    to="/profile"
+                    className="btn-secondary inline-flex min-h-10 items-center justify-center border-cyan/40 px-4 py-2 text-cyan hover:border-cyan hover:bg-cyan/10"
+                  >
+                    Edit profile
+                  </Link>
+                </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="border border-white/10 bg-black/20 p-4">
                     <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">

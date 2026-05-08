@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -27,6 +28,11 @@ import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/pass/$teamId': typeof PassTeamIdRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/pass/$teamId': typeof PassTeamIdRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/pass/$teamId': typeof PassTeamIdRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/onboarding'
+    | '/profile'
     | '/register'
     | '/certificate/$code'
     | '/pass/$teamId'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/onboarding'
+    | '/profile'
     | '/register'
     | '/certificate/$code'
     | '/pass/$teamId'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/onboarding'
+    | '/profile'
     | '/register'
     | '/certificate/$code'
     | '/pass/$teamId'
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   CertificateCodeRoute: typeof CertificateCodeRoute
   PassTeamIdRoute: typeof PassTeamIdRoute
@@ -219,6 +232,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   CertificateCodeRoute: CertificateCodeRoute,
   PassTeamIdRoute: PassTeamIdRoute,
