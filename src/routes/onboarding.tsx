@@ -27,12 +27,11 @@ const schema = z.object({
   address: z.string().trim().min(10, "Full address is required"),
   dob: z.string().trim().min(8, "Date of Birth is required"),
   linkedinUrl: z.string().url("Valid LinkedIn URL required"),
-  githubUrl: z.union([
-    z.string().url("Valid GitHub URL"),
-    z.literal(""),
-    z.undefined(),
-  ]),
-  dietaryRestrictions: z.string().optional(),
+  githubUrl: z.string().trim().url("Valid GitHub URL required"),
+  dietaryRestrictions: z
+    .string()
+    .trim()
+    .min(2, "Dietary restrictions are required. Enter None if not applicable."),
 });
 
 const emptyOnboardingForm = {
@@ -396,9 +395,10 @@ function OnboardingPage() {
               </div>
               <div>
                 <label className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70 mb-2">
-                  GitHub URL (Optional)
+                  GitHub URL
                 </label>
                 <input
+                  required
                   type="url"
                   value={form.githubUrl}
                   onChange={(e) =>
@@ -446,6 +446,7 @@ function OnboardingPage() {
                 Dietary Restrictions
               </label>
               <input
+                required
                 value={form.dietaryRestrictions}
                 onChange={(e) =>
                   setForm({ ...form, dietaryRestrictions: e.target.value })

@@ -118,6 +118,11 @@ function RegisterPage() {
           One account per participant. The team leader registers first, then
           adds 1–4 teammates.
         </p>
+        <div className="mb-6 border border-amber/35 bg-amber/10 px-4 py-3 text-center">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+            Registrations close on 15 May 2026
+          </p>
+        </div>
         <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
           <div>
             <label

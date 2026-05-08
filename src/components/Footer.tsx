@@ -18,7 +18,8 @@ export function Footer() {
         </h2>
         <p className="mx-auto max-w-xl font-serif text-lg leading-relaxed text-bone/60 mb-14 reveal reveal-delay-2">
           Registrations are open. Create your account, complete the application,
-          and step through the gate.
+          and step through the gate. Registrations close on{" "}
+          <span className="text-amber">15 May 2026</span>.
         </p>
 
         <Link

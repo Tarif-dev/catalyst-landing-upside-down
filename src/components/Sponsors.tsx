@@ -1,11 +1,12 @@
 import { SectionTitle } from "./SectionTitle";
+import cloudPartnerLogo from "@/assets/sponsors/cloud_partner_utho_white.png";
 
 type Tier = {
   tier: string;
   tag: string;
   note: string;
   size: "xl" | "lg" | "md" | "sm";
-  sponsors: { name: string; desc?: string }[];
+  sponsors: { name: string; desc?: string; logo?: string }[];
 };
 
 const tiers: Tier[] = [
@@ -28,11 +29,7 @@ const tiers: Tier[] = [
     tag: "Tier 03 · Infrastructure",
     note: "Compute, storage, and the grid beneath it all.",
     size: "md",
-    sponsors: [
-      { name: "Starcourt Cloud" },
-      { name: "Upside Compute" },
-      { name: "Mirkwood Grid" },
-    ],
+    sponsors: [{ name: "Utho", desc: "Cloud Partner", logo: cloudPartnerLogo }],
   },
   {
     tier: "AI Partner",
@@ -125,11 +122,22 @@ export function Sponsors() {
                     className="bracket group relative bg-black px-4 py-8 md:py-12 text-center transition-all duration-500 hover:bg-blood/[0.04]"
                     style={{ animationDelay: `${si * 0.04}s` }}
                   >
-                    <div
-                      className={`font-display italic text-bone/85 leading-tight transition-all duration-500 group-hover:text-blood group-hover:text-glow-blood ${sizeMap[t.size]}`}
-                    >
-                      {s.name}
-                    </div>
+                    {s.logo ? (
+                      <div className="flex min-h-24 flex-col items-center justify-center">
+                        <img
+                          src={s.logo}
+                          alt={s.name}
+                          className="max-h-20 w-auto max-w-[220px] object-contain opacity-90 drop-shadow-[0_0_22px_rgba(240,230,230,0.2)] transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
+                          loading="lazy"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className={`font-display italic text-bone/85 leading-tight transition-all duration-500 group-hover:text-blood group-hover:text-glow-blood ${sizeMap[t.size]}`}
+                      >
+                        {s.name}
+                      </div>
+                    )}
                     {s.desc && (
                       <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.4em] text-blood/70">
                         {s.desc}

@@ -196,6 +196,12 @@ function Details() {
           on the floor at Amity Kolkata, the night the world flickers.
         </p>
 
+        <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-4 text-center reveal reveal-delay-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber">
+            Registrations close on 15 May 2026
+          </p>
+        </div>
+
         {/* Spec strip */}
         <div className="mx-auto mt-14 sm:mt-20 grid max-w-4xl grid-cols-2 gap-px bg-blood/10 md:grid-cols-4 reveal reveal-delay-3">
           {[

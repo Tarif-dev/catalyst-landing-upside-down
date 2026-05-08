@@ -7,6 +7,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendPaymentInfoEmail } from "@/lib/email";
 import { toast } from "sonner";
 
+const DISCORD_URL = "https://discord.gg/TCRccCKF";
+const DISCORD_NOTICE_KEY = "catalyst:discord-notice-joined";
+
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Catalyst 2K26" }] }),
   component: Dashboard,
@@ -36,12 +39,22 @@ function Dashboard() {
   const [participantProfile, setParticipantProfile] = useState<any>(null);
   const [busy, setBusy] = useState(true);
   const [emailBusy, setEmailBusy] = useState(false);
+  const [paymentInfoRequested, setPaymentInfoRequested] = useState(false);
+  const [showDiscordNotice, setShowDiscordNotice] = useState(false);
   const sendPaymentInfoFn = useServerFn(sendPaymentInfoEmail);
   const displayName =
     participantProfile?.first_name ||
     participantProfile?.full_name?.split(" ")[0] ||
     user?.email?.split("@")[0] ||
     "Builder";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    setShowDiscordNotice(
+      window.localStorage.getItem(DISCORD_NOTICE_KEY) !== "true",
+    );
+  }, []);
 
   useEffect(() => {
     if (loading) return;
@@ -100,6 +113,45 @@ function Dashboard() {
 
   return (
     <PortalShell title={`Welcome, ${displayName}`}>
+      {showDiscordNotice && (
+        <div className="panel mb-8 border-[#5865f2]/40 bg-[#5865f2]/10 p-5 sm:p-6 reveal">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#8ea0ff]">
+                Required Community Update
+              </p>
+              <h2 className="mt-2 font-display text-2xl sm:text-3xl text-bone">
+                All participants must join the Discord server.
+              </h2>
+              <p className="mt-2 max-w-2xl font-serif text-base leading-relaxed text-bone/70">
+                Announcements, support, team coordination, and event-day
+                updates will be shared there first.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
+              <a
+                href={DISCORD_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-secondary flex min-h-12 items-center justify-center border-[#5865f2]/60 bg-[#5865f2]/15 px-6 text-[#8ea0ff] hover:border-[#5865f2] hover:bg-[#5865f2]/25"
+              >
+                Join Discord
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  window.localStorage.setItem(DISCORD_NOTICE_KEY, "true");
+                  setShowDiscordNotice(false);
+                }}
+                className="btn-secondary flex min-h-12 items-center justify-center border-white/15 px-6 text-bone/65 hover:text-bone"
+              >
+                Already joined
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {!team ? (
         <div className="panel p-6 sm:p-12 text-center reveal">
           <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood text-glow-blood mb-6 font-bold">
@@ -172,8 +224,17 @@ function Dashboard() {
                   </p>
                   <p className="mt-3 font-serif text-base leading-relaxed text-bone/70">
                     Request the payment instructions by email. Once the admin
-                    verifies your payment, your event pass unlocks.
+                    verifies your payment, your event pass unlocks. Approval
+                    takes up to 2 business days after you send the screenshot
+                    and transaction reference.
                   </p>
+                  {paymentInfoRequested && (
+                    <div className="mt-4 border border-amber/30 bg-black/25 p-3 font-serif text-sm leading-relaxed text-amber/90">
+                      Payment details were sent. It will take 2 business days
+                      to approve your payment after you reply with proof of
+                      payment.
+                    </div>
+                  )}
                   <button
                     disabled={emailBusy}
                     onClick={async () => {
@@ -189,6 +250,7 @@ function Dashboard() {
                         toast.success(
                           "Payment instructions sent! Check your email (and spam folder).",
                         );
+                        setPaymentInfoRequested(true);
                       } catch (err: any) {
                         toast.error(
                           err?.message || "Failed to send payment email.",

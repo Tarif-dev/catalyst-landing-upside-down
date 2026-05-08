@@ -158,6 +158,7 @@ export function getPaymentInfoEmailTemplate(opts: {
     <div class="body-text">
       <p>Hi ${opts.participantName || "Participant"},</p>
       <p>To complete your entry into <strong>Catalyst 2K26</strong>, every participant pays an individual registration fee of <strong>Rs. ${amount}</strong>. This fee is for your individual event pass and is not part of team identity.</p>
+      <p><strong>Payment approval timeline:</strong> It will take <strong>2 business days</strong> to approve your payment after you submit the screenshot and transaction reference.</p>
       <p><strong>What you get:</strong></p>
       <ul>
         <li>Free Wi-Fi throughout the event</li>
@@ -203,7 +204,7 @@ export function getPaymentInfoEmailTemplate(opts: {
       <div class="body-text" style="padding:8px 0 0;margin:0">
         <p style="margin:8px 0"><strong>1.</strong> Pay <strong>Rs. ${amount}</strong> to the UPI ID above with note <strong>CAT-${opts.passCode}</strong>.</p>
         <p style="margin:8px 0"><strong>2.</strong> Reply to this email with a screenshot of the successful payment and your UPI transaction reference ID.</p>
-        <p style="margin:8px 0"><strong>3.</strong> Our admin team will verify your payment within 24 hours and update your status to verified.</p>
+        <p style="margin:8px 0"><strong>3.</strong> Our admin team will verify your payment within <strong>2 business days</strong> and update your status to verified.</p>
         <p style="margin:8px 0"><strong>4.</strong> Your Event Pass QR will unlock on the dashboard after verification.</p>
       </div>
     </div>
