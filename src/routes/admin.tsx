@@ -14,13 +14,13 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "teams" | "participants";
+type Tab = "analytics" | "teams" | "participants";
 
 function Admin() {
   const { user, isAdmin, loading, session } = useAuth();
   const nav = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<Tab>("teams");
+  const [activeTab, setActiveTab] = useState<Tab>("analytics");
   const [teams, setTeams] = useState<any[]>([]);
   const [participants, setParticipants] = useState<any[]>([]);
   const [selectedParticipant, setSelectedParticipant] = useState<any | null>(
@@ -236,7 +236,185 @@ function Admin() {
   const paidParticipants = participants.filter(
     (p) => p.payment_status === "paid",
   ).length;
+  const unpaidParticipants = totalParticipants - paidParticipants;
   const completeProfiles = participants.filter((p) => p.is_complete).length;
+  const incompleteProfiles = totalParticipants - completeProfiles;
+  const participantsWithResume = participants.filter((p) => p.resume_url).length;
+  const participantsWithGithub = participants.filter((p) => p.github_url).length;
+  const participantsWithLinkedIn = participants.filter(
+    (p) => p.linkedin_url,
+  ).length;
+  const submittedTeams = teams.filter((t) => t.submissions?.length).length;
+  const winnerTeams = teams.filter((t) => t.is_winner).length;
+  const totalTeamMembers = teams.reduce(
+    (sum, team) => sum + (team.team_members?.length || 0),
+    0,
+  );
+  const averageTeamSize = totalTeams ? totalTeamMembers / totalTeams : 0;
+  const fullyVerifiedTeams = teams.filter((team) => {
+    const members = team.team_members || [];
+    return (
+      members.length > 0 &&
+      members.every(
+        (member: any) =>
+          participantByUserId.get(member.user_id)?.payment_status === "paid",
+      )
+    );
+  }).length;
+  const estimatedRevenue = paidParticipants * 200;
+  const paymentConversion = totalParticipants
+    ? Math.round((paidParticipants / totalParticipants) * 100)
+    : 0;
+  const profileCompletionRate = totalParticipants
+    ? Math.round((completeProfiles / totalParticipants) * 100)
+    : 0;
+  const submissionRate = totalTeams
+    ? Math.round((submittedTeams / totalTeams) * 100)
+    : 0;
+  const fullTeamVerificationRate = totalTeams
+    ? Math.round((fullyVerifiedTeams / totalTeams) * 100)
+    : 0;
+
+  const trackLabel = (track: string) =>
+    ({
+      healthcare: "Healthcare",
+      fintech: "Fintech",
+      sustainability: "Sustainability",
+      education: "Education",
+      open: "Open",
+    })[track] || track || "Unassigned";
+
+  const groupBy = (items: any[], getKey: (item: any) => string | null) => {
+    const counts = new Map<string, number>();
+    items.forEach((item) => {
+      const key = getKey(item)?.trim() || "Not provided";
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    return Array.from(counts, ([label, value]) => ({ label, value })).sort(
+      (a, b) => b.value - a.value || a.label.localeCompare(b.label),
+    );
+  };
+
+  const trackAnalytics = [
+    "healthcare",
+    "fintech",
+    "sustainability",
+    "education",
+    "open",
+  ].map((track) => {
+    const trackTeams = teams.filter((team) => team.track === track);
+    const userIds = new Set<string>();
+    trackTeams.forEach((team) =>
+      (team.team_members || []).forEach((member: any) =>
+        userIds.add(member.user_id),
+      ),
+    );
+    const trackParticipants = Array.from(userIds)
+      .map((id) => participantByUserId.get(id))
+      .filter(Boolean);
+    return {
+      label: trackLabel(track),
+      teams: trackTeams.length,
+      participants: trackParticipants.length,
+      verified: trackParticipants.filter((p) => p.payment_status === "paid")
+        .length,
+    };
+  });
+
+  const collegeAnalytics = groupBy(participants, (p) => p.college).slice(0, 8);
+  const courseAnalytics = groupBy(participants, (p) => p.course).slice(0, 8);
+  const yearAnalytics = groupBy(participants, (p) => p.year_of_study).slice(
+    0,
+    8,
+  );
+  const teamSizeAnalytics = [1, 2, 3, 4, 5].map((size) => ({
+    label: `${size} member${size === 1 ? "" : "s"}`,
+    value: teams.filter((team) => (team.team_members || []).length === size)
+      .length,
+  }));
+  const paymentAnalytics = [
+    { label: "Verified", value: paidParticipants },
+    { label: "Unverified", value: unpaidParticipants },
+  ];
+  const profileAnalytics = [
+    { label: "Complete", value: completeProfiles },
+    { label: "Incomplete", value: incompleteProfiles },
+  ];
+  const submissionAnalytics = [
+    { label: "Submitted", value: submittedTeams },
+    { label: "Not submitted", value: totalTeams - submittedTeams },
+  ];
+  const registrationTrend = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - index));
+    const key = date.toISOString().slice(0, 10);
+    return {
+      label: date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      }),
+      value: participants.filter((p) => p.created_at?.slice(0, 10) === key)
+        .length,
+    };
+  });
+  const needsAttention = {
+    incomplete: participants.filter((p) => !p.is_complete).slice(0, 6),
+    unverified: participants
+      .filter((p) => p.is_complete && p.payment_status !== "paid")
+      .slice(0, 6),
+    teamsMissingSubmission: teams
+      .filter((team) => !team.submissions?.length)
+      .slice(0, 6),
+    teamsNotFullyVerified: teams
+      .filter((team) => {
+        const members = team.team_members || [];
+        return (
+          members.length > 0 &&
+          members.some(
+            (member: any) =>
+              participantByUserId.get(member.user_id)?.payment_status !==
+              "paid",
+          )
+        );
+      })
+      .slice(0, 6),
+  };
+
+  const downloadAnalyticsCSV = () => {
+    const rows = [
+      ["Metric", "Value"],
+      ["Total participants", totalParticipants],
+      ["Complete profiles", completeProfiles],
+      ["Incomplete profiles", incompleteProfiles],
+      ["Verified participants", paidParticipants],
+      ["Unverified participants", unpaidParticipants],
+      ["Total teams", totalTeams],
+      ["Submitted teams", submittedTeams],
+      ["Teams fully verified", fullyVerifiedTeams],
+      ["Average team size", averageTeamSize.toFixed(2)],
+      ["Estimated revenue", estimatedRevenue],
+      [],
+      ["Track", "Teams", "Participants", "Verified Participants"],
+      ...trackAnalytics.map((track) => [
+        track.label,
+        track.teams,
+        track.participants,
+        track.verified,
+      ]),
+      [],
+      ["Top colleges", "Participants"],
+      ...collegeAnalytics.map((item) => [item.label, item.value]),
+      [],
+      ["Recent registrations", "Participants"],
+      ...registrationTrend.map((item) => [item.label, item.value]),
+    ];
+    downloadCSV(
+      rows
+        .map((row) => row.map((cell) => `"${cell ?? ""}"`).join(","))
+        .join("\n"),
+      "catalyst-analytics.csv",
+    );
+  };
 
   if (busy) {
     return (
@@ -382,6 +560,160 @@ function Admin() {
     );
   };
 
+  const maxValue = (items: { value: number }[]) =>
+    Math.max(1, ...items.map((item) => item.value));
+
+  const analyticsCard = (
+    label: string,
+    value: string | number,
+    note: string,
+    tone: "blue" | "green" | "yellow" | "red" | "purple" = "blue",
+  ) => {
+    const tones = {
+      blue: { bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" },
+      green: { bg: "#f0fdf4", text: "#15803d", border: "#bbf7d0" },
+      yellow: { bg: "#fffbeb", text: "#b45309", border: "#fde68a" },
+      red: { bg: "#fef2f2", text: "#b91c1c", border: "#fecaca" },
+      purple: { bg: "#faf5ff", text: "#7e22ce", border: "#e9d5ff" },
+    };
+    const color = tones[tone];
+    return (
+      <div
+        style={{
+          background: "#fff",
+          border: `1px solid ${color.border}`,
+          borderRadius: 12,
+          padding: 20,
+          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+        }}
+      >
+        <div style={{ fontSize: 12, fontWeight: 700, color: color.text }}>
+          {label}
+        </div>
+        <div style={{ marginTop: 8, fontSize: 30, fontWeight: 800 }}>
+          {value}
+        </div>
+        <div style={{ marginTop: 6, fontSize: 13, color: "#6b7280" }}>
+          {note}
+        </div>
+      </div>
+    );
+  };
+
+  const barList = (
+    title: string,
+    items: { label: string; value: number; meta?: string }[],
+    emptyText = "No data yet.",
+  ) => (
+    <div
+      style={{
+        background: "#fff",
+        border: "1px solid #e5e7eb",
+        borderRadius: 12,
+        padding: 20,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+      }}
+    >
+      <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700 }}>
+        {title}
+      </h3>
+      {items.length === 0 ? (
+        <div style={{ color: "#9ca3af", fontSize: 13 }}>{emptyText}</div>
+      ) : (
+        <div style={{ display: "grid", gap: 12 }}>
+          {items.map((item) => {
+            const width = `${Math.max(4, (item.value / maxValue(items)) * 100)}%`;
+            return (
+              <div key={item.label}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    fontSize: 13,
+                    marginBottom: 5,
+                  }}
+                >
+                  <span style={{ fontWeight: 600 }}>{item.label}</span>
+                  <span style={{ color: "#6b7280" }}>
+                    {item.value}
+                    {item.meta ? ` ${item.meta}` : ""}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    height: 8,
+                    borderRadius: 999,
+                    background: "#f3f4f6",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width,
+                      borderRadius: 999,
+                      background:
+                        "linear-gradient(90deg, #2563eb 0%, #06b6d4 100%)",
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
+  const attentionList = (
+    title: string,
+    items: any[],
+    getPrimary: (item: any) => string,
+    getSecondary: (item: any) => string,
+    emptyText: string,
+  ) => (
+    <div
+      style={{
+        background: "#fff",
+        border: "1px solid #e5e7eb",
+        borderRadius: 12,
+        padding: 20,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+      }}
+    >
+      <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 700 }}>
+        {title}
+      </h3>
+      {items.length === 0 ? (
+        <div style={{ color: "#16a34a", fontSize: 13, fontWeight: 600 }}>
+          {emptyText}
+        </div>
+      ) : (
+        <div style={{ display: "grid", gap: 10 }}>
+          {items.map((item) => (
+            <div
+              key={item.id}
+              style={{
+                padding: 12,
+                background: "#f9fafb",
+                border: "1px solid #f3f4f6",
+                borderRadius: 8,
+              }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 700 }}>
+                {getPrimary(item)}
+              </div>
+              <div style={{ marginTop: 2, fontSize: 12, color: "#6b7280" }}>
+                {getSecondary(item)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div
       style={{
@@ -420,9 +752,11 @@ function Admin() {
           <div style={{ display: "flex", gap: 8 }}>
             <button
               onClick={
-                activeTab === "teams"
-                  ? downloadTeamsCSV
-                  : downloadParticipantsCSV
+                activeTab === "analytics"
+                  ? downloadAnalyticsCSV
+                  : activeTab === "teams"
+                    ? downloadTeamsCSV
+                    : downloadParticipantsCSV
               }
               style={{
                 padding: "8px 16px",
@@ -435,7 +769,13 @@ function Admin() {
                 color: "#374151",
               }}
             >
-              ↓ Export {activeTab === "teams" ? "Teams" : "Participants"} CSV
+              Export{" "}
+              {activeTab === "analytics"
+                ? "Analytics"
+                : activeTab === "teams"
+                  ? "Teams"
+                  : "Participants"}{" "}
+              CSV
             </button>
           </div>
         </div>
@@ -444,6 +784,7 @@ function Admin() {
       {/* ── Tabs ── */}
       <div style={{ background: "#fff", borderBottom: "1px solid #e5e7eb" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
+          {tabBtn("Analytics Command Center", "analytics")}
           {tabBtn("Teams Database", "teams")}
           {tabBtn("Individual Participants", "participants")}
         </div>
@@ -458,7 +799,7 @@ function Admin() {
           className="admin-stats"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns: "repeat(6, 1fr)",
             gap: 16,
             marginBottom: 28,
           }}
@@ -468,6 +809,8 @@ function Admin() {
             { label: "Total Participants", value: totalParticipants },
             { label: "Verified Participants", value: paidParticipants },
             { label: "Complete Profiles", value: completeProfiles },
+            { label: "Submitted Projects", value: submittedTeams },
+            { label: "Revenue", value: `₹${estimatedRevenue}` },
           ].map((s) => (
             <div
               key={s.label}
@@ -497,12 +840,89 @@ function Admin() {
         </div>
 
         {/* ── Table Card ── */}
+        {activeTab === "analytics" && (
+          <div style={{ display: "grid", gap: 24 }}>
+            <section
+              className="admin-analytics-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                gap: 16,
+              }}
+            >
+              {analyticsCard("Payment conversion", `${paymentConversion}%`, `${paidParticipants}/${totalParticipants} participants verified`, paymentConversion >= 70 ? "green" : "yellow")}
+              {analyticsCard("Profile completion", `${profileCompletionRate}%`, `${incompleteProfiles} profiles still incomplete`, profileCompletionRate >= 85 ? "green" : "yellow")}
+              {analyticsCard("Project submission", `${submissionRate}%`, `${submittedTeams}/${totalTeams} teams have submitted`, submissionRate >= 60 ? "green" : "red")}
+              {analyticsCard("Team verification", `${fullTeamVerificationRate}%`, `${fullyVerifiedTeams}/${totalTeams} teams fully paid`, fullTeamVerificationRate >= 70 ? "green" : "yellow")}
+              {analyticsCard("Average team size", averageTeamSize.toFixed(1), `${totalTeamMembers} assigned team members`, "blue")}
+              {analyticsCard("Winner teams", winnerTeams, "Marked by admin console", "purple")}
+              {analyticsCard("Resume coverage", `${totalParticipants ? Math.round((participantsWithResume / totalParticipants) * 100) : 0}%`, `${participantsWithResume} participants uploaded resumes`, "blue")}
+              {analyticsCard("Profile links", `${participantsWithGithub}/${participantsWithLinkedIn}`, "GitHub / LinkedIn coverage", "blue")}
+            </section>
+
+            <section
+              className="admin-analytics-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: 16,
+              }}
+            >
+              {barList("Payment Status", paymentAnalytics)}
+              {barList("Profile Status", profileAnalytics)}
+              {barList("Submission Status", submissionAnalytics)}
+            </section>
+
+            <section
+              className="admin-analytics-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gap: 16,
+              }}
+            >
+              {barList("Track Health", trackAnalytics.map((track) => ({
+                label: track.label,
+                value: track.participants,
+                meta: `participants · ${track.teams} teams · ${track.verified} verified`,
+              })))}
+              {barList("Team Size Distribution", teamSizeAnalytics)}
+              {barList("Top Colleges", collegeAnalytics)}
+              {barList("Top Courses", courseAnalytics)}
+              {barList("Graduating Years", yearAnalytics)}
+              {barList("Registrations: Last 7 Days", registrationTrend)}
+            </section>
+
+            <section
+              className="admin-analytics-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                gap: 16,
+              }}
+            >
+              {attentionList("Incomplete Profiles", needsAttention.incomplete, (p) => p.full_name || p.email || "Unnamed participant", (p) => `${p.phone || "No phone"} · ${p.college || "No college"}`, "All profiles are complete.")}
+              {attentionList("Pending Payments", needsAttention.unverified, (p) => p.full_name || p.email || "Unnamed participant", (p) => `${p.pass_code || "No pass"} · ${p.course || "No course"}`, "No completed profile is waiting on payment.")}
+              {attentionList("Teams Missing Submission", needsAttention.teamsMissingSubmission, (team) => team.name, (team) => `${trackLabel(team.track)} · ${(team.team_members || []).length}/5 members`, "Every team has submitted a project.")}
+              {attentionList("Teams Not Fully Verified", needsAttention.teamsNotFullyVerified, (team) => team.name, (team) => {
+                const verified = (team.team_members || []).filter(
+                  (member: any) =>
+                    participantByUserId.get(member.user_id)?.payment_status ===
+                    "paid",
+                ).length;
+                return `${verified}/${(team.team_members || []).length} verified`;
+              }, "Every team is fully verified.")}
+            </section>
+          </div>
+        )}
+
         <div
           style={{
             background: "#fff",
             border: "1px solid #e5e7eb",
             borderRadius: 8,
             boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+            display: activeTab === "analytics" ? "none" : "block",
             overflow: "hidden",
           }}
         >
@@ -1303,6 +1723,9 @@ function Admin() {
           }
           .admin-stats > div > div:last-child {
             font-size: 24px !important;
+          }
+          .admin-analytics-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
