@@ -23,7 +23,7 @@ const schema = z.object({
   yearOfStudy: z
     .string()
     .trim()
-    .regex(/^\d{4}$/, "Please select your batch year"),
+    .regex(/^\d{4}$/, "Please select your graduating year"),
   address: z.string().trim().min(10, "Full address is required"),
   dob: z.string().trim().min(8, "Date of Birth is required"),
   linkedinUrl: z.string().url("Valid LinkedIn URL required"),
@@ -145,11 +145,6 @@ function OnboardingPage() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
-      return;
-    }
-
-    if (!resumeFile && !profile?.resume_url) {
-      toast.error("Please upload your resume.");
       return;
     }
 
@@ -340,7 +335,7 @@ function OnboardingPage() {
             </div>
             <div>
               <label className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70 mb-2">
-                Batch / Year of Study
+                Graduating Year
               </label>
               <select
                 required
@@ -412,7 +407,7 @@ function OnboardingPage() {
 
             <div className="p-6 border border-white/10 rounded-xl bg-black/20">
               <label className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70 mb-4">
-                Resume / CV (PDF Only, Max 5MB)
+                Resume / CV (Optional, PDF Only, Max 5MB)
               </label>
               <div className="flex items-center gap-4">
                 <label className="cursor-pointer btn-secondary inline-flex items-center gap-2">
