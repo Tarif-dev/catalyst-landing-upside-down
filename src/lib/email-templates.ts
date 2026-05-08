@@ -10,24 +10,29 @@ const CONTACTS = [
 const env = (key: string) =>
   typeof process === "undefined" ? "" : process.env[key] || "";
 
+const SOCIAL_URLS = {
+  instagram:
+    "https://www.instagram.com/hack_catalyst?utm_source=qr&igsh=OXBla2kyeDg5ZzRw",
+  discord: "https://discord.gg/TCRccCKF",
+  linkedin: "https://www.linkedin.com/in/catalyst-admin-b49136407",
+  email: "mailto:catalyst.auk@gmail.com",
+};
+
 const socialLinks = () => {
-  const siteUrl = env("PUBLIC_SITE_URL");
   return [
     {
       label: "Instagram",
-      href:
-        env("PUBLIC_INSTAGRAM_URL") || (siteUrl ? `${siteUrl}/#contact` : ""),
+      href: env("PUBLIC_INSTAGRAM_URL") || SOCIAL_URLS.instagram,
     },
     {
       label: "LinkedIn",
-      href:
-        env("PUBLIC_LINKEDIN_URL") || (siteUrl ? `${siteUrl}/#contact` : ""),
+      href: env("PUBLIC_LINKEDIN_URL") || SOCIAL_URLS.linkedin,
     },
     {
       label: "Discord",
-      href: env("PUBLIC_DISCORD_URL") || "https://discord.gg/",
+      href: env("PUBLIC_DISCORD_URL") || SOCIAL_URLS.discord,
     },
-    { label: "Email", href: "mailto:catalyst.auk@gmail.com" },
+    { label: "Email", href: SOCIAL_URLS.email },
   ].filter((link) => link.href);
 };
 
@@ -54,14 +59,14 @@ const contactBlock = () => `
         `<p style="margin:6px 0">${contact.name}<br><a href="tel:${contact.phone.replace(/\D/g, "")}" style="color:#f0e6e6;text-decoration:none">${contact.phone}</a></p>`,
     ).join("")}
     <p style="margin-top:18px"><strong>Social Links</strong></p>
-    <p style="margin:8px 0">
+    <div style="margin:10px 0 4px">
       ${socialLinks()
         .map(
           (link) =>
-            `<a href="${link.href}" style="color:#cc2222;text-decoration:none">${link.label}</a>`,
+            `<a href="${link.href}" style="display:inline-block;margin:0 6px 8px 0;padding:8px 12px;border:1px solid #552020;background:#160808;color:#f0e6e6;text-decoration:none;font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.12em">${link.label}</a>`,
         )
-        .join(" &nbsp;|&nbsp; ")}
-    </p>
+        .join("")}
+    </div>
     <p style="font-size:13px;color:#888">The Catalyst brochure and AI hackathon rulebook are attached with this email.</p>
     ${attachmentLinks()}
   </div>

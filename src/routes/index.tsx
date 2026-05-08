@@ -122,27 +122,39 @@ function Details() {
   const socialItems = [
     {
       label: "Instagram",
+      meta: "@hack_catalyst",
       href: socialLinks.instagram,
       icon: InstagramLogo,
-      accent: "hover:border-[#e4405f]/70 hover:text-[#ff6f8c]",
+      color: "text-[#ff6f8c]",
+      accent:
+        "border-[#e4405f]/35 bg-[#e4405f]/10 hover:border-[#e4405f]/80 hover:bg-[#e4405f]/20 hover:text-[#ff6f8c]",
     },
     {
       label: "Discord",
+      meta: "Join the server",
       href: socialLinks.discord,
       icon: DiscordLogo,
-      accent: "hover:border-[#5865f2]/70 hover:text-[#8ea0ff]",
+      color: "text-[#8ea0ff]",
+      accent:
+        "border-[#5865f2]/35 bg-[#5865f2]/10 hover:border-[#5865f2]/80 hover:bg-[#5865f2]/20 hover:text-[#8ea0ff]",
     },
     {
       label: "LinkedIn",
+      meta: "Catalyst Admin",
       href: socialLinks.linkedin,
       icon: LinkedInLogo,
-      accent: "hover:border-[#0a66c2]/70 hover:text-[#64b5ff]",
+      color: "text-[#64b5ff]",
+      accent:
+        "border-[#0a66c2]/35 bg-[#0a66c2]/10 hover:border-[#0a66c2]/80 hover:bg-[#0a66c2]/20 hover:text-[#64b5ff]",
     },
     {
       label: "Email",
+      meta: "catalyst.auk@gmail.com",
       href: socialLinks.email,
       icon: Mail,
-      accent: "hover:border-blood/60 hover:text-blood",
+      color: "text-blood",
+      accent:
+        "border-blood/35 bg-blood/10 hover:border-blood/80 hover:bg-blood/20 hover:text-blood",
     },
   ];
 
@@ -235,17 +247,30 @@ function Details() {
         </div>
 
         <div
-          className="mx-auto mt-8 max-w-3xl border-y border-bone/10 py-5 reveal reveal-delay-4"
+          className="bracket relative mx-auto mt-10 max-w-4xl overflow-hidden border border-blood/30 bg-black/70 px-4 py-7 shadow-[0_0_45px_rgba(180,20,20,0.16)] reveal reveal-delay-4 sm:px-7 sm:py-8"
           aria-label="Catalyst social links"
         >
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="h-px w-8 bg-blood/40" />
-            <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-bone/45">
-              Follow the signal
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-blood to-transparent" />
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blood/10 blur-3xl" />
+
+          <div className="relative mb-6 text-center">
+            <div className="mb-3 flex items-center justify-center gap-3">
+              <span className="h-px w-10 bg-blood/60" />
+              <p className="font-mono text-[9px] uppercase tracking-[0.45em] text-blood">
+                Follow the signal
+              </p>
+              <span className="h-px w-10 bg-blood/60" />
+            </div>
+            <h2 className="font-display text-3xl italic leading-none text-bone sm:text-4xl">
+              Stay connected
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl font-serif text-sm leading-relaxed text-bone/60 sm:text-base">
+              Updates, team calls, announcements, and behind-the-scenes drops
+              land here first.
             </p>
-            <span className="h-px w-8 bg-blood/40" />
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+          <div className="relative grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {socialItems.map((item) => {
               const Icon = item.icon;
               const isExternal = item.href.startsWith("http");
@@ -256,17 +281,24 @@ function Details() {
                   href={item.href}
                   target={isExternal ? "_blank" : undefined}
                   rel={isExternal ? "noreferrer" : undefined}
-                  className={`group inline-flex h-14 items-center justify-center gap-3 border border-bone/10 bg-black/35 px-4 font-mono text-[9px] uppercase tracking-[0.26em] text-bone/65 transition-all duration-300 hover:bg-black/70 ${item.accent}`}
+                  className={`group flex min-h-28 flex-col items-center justify-center gap-3 border px-4 py-5 text-center text-bone/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_24px_rgba(240,230,230,0.08)] ${item.accent}`}
                   aria-label={
                     item.label === "Email"
                       ? "Email Catalyst"
                       : `Follow Catalyst on ${item.label}`
                   }
                 >
-                  <span className="grid h-8 w-8 place-items-center rounded-full border border-current/20 bg-bone/[0.03] transition-transform duration-300 group-hover:-translate-y-0.5">
-                    <Icon className="h-4 w-4" />
+                  <span
+                    className={`grid h-12 w-12 place-items-center rounded-full border border-current/30 bg-black/35 shadow-[0_0_22px_currentColor] transition-transform duration-300 group-hover:scale-110 ${item.color}`}
+                  >
+                    <Icon className="h-6 w-6" />
                   </span>
-                  <span>{item.label}</span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-bone">
+                    {item.label}
+                  </span>
+                  <span className="max-w-full truncate font-serif text-sm italic text-bone/55">
+                    {item.meta}
+                  </span>
                 </a>
               );
             })}
