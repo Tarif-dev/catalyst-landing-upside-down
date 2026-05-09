@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /pass
+Disallow: /certificate
+Disallow: /team
+Disallow: /onboarding
+Disallow: /verify
+Disallow: /submit
+Disallow: /profile
+
+Sitemap: https://hack-catalyst.vercel.app/sitemap.xml

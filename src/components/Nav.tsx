@@ -60,6 +60,8 @@ export function Nav() {
           <img
             src={amityLogo}
             alt="Amity University Kolkata"
+            width="160"
+            height="40"
             className="h-8 sm:h-10 w-auto object-contain transition-opacity duration-500 group-hover:opacity-80"
             decoding="async"
             fetchPriority="high"

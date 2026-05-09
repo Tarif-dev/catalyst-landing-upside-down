@@ -1,18 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HeroVideo } from "@/components/HeroVideo";
 import { Nav } from "@/components/Nav";
-import { Tracks } from "@/components/Tracks";
-import { Timeline } from "@/components/Timeline";
-import { Prizes } from "@/components/Prizes";
-import { Faq } from "@/components/Faq";
-import { Footer } from "@/components/Footer";
-import { Countdown } from "@/components/Countdown";
-import { Venue } from "@/components/Venue";
-import { Sponsors } from "@/components/Sponsors";
-import { Contact } from "@/components/Contact";
 import { Loader } from "@/components/Loader";
 import { Mail, MessageCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
+
+const Tracks = lazy(() => import("@/components/Tracks").then((m) => ({ default: m.Tracks })));
+const Timeline = lazy(() => import("@/components/Timeline").then((m) => ({ default: m.Timeline })));
+const Prizes = lazy(() => import("@/components/Prizes").then((m) => ({ default: m.Prizes })));
+const Faq = lazy(() => import("@/components/Faq").then((m) => ({ default: m.Faq })));
+const Footer = lazy(() => import("@/components/Footer").then((m) => ({ default: m.Footer })));
+const Countdown = lazy(() => import("@/components/Countdown").then((m) => ({ default: m.Countdown })));
+const Venue = lazy(() => import("@/components/Venue").then((m) => ({ default: m.Venue })));
+const Sponsors = lazy(() => import("@/components/Sponsors").then((m) => ({ default: m.Sponsors })));
+const Contact = lazy(() => import("@/components/Contact").then((m) => ({ default: m.Contact })));
 
 const socialLinks = {
   instagram:
@@ -100,6 +101,53 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content:
           "24 hours. 4 tracks. ₹50,000 worth of prize pool. Step through the gate at Amity Kolkata, May 21–22, 2026.",
+      },
+    ],
+    links: [
+      { rel: "canonical", href: "https://hack-catalyst.vercel.app/" },
+      { rel: "preload", as: "image", href: "https://image.mux.com/rt42FVRXL01VirdZbHjOMjPwd5sTP1LKKGFj1bDQpbnM/thumbnail.jpg?time=0" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Event",
+          name: "Catalyst 2K26 AI Hackathon",
+          startDate: "2026-05-21T09:00:00+05:30",
+          endDate: "2026-05-22T18:00:00+05:30",
+          eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+          eventStatus: "https://schema.org/EventScheduled",
+          location: {
+            "@type": "Place",
+            name: "Amity University Kolkata",
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: "Major Arterial Road, Action Area II, Rajarhat, New Town",
+              addressLocality: "Kolkata",
+              postalCode: "700135",
+              addressRegion: "WB",
+              addressCountry: "IN"
+            }
+          },
+          image: [
+            "https://hack-catalyst.vercel.app/attachments/catalyst_logo_white.png"
+          ],
+          description: "Catalyst 2K26: a 24-hour AI hackathon hosted by Amity University Kolkata on 21–22 May 2026. ₹50,000 worth of prize pool. Four tracks. One Upside Down.",
+          offers: {
+            "@type": "Offer",
+            url: "https://hack-catalyst.vercel.app/register",
+            price: "0",
+            priceCurrency: "INR",
+            availability: "https://schema.org/InStock",
+            validFrom: "2026-01-01T00:00:00+05:30"
+          },
+          organizer: {
+            "@type": "Organization",
+            name: "Catalyst Hackathon",
+            url: "https://hack-catalyst.vercel.app"
+          }
+        }),
       },
     ],
   }),
@@ -320,7 +368,9 @@ function Details() {
             </p>
             <span className="block h-px w-6 sm:w-8 bg-blood/50" />
           </div>
-          <Countdown />
+          <Suspense fallback={<div className="h-32 w-full animate-pulse bg-bone/5" />}>
+            <Countdown />
+          </Suspense>
         </div>
       </div>
     </section>
@@ -375,15 +425,19 @@ function Index() {
         <Hero />
         <Details />
         <MarqueeStrip />
-        <Prizes />
-        <Tracks />
-        <Sponsors />
-        <Timeline />
-        <Venue />
-        <Faq />
-        <Contact />
+        <Suspense fallback={<div className="min-h-screen" />}>
+          <Prizes />
+          <Tracks />
+          <Sponsors />
+          <Timeline />
+          <Venue />
+          <Faq />
+          <Contact />
+        </Suspense>
       </main>
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
     </>
   );
 }

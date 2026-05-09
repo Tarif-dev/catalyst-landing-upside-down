@@ -7,7 +7,12 @@ import amityLogo from "@/assets/amity_logo_white.png";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/certificate/$code")({
-  head: () => ({ meta: [{ title: "Certificate — Catalyst 2K26" }] }),
+  head: () => ({ 
+    meta: [
+      { title: "Certificate — Catalyst 2K26" },
+      { name: "robots", content: "noindex, nofollow" }
+    ] 
+  }),
   component: CertPage,
 });
 

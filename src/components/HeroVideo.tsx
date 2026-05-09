@@ -18,6 +18,7 @@ export function HeroVideo() {
         muted
         playsInline
         nohotkeys
+        placeholder="https://image.mux.com/rt42FVRXL01VirdZbHjOMjPwd5sTP1LKKGFj1bDQpbnM/thumbnail.jpg?time=0"
         thumbnailTime={0}
         style={{
           ["--controls" as any]: "none",
