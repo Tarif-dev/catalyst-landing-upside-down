@@ -46,12 +46,20 @@ export const Route = createRootRoute({
       { property: "og:title", content: "Catalyst 2K26" },
       { property: "og:description", content: "A 24-hour AI hackathon" },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://hack-catalyst.vercel.app/attachments/catalyst_logo_white.png" },
+      {
+        property: "og:image",
+        content:
+          "https://hack-catalyst.vercel.app/attachments/catalyst_logo_white.png",
+      },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@hack_catalyst" },
-      { name: "twitter:image", content: "https://hack-catalyst.vercel.app/attachments/catalyst_logo_white.png" },
+      {
+        name: "twitter:image",
+        content:
+          "https://hack-catalyst.vercel.app/attachments/catalyst_logo_white.png",
+      },
       { name: "theme-color", content: "#000000" },
     ],
     links: [

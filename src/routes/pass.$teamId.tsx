@@ -6,11 +6,11 @@ import { useAuth } from "@/lib/auth";
 import { EventPass } from "@/components/EventPass";
 
 export const Route = createFileRoute("/pass/$teamId")({
-  head: () => ({ 
+  head: () => ({
     meta: [
       { title: "Event Pass — Catalyst 2K26" },
-      { name: "robots", content: "noindex, nofollow" }
-    ] 
+      { name: "robots", content: "noindex, nofollow" },
+    ],
   }),
   component: PassPage,
 });

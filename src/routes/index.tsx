@@ -5,15 +5,33 @@ import { Loader } from "@/components/Loader";
 import { Mail, MessageCircle } from "lucide-react";
 import { useEffect, useState, lazy, Suspense } from "react";
 
-const Tracks = lazy(() => import("@/components/Tracks").then((m) => ({ default: m.Tracks })));
-const Timeline = lazy(() => import("@/components/Timeline").then((m) => ({ default: m.Timeline })));
-const Prizes = lazy(() => import("@/components/Prizes").then((m) => ({ default: m.Prizes })));
-const Faq = lazy(() => import("@/components/Faq").then((m) => ({ default: m.Faq })));
-const Footer = lazy(() => import("@/components/Footer").then((m) => ({ default: m.Footer })));
-const Countdown = lazy(() => import("@/components/Countdown").then((m) => ({ default: m.Countdown })));
-const Venue = lazy(() => import("@/components/Venue").then((m) => ({ default: m.Venue })));
-const Sponsors = lazy(() => import("@/components/Sponsors").then((m) => ({ default: m.Sponsors })));
-const Contact = lazy(() => import("@/components/Contact").then((m) => ({ default: m.Contact })));
+const Tracks = lazy(() =>
+  import("@/components/Tracks").then((m) => ({ default: m.Tracks })),
+);
+const Timeline = lazy(() =>
+  import("@/components/Timeline").then((m) => ({ default: m.Timeline })),
+);
+const Prizes = lazy(() =>
+  import("@/components/Prizes").then((m) => ({ default: m.Prizes })),
+);
+const Faq = lazy(() =>
+  import("@/components/Faq").then((m) => ({ default: m.Faq })),
+);
+const Footer = lazy(() =>
+  import("@/components/Footer").then((m) => ({ default: m.Footer })),
+);
+const Countdown = lazy(() =>
+  import("@/components/Countdown").then((m) => ({ default: m.Countdown })),
+);
+const Venue = lazy(() =>
+  import("@/components/Venue").then((m) => ({ default: m.Venue })),
+);
+const Sponsors = lazy(() =>
+  import("@/components/Sponsors").then((m) => ({ default: m.Sponsors })),
+);
+const Contact = lazy(() =>
+  import("@/components/Contact").then((m) => ({ default: m.Contact })),
+);
 
 const socialLinks = {
   instagram:
@@ -44,13 +62,7 @@ function InstagramLogo({ className }: SocialIconProps) {
         stroke="currentColor"
         strokeWidth="1.8"
       />
-      <circle
-        cx="12"
-        cy="12"
-        r="4"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
       <circle cx="17.3" cy="6.8" r="1.2" fill="currentColor" />
     </svg>
   );
@@ -105,7 +117,11 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: "https://hack-catalyst.vercel.app/" },
-      { rel: "preload", as: "image", href: "https://image.mux.com/rt42FVRXL01VirdZbHjOMjPwd5sTP1LKKGFj1bDQpbnM/thumbnail.jpg?time=0" },
+      {
+        rel: "preload",
+        as: "image",
+        href: "https://image.mux.com/rt42FVRXL01VirdZbHjOMjPwd5sTP1LKKGFj1bDQpbnM/thumbnail.jpg?time=0",
+      },
     ],
     scripts: [
       {
@@ -123,30 +139,32 @@ export const Route = createFileRoute("/")({
             name: "Amity University Kolkata",
             address: {
               "@type": "PostalAddress",
-              streetAddress: "Major Arterial Road, Action Area II, Rajarhat, New Town",
+              streetAddress:
+                "Major Arterial Road, Action Area II, Rajarhat, New Town",
               addressLocality: "Kolkata",
               postalCode: "700135",
               addressRegion: "WB",
-              addressCountry: "IN"
-            }
+              addressCountry: "IN",
+            },
           },
           image: [
-            "https://hack-catalyst.vercel.app/attachments/catalyst_logo_white.png"
+            "https://hack-catalyst.vercel.app/attachments/catalyst_logo_white.png",
           ],
-          description: "Catalyst 2K26: a 24-hour AI hackathon hosted by Amity University Kolkata on 21–22 May 2026. ₹50,000 worth of prize pool. Four tracks. One Upside Down.",
+          description:
+            "Catalyst 2K26: a 24-hour AI hackathon hosted by Amity University Kolkata on 21–22 May 2026. ₹50,000 worth of prize pool. Four tracks. One Upside Down.",
           offers: {
             "@type": "Offer",
             url: "https://hack-catalyst.vercel.app/register",
             price: "0",
             priceCurrency: "INR",
             availability: "https://schema.org/InStock",
-            validFrom: "2026-01-01T00:00:00+05:30"
+            validFrom: "2026-01-01T00:00:00+05:30",
           },
           organizer: {
             "@type": "Organization",
             name: "Catalyst Hackathon",
-            url: "https://hack-catalyst.vercel.app"
-          }
+            url: "https://hack-catalyst.vercel.app",
+          },
         }),
       },
     ],
@@ -368,7 +386,9 @@ function Details() {
             </p>
             <span className="block h-px w-6 sm:w-8 bg-blood/50" />
           </div>
-          <Suspense fallback={<div className="h-32 w-full animate-pulse bg-bone/5" />}>
+          <Suspense
+            fallback={<div className="h-32 w-full animate-pulse bg-bone/5" />}
+          >
             <Countdown />
           </Suspense>
         </div>
