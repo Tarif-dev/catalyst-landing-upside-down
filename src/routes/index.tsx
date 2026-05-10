@@ -36,7 +36,7 @@ const Contact = lazy(() =>
 const socialLinks = {
   instagram:
     "https://www.instagram.com/hack_catalyst?utm_source=qr&igsh=OXBla2kyeDg5ZzRw",
-  discord: "https://discord.gg/TCRccCKF",
+  discord: "https://discord.gg/SDDT9D5kqs",
   linkedin: "https://www.linkedin.com/in/catalyst-admin-b49136407",
   email: "mailto:catalyst.auk@gmail.com",
 };

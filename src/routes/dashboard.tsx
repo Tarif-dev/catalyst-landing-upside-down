@@ -7,7 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendPaymentInfoEmail } from "@/lib/email";
 import { toast } from "sonner";
 
-const DISCORD_URL = "https://discord.gg/TCRccCKF";
+const DISCORD_URL = "https://discord.gg/SDDT9D5kqs";
 const DISCORD_NOTICE_KEY = "catalyst:discord-notice-joined";
 
 export const Route = createFileRoute("/dashboard")({
@@ -124,8 +124,8 @@ function Dashboard() {
                 All participants must join the Discord server.
               </h2>
               <p className="mt-2 max-w-2xl font-serif text-base leading-relaxed text-bone/70">
-                Announcements, support, team coordination, and event-day
-                updates will be shared there first.
+                Announcements, support, team coordination, and event-day updates
+                will be shared there first.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
@@ -238,8 +238,8 @@ function Dashboard() {
                   </p>
                   {paymentInfoRequested && (
                     <div className="mt-4 border border-amber/30 bg-black/25 p-3 font-serif text-sm leading-relaxed text-amber/90">
-                      Payment details were sent. It will take 2 business days
-                      to approve your payment after you reply with proof of
+                      Payment details were sent. It will take 2 business days to
+                      approve your payment after you reply with proof of
                       payment.
                     </div>
                   )}
