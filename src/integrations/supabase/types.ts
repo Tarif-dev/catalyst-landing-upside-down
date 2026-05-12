@@ -78,6 +78,8 @@ export type Database = {
           course: string | null
           created_at: string
           dietary_restrictions: string | null
+          discord_id: string | null
+          discord_username: string | null
           dob: string | null
           email: string | null
           first_name: string | null
@@ -85,6 +87,7 @@ export type Database = {
           github_url: string | null
           id: string
           is_complete: boolean
+          is_in_discord: boolean
           last_name: string | null
           linkedin_url: string | null
           pass_code: string
@@ -104,6 +107,8 @@ export type Database = {
           course?: string | null
           created_at?: string
           dietary_restrictions?: string | null
+          discord_id?: string | null
+          discord_username?: string | null
           dob?: string | null
           email?: string | null
           first_name?: string | null
@@ -111,6 +116,7 @@ export type Database = {
           github_url?: string | null
           id?: string
           is_complete?: boolean
+          is_in_discord?: boolean
           last_name?: string | null
           linkedin_url?: string | null
           pass_code?: string
@@ -130,6 +136,8 @@ export type Database = {
           course?: string | null
           created_at?: string
           dietary_restrictions?: string | null
+          discord_id?: string | null
+          discord_username?: string | null
           dob?: string | null
           email?: string | null
           first_name?: string | null
@@ -137,6 +145,7 @@ export type Database = {
           github_url?: string | null
           id?: string
           is_complete?: boolean
+          is_in_discord?: boolean
           last_name?: string | null
           linkedin_url?: string | null
           pass_code?: string
@@ -317,6 +326,86 @@ export type Database = {
         }
         Relationships: []
       }
+      email_campaigns: {
+        Row: {
+          id: string
+          subject: string
+          body_html: string
+          target_filter: Record<string, any>
+          status: Database["public"]["Enums"]["campaign_status"]
+          sent_count: number
+          total_count: number
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          subject: string
+          body_html: string
+          target_filter?: Record<string, any>
+          status?: Database["public"]["Enums"]["campaign_status"]
+          sent_count?: number
+          total_count?: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          subject?: string
+          body_html?: string
+          target_filter?: Record<string, any>
+          status?: Database["public"]["Enums"]["campaign_status"]
+          sent_count?: number
+          total_count?: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_jobs: {
+        Row: {
+          id: string
+          campaign_id: string
+          recipient_email: string
+          recipient_name: string | null
+          status: Database["public"]["Enums"]["email_job_status"]
+          error_msg: string | null
+          sent_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          recipient_email: string
+          recipient_name?: string | null
+          status?: Database["public"]["Enums"]["email_job_status"]
+          error_msg?: string | null
+          sent_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          recipient_email?: string
+          recipient_name?: string | null
+          status?: Database["public"]["Enums"]["email_job_status"]
+          error_msg?: string | null
+          sent_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_jobs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -361,6 +450,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "participant"
+      campaign_status: "draft" | "queued" | "processing" | "completed" | "failed"
+      email_job_status: "pending" | "sent" | "failed"
       member_role: "leader" | "member"
       payment_status: "unpaid" | "pending" | "paid" | "refunded"
       track_kind:
@@ -497,6 +588,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "participant"],
+      campaign_status: ["draft", "queued", "processing", "completed", "failed"],
+      email_job_status: ["pending", "sent", "failed"],
       member_role: ["leader", "member"],
       payment_status: ["unpaid", "pending", "paid", "refunded"],
       track_kind: [

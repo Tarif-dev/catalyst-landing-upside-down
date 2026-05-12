@@ -311,3 +311,289 @@ export const deleteParticipantAccount = createServerFn({ method: "POST" })
       participantName: profile.full_name || profile.email || "Participant",
     };
   });
+
+/* ── 5. Create Email Campaign (admin bulk emails) ─────────── */
+
+export const createEmailCampaign = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      adminAccessToken: z.string().min(20),
+      subject: z.string().min(1).max(200),
+      bodyHtml: z.string().min(1),
+      targetFilter: z.object({
+        type: z.enum(["all", "verified", "unverified", "track", "complete"]),
+        track: z
+          .enum([
+            "healthcare",
+            "fintech",
+            "sustainability",
+            "education",
+            "open",
+          ])
+          .optional(),
+      }),
+    }),
+  )
+  .handler(async ({ data }) => {
+    // Verify admin
+    const callerSupa = authedClient(data.adminAccessToken);
+    const { data: callerUser, error: callerErr } =
+      await callerSupa.auth.getUser(data.adminAccessToken);
+    if (callerErr || !callerUser.user) throw new Error("Unauthorized.");
+
+    const supa = adminClient();
+    const { data: adminRow } = await supa
+      .from("admins")
+      .select("id")
+      .eq("id", callerUser.user.id)
+      .maybeSingle();
+    if (!adminRow) throw new Error("Unauthorized: not an admin.");
+
+    // Build participant query based on target filter
+    let query = supa.from("profiles").select("user_id, full_name, email");
+
+    switch (data.targetFilter.type) {
+      case "verified":
+        query = query.eq("payment_status", "paid");
+        break;
+      case "unverified":
+        query = query.neq("payment_status", "paid");
+        break;
+      case "complete":
+        query = query.eq("is_complete", true);
+        break;
+      case "track": {
+        if (!data.targetFilter.track) throw new Error("Track is required.");
+        // Get user_ids from team_members who are in teams with this track
+        const { data: trackTeams } = await supa
+          .from("teams")
+          .select("id")
+          .eq("track", data.targetFilter.track);
+        const teamIds = (trackTeams ?? []).map((t) => t.id);
+        if (teamIds.length === 0) {
+          return { campaignId: null, totalCount: 0, message: "No teams in this track." };
+        }
+        const { data: trackMembers } = await supa
+          .from("team_members")
+          .select("user_id")
+          .in("team_id", teamIds);
+        const userIds = (trackMembers ?? []).map((m) => m.user_id);
+        if (userIds.length === 0) {
+          return { campaignId: null, totalCount: 0, message: "No participants in this track." };
+        }
+        query = query.in("user_id", userIds);
+        break;
+      }
+      // "all" — no filter
+    }
+
+    const { data: recipients, error: recipientErr } = await query;
+    if (recipientErr) throw recipientErr;
+
+    // Also fetch email from auth for recipients that don't have it in profiles
+    const recipientList: Array<{ email: string; name: string }> = [];
+    for (const r of recipients ?? []) {
+      let email = r.email;
+      if (!email) {
+        const { data: authUser } = await supa.auth.admin.getUserById(
+          r.user_id,
+        );
+        email = authUser?.user?.email ?? null;
+      }
+      if (email) {
+        recipientList.push({ email, name: r.full_name || "" });
+      }
+    }
+
+    if (recipientList.length === 0) {
+      return { campaignId: null, totalCount: 0, message: "No recipients found." };
+    }
+
+    // Create campaign
+    const { data: campaign, error: campaignErr } = await supa
+      .from("email_campaigns")
+      .insert({
+        subject: data.subject,
+        body_html: data.bodyHtml,
+        target_filter: data.targetFilter as any,
+        status: "queued",
+        total_count: recipientList.length,
+        created_by: callerUser.user.id,
+      } as any)
+      .select("id")
+      .single();
+
+    if (campaignErr || !campaign) {
+      console.error("[Email] Campaign creation failed:", campaignErr);
+      throw new Error("Failed to create campaign.");
+    }
+
+    // Bulk insert email jobs
+    const jobs = recipientList.map((r) => ({
+      campaign_id: campaign.id,
+      recipient_email: r.email,
+      recipient_name: r.name,
+      status: "pending" as const,
+    }));
+
+    // Insert in chunks of 100 to avoid payload limits
+    for (let i = 0; i < jobs.length; i += 100) {
+      const chunk = jobs.slice(i, i + 100);
+      const { error: jobErr } = await supa
+        .from("email_jobs")
+        .insert(chunk as any);
+      if (jobErr) {
+        console.error("[Email] Job insert failed:", jobErr);
+      }
+    }
+
+    console.log(
+      `[Email] Campaign ${campaign.id} created: ${recipientList.length} recipients queued.`,
+    );
+
+    return {
+      campaignId: campaign.id,
+      totalCount: recipientList.length,
+    };
+  });
+
+/* ── 6. Process Email Queue (manual trigger from admin) ───── */
+
+export const triggerEmailProcessing = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      adminAccessToken: z.string().min(20),
+    }),
+  )
+  .handler(async ({ data }) => {
+    // Verify admin
+    const callerSupa = authedClient(data.adminAccessToken);
+    const { data: callerUser, error: callerErr } =
+      await callerSupa.auth.getUser(data.adminAccessToken);
+    if (callerErr || !callerUser.user) throw new Error("Unauthorized.");
+
+    const supa = adminClient();
+    const { data: adminRow } = await supa
+      .from("admins")
+      .select("id")
+      .eq("id", callerUser.user.id)
+      .maybeSingle();
+    if (!adminRow) throw new Error("Unauthorized: not an admin.");
+
+    // Process up to 50 pending jobs
+    const BATCH = 50;
+    const { data: jobs, error: fetchErr } = await supa
+      .from("email_jobs")
+      .select(
+        "id, recipient_email, recipient_name, campaign_id, email_campaigns(subject, body_html)",
+      )
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .limit(BATCH);
+
+    if (fetchErr || !jobs) {
+      return { processed: 0, error: fetchErr?.message };
+    }
+
+    let sent = 0;
+    let failed = 0;
+    const { getBulkEmailTemplate } = await import("@/lib/bulk-email-template");
+
+    for (const job of jobs) {
+      const campaign = (job as any).email_campaigns;
+      if (!campaign) {
+        await supa
+          .from("email_jobs")
+          .update({ status: "failed", error_msg: "Campaign missing" } as any)
+          .eq("id", job.id);
+        failed++;
+        continue;
+      }
+
+      try {
+        let html = campaign.body_html;
+        if (job.recipient_name) {
+          html = html.replace(/\{\{name\}\}/gi, job.recipient_name);
+        }
+
+        await sendMail({
+          to: job.recipient_email,
+          subject: campaign.subject,
+          html: getBulkEmailTemplate(html),
+        });
+
+        await supa
+          .from("email_jobs")
+          .update({ status: "sent", sent_at: new Date().toISOString() } as any)
+          .eq("id", job.id);
+        sent++;
+      } catch (err: any) {
+        await supa
+          .from("email_jobs")
+          .update({
+            status: "failed",
+            error_msg: err.message?.slice(0, 500),
+          } as any)
+          .eq("id", job.id);
+        failed++;
+      }
+    }
+
+    // Update campaign status
+    const campaignIds = [...new Set(jobs.map((j) => j.campaign_id))];
+    for (const cid of campaignIds) {
+      const { count: pendingCount } = await supa
+        .from("email_jobs")
+        .select("id", { count: "exact", head: true })
+        .eq("campaign_id", cid)
+        .eq("status", "pending");
+
+      const { count: sentTotal } = await supa
+        .from("email_jobs")
+        .select("id", { count: "exact", head: true })
+        .eq("campaign_id", cid)
+        .eq("status", "sent");
+
+      await supa
+        .from("email_campaigns")
+        .update({
+          sent_count: sentTotal ?? 0,
+          status: (pendingCount ?? 0) === 0 ? "completed" : "processing",
+        } as any)
+        .eq("id", cid);
+    }
+
+    return { processed: jobs.length, sent, failed };
+  });
+
+/* ── 7. Get Email Campaigns (admin) ───────────────────────── */
+
+export const getEmailCampaigns = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      adminAccessToken: z.string().min(20),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const callerSupa = authedClient(data.adminAccessToken);
+    const { data: callerUser, error: callerErr } =
+      await callerSupa.auth.getUser(data.adminAccessToken);
+    if (callerErr || !callerUser.user) throw new Error("Unauthorized.");
+
+    const supa = adminClient();
+    const { data: adminRow } = await supa
+      .from("admins")
+      .select("id")
+      .eq("id", callerUser.user.id)
+      .maybeSingle();
+    if (!adminRow) throw new Error("Unauthorized: not an admin.");
+
+    const { data: campaigns, error } = await supa
+      .from("email_campaigns")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+    return { campaigns: campaigns ?? [] };
+  });

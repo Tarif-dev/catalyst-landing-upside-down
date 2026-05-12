@@ -5,10 +5,10 @@ import { PortalShell } from "@/components/PortalShell";
 import { useAuth } from "@/lib/auth";
 import { useServerFn } from "@tanstack/react-start";
 import { sendPaymentInfoEmail } from "@/lib/email";
+import { getDiscordAuthUrl } from "@/lib/discord";
 import { toast } from "sonner";
 
 const DISCORD_URL = "https://discord.gg/SDDT9D5kqs";
-const DISCORD_NOTICE_KEY = "catalyst:discord-notice-joined";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Catalyst 2K26" }] }),
@@ -40,20 +40,46 @@ function Dashboard() {
   const [busy, setBusy] = useState(true);
   const [emailBusy, setEmailBusy] = useState(false);
   const [paymentInfoRequested, setPaymentInfoRequested] = useState(false);
-  const [showDiscordNotice, setShowDiscordNotice] = useState(false);
+  const [discordBusy, setDiscordBusy] = useState(false);
   const sendPaymentInfoFn = useServerFn(sendPaymentInfoEmail);
+  const getDiscordAuthUrlFn = useServerFn(getDiscordAuthUrl);
   const displayName =
     participantProfile?.first_name ||
     participantProfile?.full_name?.split(" ")[0] ||
     user?.email?.split("@")[0] ||
     "Builder";
 
+  // Handle Discord callback query params
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    setShowDiscordNotice(
-      window.localStorage.getItem(DISCORD_NOTICE_KEY) !== "true",
-    );
+    const params = new URLSearchParams(window.location.search);
+    const discordResult = params.get("discord");
+    if (discordResult) {
+      switch (discordResult) {
+        case "verified":
+          toast.success("Discord verified! You're in the Catalyst server.");
+          break;
+        case "not-in-server":
+          toast.error(
+            "Discord connected but you haven't joined the Catalyst server yet. Join first, then verify again.",
+          );
+          break;
+        case "denied":
+          toast.info("Discord authorization was cancelled.");
+          break;
+        case "error":
+          toast.error("Discord verification failed. Please try again.");
+          break;
+      }
+      // Clean up URL
+      params.delete("discord");
+      const clean = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname + (clean ? `?${clean}` : ""),
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -113,19 +139,45 @@ function Dashboard() {
 
   return (
     <PortalShell title={`Welcome, ${displayName}`}>
-      {showDiscordNotice && (
+      {/* Discord Verification Banner */}
+      {participantProfile?.is_in_discord ? (
+        <div className="panel mb-8 border-green-500/30 bg-green-500/5 p-5 sm:p-6 reveal">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-green-400">
+                Discord Verified
+              </p>
+              <p className="mt-1 font-serif text-base text-bone/70">
+                Connected as{" "}
+                <span className="font-mono text-green-300">
+                  {participantProfile.discord_username || "Discord User"}
+                </span>
+              </p>
+            </div>
+            <a
+              href={DISCORD_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-secondary flex min-h-10 items-center justify-center border-green-500/40 px-5 text-green-400 hover:border-green-500 hover:bg-green-500/10"
+            >
+              Open Server
+            </a>
+          </div>
+        </div>
+      ) : (
         <div className="panel mb-8 border-[#5865f2]/40 bg-[#5865f2]/10 p-5 sm:p-6 reveal">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#8ea0ff]">
-                Required Community Update
+                Required — Community Verification
               </p>
               <h2 className="mt-2 font-display text-2xl sm:text-3xl text-bone">
-                All participants must join the Discord server.
+                Connect & verify your Discord
               </h2>
               <p className="mt-2 max-w-2xl font-serif text-base leading-relaxed text-bone/70">
-                Announcements, support, team coordination, and event-day updates
-                will be shared there first.
+                Join the Catalyst Discord server first, then click "Verify
+                Discord" to confirm your membership. All event announcements go
+                through Discord.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
@@ -135,17 +187,35 @@ function Dashboard() {
                 rel="noreferrer"
                 className="btn-secondary flex min-h-12 items-center justify-center border-[#5865f2]/60 bg-[#5865f2]/15 px-6 text-[#8ea0ff] hover:border-[#5865f2] hover:bg-[#5865f2]/25"
               >
-                Join Discord
+                1. Join Server
               </a>
               <button
                 type="button"
-                onClick={() => {
-                  window.localStorage.setItem(DISCORD_NOTICE_KEY, "true");
-                  setShowDiscordNotice(false);
+                disabled={discordBusy}
+                onClick={async () => {
+                  if (!session?.access_token) {
+                    toast.error("Please sign in again.");
+                    return;
+                  }
+                  setDiscordBusy(true);
+                  try {
+                    const { url } = await getDiscordAuthUrlFn({
+                      data: {
+                        accessToken: session.access_token,
+                        redirectOrigin: window.location.origin,
+                      },
+                    });
+                    window.location.href = url;
+                  } catch (err: any) {
+                    toast.error(
+                      err?.message || "Failed to start Discord verification.",
+                    );
+                    setDiscordBusy(false);
+                  }
                 }}
-                className="btn-secondary flex min-h-12 items-center justify-center border-white/15 px-6 text-bone/65 hover:text-bone"
+                className="btn-secondary flex min-h-12 items-center justify-center border-[#5865f2]/60 bg-[#5865f2]/30 px-6 text-white hover:bg-[#5865f2]/50 disabled:opacity-50"
               >
-                Already joined
+                {discordBusy ? "Redirecting..." : "2. Verify Discord"}
               </button>
             </div>
           </div>

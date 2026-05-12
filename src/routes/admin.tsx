@@ -7,6 +7,9 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   deleteParticipantAccount,
   setParticipantPaymentStatus as setParticipantPaymentStatusFn,
+  createEmailCampaign,
+  triggerEmailProcessing,
+  getEmailCampaigns,
 } from "@/lib/email";
 
 export const Route = createFileRoute("/admin")({
@@ -14,7 +17,7 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "analytics" | "teams" | "participants";
+type Tab = "analytics" | "teams" | "participants" | "comms";
 
 function Admin() {
   const { user, isAdmin, loading, session } = useAuth();
@@ -30,10 +33,21 @@ function Admin() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [busy, setBusy] = useState(true);
+  /* ── Communications state ── */
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [emailTarget, setEmailTarget] = useState<string>("all");
+  const [emailTrack, setEmailTrack] = useState<string>("healthcare");
+  const [emailSending, setEmailSending] = useState(false);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [processingEmails, setProcessingEmails] = useState(false);
   const setParticipantPaymentStatusServer = useServerFn(
     setParticipantPaymentStatusFn,
   );
   const deleteParticipantAccountFn = useServerFn(deleteParticipantAccount);
+  const createEmailCampaignFn = useServerFn(createEmailCampaign);
+  const triggerEmailProcessingFn = useServerFn(triggerEmailProcessing);
+  const getEmailCampaignsFn = useServerFn(getEmailCampaigns);
 
   const load = async () => {
     const [teamsRes, participantsRes] = await Promise.all([
@@ -787,6 +801,7 @@ function Admin() {
           {tabBtn("Analytics Command Center", "analytics")}
           {tabBtn("Teams Database", "teams")}
           {tabBtn("Individual Participants", "participants")}
+          {tabBtn("Communications", "comms")}
         </div>
       </div>
 
@@ -1700,6 +1715,452 @@ function Admin() {
           </div>
         </div>
       )}
+
+      {/* ── Communications Tab ── */}
+      {activeTab === "comms" && (
+        <div style={{ display: "grid", gap: 24 }}>
+          {/* Compose Card */}
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 12,
+              padding: 24,
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+            }}
+          >
+            <h3 style={{ margin: "0 0 20px", fontSize: 17, fontWeight: 700 }}>
+              Compose Bulk Email
+            </h3>
+            <div style={{ display: "grid", gap: 16 }}>
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="e.g. Important Update — Catalyst 2K26"
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: 8,
+                    fontSize: 14,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#374151",
+                    marginBottom: 6,
+                  }}
+                >
+                  Body (HTML supported — use {"{{name}}"} for personalization)
+                </label>
+                <textarea
+                  value={emailBody}
+                  onChange={(e) => setEmailBody(e.target.value)}
+                  rows={10}
+                  placeholder="<p>Hi {{name}},</p>\n<p>We have an exciting update...</p>"
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontFamily: "monospace",
+                    resize: "vertical",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 16,
+                }}
+              >
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: "#374151",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Target Audience
+                  </label>
+                  <select
+                    value={emailTarget}
+                    onChange={(e) => setEmailTarget(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      border: "1px solid #d1d5db",
+                      borderRadius: 8,
+                      fontSize: 14,
+                      background: "#fff",
+                    }}
+                  >
+                    <option value="all">All Participants</option>
+                    <option value="verified">Verified (Paid) Only</option>
+                    <option value="unverified">Unverified Only</option>
+                    <option value="complete">Complete Profiles Only</option>
+                    <option value="track">Specific Track</option>
+                  </select>
+                </div>
+                {emailTarget === "track" && (
+                  <div>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: "#374151",
+                        marginBottom: 6,
+                      }}
+                    >
+                      Track
+                    </label>
+                    <select
+                      value={emailTrack}
+                      onChange={(e) => setEmailTrack(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 14px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: 8,
+                        fontSize: 14,
+                        background: "#fff",
+                      }}
+                    >
+                      <option value="healthcare">Healthcare</option>
+                      <option value="fintech">Fintech</option>
+                      <option value="sustainability">Sustainability</option>
+                      <option value="education">Education</option>
+                      <option value="open">Open</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <button
+                  disabled={emailSending || !emailSubject.trim() || !emailBody.trim()}
+                  onClick={async () => {
+                    if (!session?.access_token) {
+                      toast.error("Please sign in again.");
+                      return;
+                    }
+                    const confirm = window.confirm(
+                      `Send "${emailSubject}" to ${emailTarget === "track" ? emailTrack + " track" : emailTarget} participants?`,
+                    );
+                    if (!confirm) return;
+                    setEmailSending(true);
+                    try {
+                      const result = await createEmailCampaignFn({
+                        data: {
+                          adminAccessToken: session.access_token,
+                          subject: emailSubject,
+                          bodyHtml: emailBody,
+                          targetFilter: {
+                            type: emailTarget as any,
+                            ...(emailTarget === "track"
+                              ? { track: emailTrack as any }
+                              : {}),
+                          },
+                        },
+                      });
+                      if (result.campaignId) {
+                        toast.success(
+                          `Campaign queued! ${result.totalCount} emails will be sent.`,
+                        );
+                        setEmailSubject("");
+                        setEmailBody("");
+                        // Refresh campaigns
+                        const res = await getEmailCampaignsFn({
+                          data: { adminAccessToken: session.access_token },
+                        });
+                        setCampaigns(res.campaigns);
+                      } else {
+                        toast.info(result.message || "No recipients found.");
+                      }
+                    } catch (err: any) {
+                      toast.error(err?.message || "Failed to create campaign.");
+                    } finally {
+                      setEmailSending(false);
+                    }
+                  }}
+                  style={{
+                    padding: "10px 24px",
+                    borderRadius: 8,
+                    border: "none",
+                    background:
+                      emailSending || !emailSubject.trim() || !emailBody.trim()
+                        ? "#9ca3af"
+                        : "#2563eb",
+                    color: "#fff",
+                    cursor:
+                      emailSending || !emailSubject.trim() || !emailBody.trim()
+                        ? "not-allowed"
+                        : "pointer",
+                    fontSize: 14,
+                    fontWeight: 600,
+                  }}
+                >
+                  {emailSending ? "Queuing..." : "Queue Emails"}
+                </button>
+                <button
+                  disabled={processingEmails}
+                  onClick={async () => {
+                    if (!session?.access_token) {
+                      toast.error("Please sign in again.");
+                      return;
+                    }
+                    setProcessingEmails(true);
+                    try {
+                      const result = await triggerEmailProcessingFn({
+                        data: { adminAccessToken: session.access_token },
+                      });
+                      toast.success(
+                        `Processed ${result.processed} emails (${result.sent} sent, ${result.failed} failed).`,
+                      );
+                      // Refresh campaigns
+                      const res = await getEmailCampaignsFn({
+                        data: { adminAccessToken: session.access_token },
+                      });
+                      setCampaigns(res.campaigns);
+                    } catch (err: any) {
+                      toast.error(
+                        err?.message || "Failed to process email queue.",
+                      );
+                    } finally {
+                      setProcessingEmails(false);
+                    }
+                  }}
+                  style={{
+                    padding: "10px 24px",
+                    borderRadius: 8,
+                    border: "1px solid #d1d5db",
+                    background: processingEmails ? "#f3f4f6" : "#fff",
+                    color: "#374151",
+                    cursor: processingEmails ? "not-allowed" : "pointer",
+                    fontSize: 14,
+                    fontWeight: 500,
+                  }}
+                >
+                  {processingEmails
+                    ? "Processing..."
+                    : "Process Queue Now (50 max)"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Email Preview */}
+          {emailBody.trim() && (
+            <div
+              style={{
+                background: "#fff",
+                border: "1px solid #e5e7eb",
+                borderRadius: 12,
+                padding: 24,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              }}
+            >
+              <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700 }}>
+                Preview
+              </h3>
+              <div
+                style={{
+                  background: "#000",
+                  border: "1px solid #331111",
+                  borderRadius: 8,
+                  padding: 24,
+                  color: "#ccc",
+                  fontFamily: "Georgia, serif",
+                  fontSize: 15,
+                  lineHeight: 1.7,
+                  maxHeight: 400,
+                  overflowY: "auto",
+                }}
+                dangerouslySetInnerHTML={{ __html: emailBody }}
+              />
+            </div>
+          )}
+
+          {/* Campaign History */}
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 12,
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                padding: "16px 24px",
+                borderBottom: "1px solid #e5e7eb",
+                background: "#f9fafb",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
+                Campaign History
+              </h3>
+              <button
+                onClick={async () => {
+                  if (!session?.access_token) return;
+                  try {
+                    const res = await getEmailCampaignsFn({
+                      data: { adminAccessToken: session.access_token },
+                    });
+                    setCampaigns(res.campaigns);
+                    toast.success("Campaigns refreshed.");
+                  } catch {
+                    toast.error("Failed to load campaigns.");
+                  }
+                }}
+                style={{
+                  padding: "6px 14px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  background: "#fff",
+                  cursor: "pointer",
+                  fontSize: 13,
+                }}
+              >
+                Refresh
+              </button>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: 14,
+                }}
+              >
+                <thead>
+                  <tr style={{ background: "#f9fafb" }}>
+                    {["Subject", "Target", "Status", "Sent / Total", "Created"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          style={{
+                            padding: "10px 16px",
+                            textAlign: "left",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "#6b7280",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            borderBottom: "1px solid #e5e7eb",
+                          }}
+                        >
+                          {h}
+                        </th>
+                      ),
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {campaigns.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        style={{
+                          padding: "32px 16px",
+                          textAlign: "center",
+                          color: "#9ca3af",
+                        }}
+                      >
+                        No campaigns yet. Click "Refresh" to load.
+                      </td>
+                    </tr>
+                  ) : (
+                    campaigns.map((c: any) => (
+                      <tr
+                        key={c.id}
+                        style={{ borderBottom: "1px solid #f3f4f6" }}
+                      >
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            fontWeight: 600,
+                            maxWidth: 280,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {c.subject}
+                        </td>
+                        <td style={{ padding: "12px 16px", color: "#6b7280" }}>
+                          {c.target_filter?.type || "all"}
+                          {c.target_filter?.track
+                            ? ` (${c.target_filter.track})`
+                            : ""}
+                        </td>
+                        <td style={{ padding: "12px 16px" }}>
+                          {badge(
+                            c.status,
+                            c.status === "completed"
+                              ? "green"
+                              : c.status === "failed"
+                                ? "red"
+                                : c.status === "processing"
+                                  ? "yellow"
+                                  : "blue",
+                          )}
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 16px",
+                            fontFamily: "monospace",
+                          }}
+                        >
+                          {c.sent_count}/{c.total_count}
+                        </td>
+                        <td style={{ padding: "12px 16px", color: "#6b7280" }}>
+                          {new Date(c.created_at).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @media (max-width: 760px) {
           .admin-topbar {
