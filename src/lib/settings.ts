@@ -1,6 +1,6 @@
-import { createServerFn } from "@tanstack/start";
+import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { adminClient } from "@/integrations/supabase/client.server";
+import { supabaseAdmin as adminClient } from "@/integrations/supabase/client.server";
 import { supabase } from "@/integrations/supabase/client";
 
 export const getAppSettings = createServerFn({ method: "GET" }).handler(async () => {
