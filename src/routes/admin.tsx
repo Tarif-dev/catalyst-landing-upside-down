@@ -344,8 +344,7 @@ function Admin() {
   };
 
   const canTerminateCampaign = (campaign: any) =>
-    ["queued", "processing", "pending"].includes(campaign.status) &&
-    (campaign.pending_count ?? 0) > 0;
+    ["queued", "processing", "pending"].includes(campaign.status);
 
   const refreshCampaigns = async () => {
     if (!session?.access_token) return;
@@ -1948,7 +1947,7 @@ function Admin() {
                       });
                       if (result.campaignId) {
                         toast.success(
-                          `Campaign queued! ${result.totalCount} emails will be sent.`,
+                          `Campaign queued with ${result.totalCount} recipients. Click "Process Queue Now" to send the next batch.`,
                         );
                         setEmailSubject("");
                         setEmailBody("");

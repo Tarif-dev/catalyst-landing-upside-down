@@ -504,6 +504,13 @@ export const createEmailCampaign = createServerFn({ method: "POST" })
         .insert(chunk as any);
       if (jobErr) {
         console.error("[Email] Job insert failed:", jobErr);
+        await supa
+          .from("email_campaigns")
+          .update({ status: "failed" } as any)
+          .eq("id", campaign.id);
+        throw new Error(
+          `Campaign was created, but recipient jobs could not be queued: ${jobErr.message}`,
+        );
       }
     }
 
