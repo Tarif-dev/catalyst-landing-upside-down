@@ -10,7 +10,7 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { createClient } from "@supabase/supabase-js";
 import { sendMail } from "@/lib/gmail";
-import { getBulkEmailTemplate } from "@/lib/bulk-email-template";
+import { prepareBulkMailContent } from "@/lib/bulk-email-content";
 
 const BATCH_SIZE = 50;
 
@@ -79,7 +79,8 @@ async function processEmails() {
       await sendMail({
         to: job.recipient_email,
         subject: campaign.subject,
-        html: getBulkEmailTemplate(personalizedHtml),
+        ...prepareBulkMailContent(personalizedHtml),
+        includeDefaultAttachments: false,
       });
 
       await supa

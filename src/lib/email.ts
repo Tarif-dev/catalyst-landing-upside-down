@@ -15,6 +15,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { sendMail } from "@/lib/gmail";
+import { prepareBulkMailContent } from "@/lib/bulk-email-content";
 import {
   getWelcomeEmailTemplate,
   getPaymentInfoEmailTemplate,
@@ -552,8 +553,6 @@ export const triggerEmailProcessing = createServerFn({ method: "POST" })
 
     let sent = 0;
     let failed = 0;
-    const { getBulkEmailTemplate } = await import("@/lib/bulk-email-template");
-
     for (const job of jobs) {
       const campaign = (job as any).email_campaigns;
       if (!campaign) {
@@ -583,7 +582,8 @@ export const triggerEmailProcessing = createServerFn({ method: "POST" })
         await sendMail({
           to: job.recipient_email,
           subject: campaign.subject,
-          html: getBulkEmailTemplate(html),
+          ...prepareBulkMailContent(html),
+          includeDefaultAttachments: false,
         });
 
         await supa

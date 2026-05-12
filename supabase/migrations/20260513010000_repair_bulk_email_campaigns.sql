@@ -80,6 +80,12 @@ CREATE TABLE IF NOT EXISTS public.email_jobs (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_jobs
+  ADD COLUMN IF NOT EXISTS recipient_name text,
+  ADD COLUMN IF NOT EXISTS error_msg text,
+  ADD COLUMN IF NOT EXISTS sent_at timestamptz,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+
 DO $$
 BEGIN
   IF EXISTS (
@@ -102,3 +108,5 @@ CREATE INDEX IF NOT EXISTS idx_email_jobs_pending
 
 CREATE INDEX IF NOT EXISTS idx_email_jobs_campaign
   ON public.email_jobs (campaign_id, status);
+
+NOTIFY pgrst, 'reload schema';

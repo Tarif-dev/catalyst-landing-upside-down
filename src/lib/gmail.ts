@@ -40,8 +40,10 @@ function getTransporter() {
 export interface SendMailOptions {
   to: string;
   subject: string;
-  html: string;
+  html?: string;
+  text?: string;
   attachments?: nodemailer.SendMailOptions["attachments"];
+  includeDefaultAttachments?: boolean;
 }
 
 const DEFAULT_ATTACHMENT_FILES = [
@@ -65,11 +67,14 @@ function attachmentPath(diskName: string) {
 
 function emailAttachments(
   attachments?: nodemailer.SendMailOptions["attachments"],
+  includeDefaultAttachments = true,
 ) {
-  const bundledAttachments = DEFAULT_ATTACHMENT_FILES.flatMap((attachment) => {
-    const path = attachmentPath(attachment.diskName);
-    return path ? [{ filename: attachment.filename, path }] : [];
-  });
+  const bundledAttachments = includeDefaultAttachments
+    ? DEFAULT_ATTACHMENT_FILES.flatMap((attachment) => {
+        const path = attachmentPath(attachment.diskName);
+        return path ? [{ filename: attachment.filename, path }] : [];
+      })
+    : [];
   return [...bundledAttachments, ...(attachments ?? [])];
 }
 
@@ -81,8 +86,14 @@ export async function sendMail({
   to,
   subject,
   html,
+  text,
   attachments,
+  includeDefaultAttachments,
 }: SendMailOptions) {
+  if (!html && !text) {
+    throw new Error("Email body is empty.");
+  }
+
   const transporter = getTransporter();
 
   const result = await transporter.sendMail({
@@ -90,7 +101,8 @@ export async function sendMail({
     to,
     subject,
     html,
-    attachments: emailAttachments(attachments),
+    text,
+    attachments: emailAttachments(attachments, includeDefaultAttachments),
   });
 
   console.log(
