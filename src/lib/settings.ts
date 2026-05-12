@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const getAppSettings = createServerFn({ method: "GET" }).handler(async () => {
   // Use adminClient to ensure it can always read
-  const supa = adminClient();
+  const supa = adminClient;
   const { data, error } = await supa.storage.from("config").download("settings.json");
   if (error || !data) {
     // Return default settings if file doesn't exist
@@ -30,7 +30,7 @@ export const updateAppSettings = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     // 1. Verify admin
-    const supa = adminClient();
+    const supa = adminClient;
     const { data: callerUser, error: callerErr } = await supabase.auth.getUser(
       data.adminAccessToken,
     );
