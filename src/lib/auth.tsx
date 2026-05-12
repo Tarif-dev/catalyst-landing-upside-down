@@ -30,7 +30,8 @@ const AuthCtx = createContext<Ctx>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
+  const [userDataLoading, setUserDataLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   // Track last fetched userId to avoid redundant DB calls
   const lastFetchedUserId = useRef<string | null>(null);
@@ -39,12 +40,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up listener FIRST so we don't miss SIGNED_IN events
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
-      setLoading(false);
+      setAuthReady(true);
     });
     // Then fetch existing session
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      setLoading(false);
+      setAuthReady(true);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -56,22 +57,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAdmin(false);
       setProfile(null);
       lastFetchedUserId.current = null;
+      setUserDataLoading(false);
       return;
     }
 
     // Skip refetch if user hasn't changed (avoids double-fire on token refresh)
     if (userId === lastFetchedUserId.current) return;
     lastFetchedUserId.current = userId;
+    setUserDataLoading(true);
 
     // Batch both requests in a single Promise.all
     Promise.all([
       supabase.from("admins").select("id").eq("id", userId).maybeSingle(),
       supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
-    ]).then(([adminRes, profRes]) => {
-      setIsAdmin(!!adminRes.data);
-      setProfile(profRes.data);
-    });
+    ])
+      .then(([adminRes, profRes]) => {
+        setIsAdmin(!!adminRes.data);
+        setProfile(profRes.data);
+        setUserDataLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load auth profile data", err);
+        setIsAdmin(false);
+        setProfile(null);
+        setUserDataLoading(false);
+      });
   }, [session]);
+
+  const loading =
+    !authReady ||
+    userDataLoading ||
+    (!!session?.user && lastFetchedUserId.current !== session.user.id);
 
   return (
     <AuthCtx.Provider
@@ -83,7 +99,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin,
         signOut: async () => {
           lastFetchedUserId.current = null;
-          await supabase.auth.signOut();
+          setSession(null);
+          setProfile(null);
+          setIsAdmin(false);
+          setUserDataLoading(false);
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error("Supabase sign out failed", error);
+            await supabase.auth.signOut({ scope: "local" });
+          }
         },
       }}
     >

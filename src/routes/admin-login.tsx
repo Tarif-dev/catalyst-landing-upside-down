@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
@@ -16,10 +16,12 @@ function AdminLogin() {
   const nav = useNavigate();
   const { session } = useAuth();
 
-  // If already logged in, they can try to go to admin
-  if (session) {
-    nav({ to: "/admin" });
-  }
+  // If already logged in, they can try to go to admin.
+  useEffect(() => {
+    if (session) {
+      nav({ to: "/admin" });
+    }
+  }, [session, nav]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

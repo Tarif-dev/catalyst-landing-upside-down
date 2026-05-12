@@ -55,7 +55,7 @@ function Admin() {
   const [settingsBusy, setSettingsBusy] = useState(false);
 
   const load = async () => {
-    const [teamsRes, participantsRes] = await Promise.all([
+    const [teamsRes, participantsRes, settingsRes] = await Promise.all([
       supabase
         .from("teams")
         .select(

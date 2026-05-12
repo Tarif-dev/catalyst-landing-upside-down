@@ -19,12 +19,17 @@ export function PortalShell({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent | TouchEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+    document.addEventListener("touchstart", handleClickOutside, {
+      passive: true,
+    });
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
@@ -73,7 +78,7 @@ export function PortalShell({
                 >
                   <MessageSquare className="w-5 h-5" />
                 </a>
-                
+
                 <Link
                   to="/dashboard"
                   className="font-serif italic text-bone drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:text-white hover:text-glow-cyan transition-all duration-300"
@@ -88,40 +93,55 @@ export function PortalShell({
                     Admin
                   </Link>
                 )}
-                
+
                 <div className="relative ml-1 sm:ml-2" ref={dropdownRef}>
-                  <button 
+                  <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 border border-white/20 text-bone hover:border-white/50 transition-colors focus:outline-none"
                   >
                     {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                      <img
+                        src={profile.avatar_url}
+                        alt="Profile"
+                        className="w-full h-full rounded-full object-cover"
+                      />
                     ) : (
                       <span className="font-mono text-sm">{getInitial()}</span>
                     )}
                   </button>
-                  
+
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-56 rounded-md bg-black border border-white/20 shadow-2xl overflow-hidden py-1 z-50">
                       <div className="px-4 py-3 border-b border-white/10 mb-1 bg-black">
-                        <p className="text-sm font-medium text-bone truncate">{profile?.full_name || "Builder"}</p>
-                        <p className="text-xs text-bone/50 truncate font-mono mt-1">{user.email}</p>
+                        <p className="text-sm font-medium text-bone truncate">
+                          {profile?.full_name || "Builder"}
+                        </p>
+                        <p className="text-xs text-bone/50 truncate font-mono mt-1">
+                          {user.email}
+                        </p>
                       </div>
-                      
+
                       <button
+                        type="button"
                         onClick={() => {
                           setDropdownOpen(false);
                           nav({ to: "/profile" });
                         }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-bone/90 hover:bg-white/10 hover:text-bone transition-colors w-full text-left"
                       >
-                        <Settings className="w-4 h-4 text-bone/50" /> Edit Profile
+                        <Settings className="w-4 h-4 text-bone/50" /> Edit
+                        Profile
                       </button>
-                      
+
                       <button
+                        type="button"
                         onClick={async () => {
                           setDropdownOpen(false);
-                          await signOut();
+                          try {
+                            await signOut();
+                          } catch (err) {
+                            console.error("Sign out failed", err);
+                          }
                           nav({ to: "/" });
                         }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-blood hover:bg-blood/20 transition-colors w-full text-left"
