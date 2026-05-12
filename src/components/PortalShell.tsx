@@ -1,9 +1,17 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { ReactNode, useState, useRef, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
+import { ReactNode } from "react";
 import amityLogo from "@/assets/amity_logo_white.png";
 import catalystLogo from "@/assets/catalyst_logo.png";
 import { useAuth } from "@/lib/auth";
 import { MessageSquare, LogOut, Settings } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function PortalShell({
   children,
@@ -13,33 +21,21 @@ export function PortalShell({
   title?: string;
 }) {
   const { user, isAdmin, signOut, profile } = useAuth();
-  const nav = useNavigate();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent | TouchEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside, {
-      passive: true,
-    });
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, []);
 
   const getInitial = () => {
     if (profile?.full_name) return profile.full_name.charAt(0).toUpperCase();
     if (user?.email) return user.email.charAt(0).toUpperCase();
     return "U";
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (err) {
+      console.error("Sign out failed", err);
+    } finally {
+      window.location.assign("/");
+    }
   };
 
   return (
@@ -94,63 +90,61 @@ export function PortalShell({
                   </Link>
                 )}
 
-                <div className="relative ml-1 sm:ml-2" ref={dropdownRef}>
-                  <button
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 border border-white/20 text-bone hover:border-white/50 transition-colors focus:outline-none"
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Open profile menu"
+                      className="ml-1 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/40 text-bone transition-colors hover:border-white/50 focus:outline-none sm:ml-2"
+                    >
+                      {profile?.avatar_url ? (
+                        <img
+                          src={profile.avatar_url}
+                          alt="Profile"
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="font-mono text-sm">
+                          {getInitial()}
+                        </span>
+                      )}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={10}
+                    className="z-[1000] w-56 border-white/20 bg-black p-0 text-bone shadow-2xl"
                   >
-                    {profile?.avatar_url ? (
-                      <img
-                        src={profile.avatar_url}
-                        alt="Profile"
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="font-mono text-sm">{getInitial()}</span>
-                    )}
-                  </button>
-
-                  {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 rounded-md bg-black border border-white/20 shadow-2xl overflow-hidden py-1 z-50">
-                      <div className="px-4 py-3 border-b border-white/10 mb-1 bg-black">
-                        <p className="text-sm font-medium text-bone truncate">
-                          {profile?.full_name || "Builder"}
-                        </p>
-                        <p className="text-xs text-bone/50 truncate font-mono mt-1">
-                          {user.email}
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDropdownOpen(false);
-                          nav({ to: "/profile" });
-                        }}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-bone/90 hover:bg-white/10 hover:text-bone transition-colors w-full text-left"
-                      >
-                        <Settings className="w-4 h-4 text-bone/50" /> Edit
-                        Profile
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          setDropdownOpen(false);
-                          try {
-                            await signOut();
-                          } catch (err) {
-                            console.error("Sign out failed", err);
-                          }
-                          nav({ to: "/" });
-                        }}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-blood hover:bg-blood/20 transition-colors w-full text-left"
-                      >
-                        <LogOut className="w-4 h-4 text-blood/60" /> Sign out
-                      </button>
-                    </div>
-                  )}
-                </div>
+                    <DropdownMenuLabel className="border-b border-white/10 bg-black px-4 py-3">
+                      <p className="truncate text-sm font-medium text-bone">
+                        {profile?.full_name || "Builder"}
+                      </p>
+                      <p className="mt-1 truncate font-mono text-xs font-normal text-bone/50">
+                        {user.email}
+                      </p>
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer px-4 py-2.5 text-bone/90 focus:bg-white/10 focus:text-bone"
+                    >
+                      <a href="/profile">
+                        <Settings className="h-4 w-4 text-bone/50" />
+                        Edit Profile
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="m-0 bg-white/10" />
+                    <DropdownMenuItem
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        void handleSignOut();
+                      }}
+                      className="cursor-pointer px-4 py-2.5 text-blood focus:bg-blood/20 focus:text-blood"
+                    >
+                      <LogOut className="h-4 w-4 text-blood/60" />
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <Link
