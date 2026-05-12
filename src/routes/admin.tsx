@@ -11,13 +11,14 @@ import {
   triggerEmailProcessing,
   getEmailCampaigns,
 } from "@/lib/email";
+import { getAppSettings, updateAppSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Console — Catalyst 2K26" }] }),
   component: Admin,
 });
 
-type Tab = "analytics" | "teams" | "participants" | "comms";
+type Tab = "analytics" | "teams" | "participants" | "comms" | "settings";
 
 function Admin() {
   const { user, isAdmin, loading, session } = useAuth();
@@ -48,6 +49,10 @@ function Admin() {
   const createEmailCampaignFn = useServerFn(createEmailCampaign);
   const triggerEmailProcessingFn = useServerFn(triggerEmailProcessing);
   const getEmailCampaignsFn = useServerFn(getEmailCampaigns);
+  const getAppSettingsFn = useServerFn(getAppSettings);
+  const updateAppSettingsFn = useServerFn(updateAppSettings);
+  const [appSettings, setAppSettings] = useState<{ registrationsOpen: boolean }>({ registrationsOpen: true });
+  const [settingsBusy, setSettingsBusy] = useState(false);
 
   const load = async () => {
     const [teamsRes, participantsRes] = await Promise.all([
@@ -61,9 +66,11 @@ function Admin() {
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false }),
+      getAppSettingsFn()
     ]);
     setTeams(teamsRes.data ?? []);
     setParticipants(participantsRes.data ?? []);
+    setAppSettings(settingsRes || { registrationsOpen: true });
     setBusy(false);
   };
 
@@ -802,6 +809,7 @@ function Admin() {
           {tabBtn("Teams Database", "teams")}
           {tabBtn("Individual Participants", "participants")}
           {tabBtn("Communications", "comms")}
+          {tabBtn("Settings", "settings")}
         </div>
       </div>
 
@@ -2156,6 +2164,72 @@ function Admin() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Settings Tab ── */}
+      {activeTab === "settings" && (
+        <div style={{ display: "grid", gap: 24 }}>
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 12,
+              padding: 24,
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+            }}
+          >
+            <h3 style={{ margin: "0 0 20px", fontSize: 17, fontWeight: 700 }}>
+              Global Settings
+            </h3>
+            
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+              <div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#111827" }}>
+                  Allow New Registrations
+                </h4>
+                <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}>
+                  When disabled, the registration page will display a message that slots are filled.
+                </p>
+              </div>
+              
+              <button
+                disabled={settingsBusy}
+                onClick={async () => {
+                  if (!session?.access_token) return;
+                  setSettingsBusy(true);
+                  const newVal = !appSettings.registrationsOpen;
+                  try {
+                    await updateAppSettingsFn({
+                      data: {
+                        adminAccessToken: session.access_token,
+                        settings: { registrationsOpen: newVal }
+                      }
+                    });
+                    setAppSettings({ registrationsOpen: newVal });
+                    toast.success(newVal ? "Registrations opened." : "Registrations closed.");
+                  } catch (err: any) {
+                    toast.error("Failed to update settings.");
+                  } finally {
+                    setSettingsBusy(false);
+                  }
+                }}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  cursor: settingsBusy ? "not-allowed" : "pointer",
+                  background: appSettings.registrationsOpen ? "#dc2626" : "#059669",
+                  color: "#fff",
+                  border: "none",
+                  transition: "background 0.2s"
+                }}
+              >
+                {settingsBusy ? "Updating..." : appSettings.registrationsOpen ? "Stop Registrations" : "Open Registrations"}
+              </button>
             </div>
           </div>
         </div>

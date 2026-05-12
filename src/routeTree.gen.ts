@@ -20,9 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as VerifyCodeRouteImport } from './routes/verify.$code'
 import { Route as TeamNewRouteImport } from './routes/team.new'
 import { Route as TeamJoinRouteImport } from './routes/team.join'
-import { Route as TeamTeamIdRouteImport } from './routes/team.$teamId'
 import { Route as SubmitTeamIdRouteImport } from './routes/submit.$teamId'
-import { Route as PassTeamIdRouteImport } from './routes/pass.$teamId'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -80,19 +78,9 @@ const TeamJoinRoute = TeamJoinRouteImport.update({
   path: '/team/join',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TeamTeamIdRoute = TeamTeamIdRouteImport.update({
-  id: '/team/$teamId',
-  path: '/team/$teamId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SubmitTeamIdRoute = SubmitTeamIdRouteImport.update({
   id: '/submit/$teamId',
   path: '/submit/$teamId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PassTeamIdRoute = PassTeamIdRouteImport.update({
-  id: '/pass/$teamId',
-  path: '/pass/$teamId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CertificateCodeRoute = CertificateCodeRouteImport.update({
@@ -111,9 +99,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/certificate/$code': typeof CertificateCodeRoute
-  '/pass/$teamId': typeof PassTeamIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
-  '/team/$teamId': typeof TeamTeamIdRoute
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
@@ -128,9 +114,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/certificate/$code': typeof CertificateCodeRoute
-  '/pass/$teamId': typeof PassTeamIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
-  '/team/$teamId': typeof TeamTeamIdRoute
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
@@ -146,9 +130,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/certificate/$code': typeof CertificateCodeRoute
-  '/pass/$teamId': typeof PassTeamIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
-  '/team/$teamId': typeof TeamTeamIdRoute
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
@@ -165,9 +147,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/certificate/$code'
-    | '/pass/$teamId'
     | '/submit/$teamId'
-    | '/team/$teamId'
     | '/team/join'
     | '/team/new'
     | '/verify/$code'
@@ -182,9 +162,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/certificate/$code'
-    | '/pass/$teamId'
     | '/submit/$teamId'
-    | '/team/$teamId'
     | '/team/join'
     | '/team/new'
     | '/verify/$code'
@@ -199,9 +177,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/certificate/$code'
-    | '/pass/$teamId'
     | '/submit/$teamId'
-    | '/team/$teamId'
     | '/team/join'
     | '/team/new'
     | '/verify/$code'
@@ -217,9 +193,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   CertificateCodeRoute: typeof CertificateCodeRoute
-  PassTeamIdRoute: typeof PassTeamIdRoute
   SubmitTeamIdRoute: typeof SubmitTeamIdRoute
-  TeamTeamIdRoute: typeof TeamTeamIdRoute
   TeamJoinRoute: typeof TeamJoinRoute
   TeamNewRoute: typeof TeamNewRoute
   VerifyCodeRoute: typeof VerifyCodeRoute
@@ -304,25 +278,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/team/$teamId': {
-      id: '/team/$teamId'
-      path: '/team/$teamId'
-      fullPath: '/team/$teamId'
-      preLoaderRoute: typeof TeamTeamIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/submit/$teamId': {
       id: '/submit/$teamId'
       path: '/submit/$teamId'
       fullPath: '/submit/$teamId'
       preLoaderRoute: typeof SubmitTeamIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pass/$teamId': {
-      id: '/pass/$teamId'
-      path: '/pass/$teamId'
-      fullPath: '/pass/$teamId'
-      preLoaderRoute: typeof PassTeamIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/certificate/$code': {
@@ -345,9 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   CertificateCodeRoute: CertificateCodeRoute,
-  PassTeamIdRoute: PassTeamIdRoute,
   SubmitTeamIdRoute: SubmitTeamIdRoute,
-  TeamTeamIdRoute: TeamTeamIdRoute,
   TeamJoinRoute: TeamJoinRoute,
   TeamNewRoute: TeamNewRoute,
   VerifyCodeRoute: VerifyCodeRoute,

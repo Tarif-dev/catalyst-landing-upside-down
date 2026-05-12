@@ -6,9 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { PortalShell } from "@/components/PortalShell";
 import { toast } from "sonner";
+import { getAppSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/register")({
   head: () => ({ meta: [{ title: "Create Account — Catalyst 2K26" }] }),
+  loader: async () => {
+    try {
+      return await getAppSettings();
+    } catch {
+      return { registrationsOpen: true };
+    }
+  },
   component: RegisterPage,
 });
 
@@ -36,6 +44,7 @@ function readRegisterDraft() {
 }
 
 function RegisterPage() {
+  const settings = Route.useLoaderData();
   const nav = useNavigate();
   const [form, setForm] = useState(readRegisterDraft);
   const didMount = useRef(false);
@@ -123,81 +132,110 @@ function RegisterPage() {
             Registrations close on 15 May 2026
           </p>
         </div>
-        <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="you@hawkins.lab"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="input-styled"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2"
-            >
-              Password{" "}
-              <span className="text-bone/40 normal-case tracking-normal">
-                (min 8)
-              </span>
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPw ? "text" : "password"}
-                required
-                autoComplete="new-password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="input-styled pr-12"
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPw((s) => !s)}
-                aria-label={showPw ? "Hide password" : "Show password"}
-                className="absolute inset-y-0 right-0 flex items-center px-4 text-bone/50 hover:text-blood transition-colors"
+        
+        {!settings.registrationsOpen ? (
+          <div className="panel p-8 sm:p-12 text-center space-y-6">
+            <h2 className="font-display text-3xl sm:text-4xl text-bone">
+              We are grateful
+            </h2>
+            <p className="font-serif text-lg text-bone/80 max-w-md mx-auto leading-relaxed">
+              But the slots are filled. We will be happy to host you next time.
+            </p>
+            <div className="pt-4">
+              <Link
+                to="/"
+                className="btn-secondary inline-flex px-8 py-3"
               >
-                {showPw ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
-              </button>
+                Return to Hawkins
+              </Link>
             </div>
+            <p className="text-center text-sm font-serif italic text-bone/60 mt-8">
+              Already registered?{" "}
+              <Link
+                to="/login"
+                className="text-blood hover:text-glow-blood transition-all underline-offset-4 hover:underline"
+              >
+                Sign in to your account
+              </Link>
+            </p>
           </div>
+        ) : (
+          <form onSubmit={submit} className="panel p-8 sm:p-10 space-y-6">
+            <div>
+              <label
+                htmlFor="email"
+                className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2"
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="email"
+                placeholder="you@hawkins.lab"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="input-styled"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full flex items-center justify-center gap-3 mt-4"
-          >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {loading ? "Creating…" : "Create account"}
-          </button>
+            <div>
+              <label
+                htmlFor="password"
+                className="block font-mono text-[10px] uppercase tracking-[0.4em] text-blood/90 mb-2"
+              >
+                Password{" "}
+                <span className="text-bone/40 normal-case tracking-normal">
+                  (min 8)
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPw ? "text" : "password"}
+                  required
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  className="input-styled pr-12"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((s) => !s)}
+                  aria-label={showPw ? "Hide password" : "Show password"}
+                  className="absolute inset-y-0 right-0 flex items-center px-4 text-bone/50 hover:text-blood transition-colors"
+                >
+                  {showPw ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
 
-          <p className="text-center text-base font-serif italic text-bone/70 mt-6">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-blood hover:text-glow-blood transition-all underline-offset-4 hover:underline"
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full flex items-center justify-center gap-3 mt-4"
             >
-              Sign in
-            </Link>
-          </p>
-        </form>
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading ? "Creating…" : "Create account"}
+            </button>
+
+            <p className="text-center text-base font-serif italic text-bone/70 mt-6">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-blood hover:text-glow-blood transition-all underline-offset-4 hover:underline"
+              >
+                Sign in
+              </Link>
+            </p>
+          </form>
+        )}
       </div>
     </PortalShell>
   );

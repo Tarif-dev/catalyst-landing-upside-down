@@ -414,11 +414,9 @@ export const createEmailCampaign = createServerFn({ method: "POST" })
       .from("email_campaigns")
       .insert({
         subject: data.subject,
-        body_html: data.bodyHtml,
+        body: data.bodyHtml,
         target_filter: data.targetFilter as any,
-        status: "queued",
-        total_count: recipientList.length,
-        created_by: callerUser.user.id,
+        status: "queued"
       } as any)
       .select("id")
       .single();
@@ -485,7 +483,7 @@ export const triggerEmailProcessing = createServerFn({ method: "POST" })
     const { data: jobs, error: fetchErr } = await supa
       .from("email_jobs")
       .select(
-        "id, recipient_email, recipient_name, campaign_id, email_campaigns(subject, body_html)",
+        "id, recipient_email, recipient_name, campaign_id, email_campaigns(subject, body)",
       )
       .eq("status", "pending")
       .order("created_at", { ascending: true })
@@ -511,7 +509,7 @@ export const triggerEmailProcessing = createServerFn({ method: "POST" })
       }
 
       try {
-        let html = campaign.body_html;
+        let html = campaign.body;
         if (job.recipient_name) {
           html = html.replace(/\{\{name\}\}/gi, job.recipient_name);
         }
@@ -557,7 +555,6 @@ export const triggerEmailProcessing = createServerFn({ method: "POST" })
       await supa
         .from("email_campaigns")
         .update({
-          sent_count: sentTotal ?? 0,
           status: (pendingCount ?? 0) === 0 ? "completed" : "processing",
         } as any)
         .eq("id", cid);
@@ -590,10 +587,21 @@ export const getEmailCampaigns = createServerFn({ method: "POST" })
 
     const { data: campaigns, error } = await supa
       .from("email_campaigns")
-      .select("*")
+      .select("*, email_jobs(id, status)")
       .order("created_at", { ascending: false })
       .limit(50);
 
     if (error) throw error;
-    return { campaigns: campaigns ?? [] };
+    
+    // Calculate counts
+    const campaignsWithCounts = (campaigns ?? []).map(c => {
+      const jobs = (c as any).email_jobs || [];
+      return {
+        ...c,
+        total_count: jobs.length,
+        sent_count: jobs.filter((j: any) => j.status === 'sent').length
+      };
+    });
+    
+    return { campaigns: campaignsWithCounts };
   });
