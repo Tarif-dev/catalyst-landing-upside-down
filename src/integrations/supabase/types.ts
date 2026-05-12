@@ -330,38 +330,32 @@ export type Database = {
         Row: {
           id: string
           subject: string
-          body_html: string
-          target_filter: Record<string, any>
-          status: Database["public"]["Enums"]["campaign_status"]
-          sent_count: number
-          total_count: number
-          created_by: string | null
+          body: string
+          target_filter: string
+          status: string | null
+          sent_count?: number
+          total_count?: number
           created_at: string
-          updated_at: string
         }
         Insert: {
           id?: string
           subject: string
-          body_html: string
-          target_filter?: Record<string, any>
-          status?: Database["public"]["Enums"]["campaign_status"]
+          body: string
+          target_filter?: string
+          status?: string | null
           sent_count?: number
           total_count?: number
-          created_by?: string | null
           created_at?: string
-          updated_at?: string
         }
         Update: {
           id?: string
           subject?: string
-          body_html?: string
-          target_filter?: Record<string, any>
-          status?: Database["public"]["Enums"]["campaign_status"]
+          body?: string
+          target_filter?: string
+          status?: string | null
           sent_count?: number
           total_count?: number
-          created_by?: string | null
           created_at?: string
-          updated_at?: string
         }
         Relationships: []
       }

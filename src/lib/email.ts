@@ -86,6 +86,80 @@ function adminClient() {
   });
 }
 
+type EmailTargetFilter = {
+  type: "all" | "verified" | "unverified" | "track" | "complete";
+  track?: "healthcare" | "fintech" | "sustainability" | "education" | "open";
+};
+
+async function requireAdmin(adminAccessToken: string) {
+  const callerSupa = authedClient(adminAccessToken);
+  const { data: callerUser, error: callerErr } =
+    await callerSupa.auth.getUser(adminAccessToken);
+  if (callerErr || !callerUser.user) throw new Error("Unauthorized.");
+
+  const supa = adminClient();
+  const { data: adminRow } = await supa
+    .from("admins")
+    .select("id")
+    .eq("id", callerUser.user.id)
+    .maybeSingle();
+  if (!adminRow) throw new Error("Unauthorized: not an admin.");
+
+  return { supa, user: callerUser.user };
+}
+
+function serializeTargetFilter(filter: EmailTargetFilter) {
+  return JSON.stringify(filter);
+}
+
+function parseTargetFilter(value: unknown): EmailTargetFilter {
+  if (!value) return { type: "all" };
+  if (typeof value === "object") return value as EmailTargetFilter;
+  if (typeof value !== "string") return { type: "all" };
+
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed && typeof parsed === "object") return parsed;
+  } catch {
+    const normalized = value.toLowerCase().trim();
+    if (normalized === "paid") return { type: "verified" };
+    if (normalized === "unpaid") return { type: "unverified" };
+    if (["verified", "unverified", "track", "complete"].includes(normalized)) {
+      return { type: normalized as EmailTargetFilter["type"] };
+    }
+  }
+
+  return { type: "all" };
+}
+
+async function syncCampaignStatus(
+  supa: ReturnType<typeof adminClient>,
+  campaignId: string,
+) {
+  const { data: campaign } = await supa
+    .from("email_campaigns")
+    .select("status")
+    .eq("id", campaignId)
+    .maybeSingle();
+
+  if (["terminated", "cancelled", "canceled"].includes((campaign as any)?.status)) {
+    return;
+  }
+
+  const { count: pendingCount } = await supa
+    .from("email_jobs")
+    .select("id", { count: "exact", head: true })
+    .eq("campaign_id", campaignId)
+    .eq("status", "pending");
+
+  await supa
+    .from("email_campaigns")
+    .update({
+      status: (pendingCount ?? 0) === 0 ? "completed" : "processing",
+    } as any)
+    .eq("id", campaignId);
+}
+
 /* ── 1. Welcome Email ──────────────────────────────────────── */
 
 export const sendWelcomeEmail = createServerFn({ method: "POST" })
@@ -335,19 +409,7 @@ export const createEmailCampaign = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    // Verify admin
-    const callerSupa = authedClient(data.adminAccessToken);
-    const { data: callerUser, error: callerErr } =
-      await callerSupa.auth.getUser(data.adminAccessToken);
-    if (callerErr || !callerUser.user) throw new Error("Unauthorized.");
-
-    const supa = adminClient();
-    const { data: adminRow } = await supa
-      .from("admins")
-      .select("id")
-      .eq("id", callerUser.user.id)
-      .maybeSingle();
-    if (!adminRow) throw new Error("Unauthorized: not an admin.");
+    const { supa } = await requireAdmin(data.adminAccessToken);
 
     // Build participant query based on target filter
     let query = supa.from("profiles").select("user_id, full_name, email");
@@ -415,8 +477,8 @@ export const createEmailCampaign = createServerFn({ method: "POST" })
       .insert({
         subject: data.subject,
         body: data.bodyHtml,
-        target_filter: data.targetFilter as any,
-        status: "queued"
+        target_filter: serializeTargetFilter(data.targetFilter),
+        status: "queued",
       } as any)
       .select("id")
       .single();
@@ -464,26 +526,14 @@ export const triggerEmailProcessing = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    // Verify admin
-    const callerSupa = authedClient(data.adminAccessToken);
-    const { data: callerUser, error: callerErr } =
-      await callerSupa.auth.getUser(data.adminAccessToken);
-    if (callerErr || !callerUser.user) throw new Error("Unauthorized.");
-
-    const supa = adminClient();
-    const { data: adminRow } = await supa
-      .from("admins")
-      .select("id")
-      .eq("id", callerUser.user.id)
-      .maybeSingle();
-    if (!adminRow) throw new Error("Unauthorized: not an admin.");
+    const { supa } = await requireAdmin(data.adminAccessToken);
 
     // Process up to 50 pending jobs
     const BATCH = 50;
     const { data: jobs, error: fetchErr } = await supa
       .from("email_jobs")
       .select(
-        "id, recipient_email, recipient_name, campaign_id, email_campaigns(subject, body)",
+        "id, recipient_email, recipient_name, campaign_id, email_campaigns(subject, body, status)",
       )
       .eq("status", "pending")
       .order("created_at", { ascending: true })
@@ -508,8 +558,17 @@ export const triggerEmailProcessing = createServerFn({ method: "POST" })
         continue;
       }
 
+      if (["terminated", "cancelled", "canceled"].includes(campaign.status)) {
+        await supa
+          .from("email_jobs")
+          .update({ status: "failed", error_msg: "Campaign terminated" } as any)
+          .eq("id", job.id);
+        failed++;
+        continue;
+      }
+
       try {
-        let html = campaign.body;
+        let html = campaign.body || "";
         if (job.recipient_name) {
           html = html.replace(/\{\{name\}\}/gi, job.recipient_name);
         }
@@ -540,24 +599,7 @@ export const triggerEmailProcessing = createServerFn({ method: "POST" })
     // Update campaign status
     const campaignIds = [...new Set(jobs.map((j) => j.campaign_id))];
     for (const cid of campaignIds) {
-      const { count: pendingCount } = await supa
-        .from("email_jobs")
-        .select("id", { count: "exact", head: true })
-        .eq("campaign_id", cid)
-        .eq("status", "pending");
-
-      const { count: sentTotal } = await supa
-        .from("email_jobs")
-        .select("id", { count: "exact", head: true })
-        .eq("campaign_id", cid)
-        .eq("status", "sent");
-
-      await supa
-        .from("email_campaigns")
-        .update({
-          status: (pendingCount ?? 0) === 0 ? "completed" : "processing",
-        } as any)
-        .eq("id", cid);
+      await syncCampaignStatus(supa, cid);
     }
 
     return { processed: jobs.length, sent, failed };
@@ -572,18 +614,7 @@ export const getEmailCampaigns = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const callerSupa = authedClient(data.adminAccessToken);
-    const { data: callerUser, error: callerErr } =
-      await callerSupa.auth.getUser(data.adminAccessToken);
-    if (callerErr || !callerUser.user) throw new Error("Unauthorized.");
-
-    const supa = adminClient();
-    const { data: adminRow } = await supa
-      .from("admins")
-      .select("id")
-      .eq("id", callerUser.user.id)
-      .maybeSingle();
-    if (!adminRow) throw new Error("Unauthorized: not an admin.");
+    const { supa } = await requireAdmin(data.adminAccessToken);
 
     const { data: campaigns, error } = await supa
       .from("email_campaigns")
@@ -598,10 +629,65 @@ export const getEmailCampaigns = createServerFn({ method: "POST" })
       const jobs = (c as any).email_jobs || [];
       return {
         ...c,
+        target_filter: parseTargetFilter((c as any).target_filter),
         total_count: jobs.length,
-        sent_count: jobs.filter((j: any) => j.status === 'sent').length
+        sent_count: jobs.filter((j: any) => j.status === 'sent').length,
+        failed_count: jobs.filter((j: any) => j.status === 'failed').length,
+        pending_count: jobs.filter((j: any) => j.status === 'pending').length,
       };
     });
     
     return { campaigns: campaignsWithCounts };
+  });
+
+/* â”€â”€ 8. Terminate Email Campaign (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+export const terminateEmailCampaign = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      adminAccessToken: z.string().min(20),
+      campaignId: z.string().uuid(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const { supa } = await requireAdmin(data.adminAccessToken);
+
+    const { data: campaign, error: campaignErr } = await supa
+      .from("email_campaigns")
+      .select("id, status")
+      .eq("id", data.campaignId)
+      .maybeSingle();
+
+    if (campaignErr) throw campaignErr;
+    if (!campaign) throw new Error("Campaign not found.");
+
+    const status = (campaign as any).status;
+    if (["completed", "terminated", "cancelled", "canceled"].includes(status)) {
+      return { terminated: status !== "completed", pendingCancelled: 0, status };
+    }
+
+    const { count: pendingCount } = await supa
+      .from("email_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("campaign_id", data.campaignId)
+      .eq("status", "pending");
+
+    const { error: jobsErr } = await supa
+      .from("email_jobs")
+      .update({ status: "failed", error_msg: "Campaign terminated by admin" } as any)
+      .eq("campaign_id", data.campaignId)
+      .eq("status", "pending");
+    if (jobsErr) throw jobsErr;
+
+    const { error: updateErr } = await supa
+      .from("email_campaigns")
+      .update({ status: "terminated" } as any)
+      .eq("id", data.campaignId);
+    if (updateErr) throw updateErr;
+
+    return {
+      terminated: true,
+      pendingCancelled: pendingCount ?? 0,
+      status: "terminated",
+    };
   });

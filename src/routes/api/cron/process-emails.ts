@@ -29,7 +29,7 @@ async function processEmails() {
   // Grab pending jobs with their campaign data
   const { data: jobs, error } = await supa
     .from("email_jobs")
-    .select("id, recipient_email, recipient_name, campaign_id, email_campaigns(subject, body_html)")
+    .select("id, recipient_email, recipient_name, campaign_id, email_campaigns(subject, body, status)")
     .eq("status", "pending")
     .order("created_at", { ascending: true })
     .limit(BATCH_SIZE);
@@ -57,9 +57,18 @@ async function processEmails() {
       continue;
     }
 
+    if (["terminated", "cancelled", "canceled"].includes(campaign.status)) {
+      await supa
+        .from("email_jobs")
+        .update({ status: "failed", error_msg: "Campaign terminated" } as any)
+        .eq("id", job.id);
+      failedCount++;
+      continue;
+    }
+
     try {
       // Personalize the body: replace {{name}} with recipient name
-      let personalizedHtml = campaign.body_html;
+      let personalizedHtml = campaign.body || "";
       if (job.recipient_name) {
         personalizedHtml = personalizedHtml.replace(
           /\{\{name\}\}/gi,
@@ -95,16 +104,15 @@ async function processEmails() {
   // Update campaign sent_count for each campaign
   const campaignIds = [...new Set(jobs.map((j) => j.campaign_id))];
   for (const cid of campaignIds) {
-    const { count: sentTotal } = await supa
-      .from("email_jobs")
-      .select("id", { count: "exact", head: true })
-      .eq("campaign_id", cid)
-      .eq("status", "sent");
+    const { data: campaign } = await supa
+      .from("email_campaigns")
+      .select("status")
+      .eq("id", cid)
+      .maybeSingle();
 
-    const { count: totalJobs } = await supa
-      .from("email_jobs")
-      .select("id", { count: "exact", head: true })
-      .eq("campaign_id", cid);
+    if (["terminated", "cancelled", "canceled"].includes((campaign as any)?.status)) {
+      continue;
+    }
 
     const { count: pendingJobs } = await supa
       .from("email_jobs")
@@ -117,10 +125,7 @@ async function processEmails() {
 
     await supa
       .from("email_campaigns")
-      .update({
-        sent_count: sentTotal ?? 0,
-        status: newStatus,
-      } as any)
+      .update({ status: newStatus } as any)
       .eq("id", cid);
   }
 

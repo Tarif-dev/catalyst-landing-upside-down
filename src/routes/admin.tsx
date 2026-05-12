@@ -10,6 +10,7 @@ import {
   createEmailCampaign,
   triggerEmailProcessing,
   getEmailCampaigns,
+  terminateEmailCampaign,
 } from "@/lib/email";
 import { getAppSettings, updateAppSettings } from "@/lib/settings";
 
@@ -42,6 +43,7 @@ function Admin() {
   const [emailSending, setEmailSending] = useState(false);
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [processingEmails, setProcessingEmails] = useState(false);
+  const [terminatingCampaignId, setTerminatingCampaignId] = useState<string | null>(null);
   const setParticipantPaymentStatusServer = useServerFn(
     setParticipantPaymentStatusFn,
   );
@@ -49,6 +51,7 @@ function Admin() {
   const createEmailCampaignFn = useServerFn(createEmailCampaign);
   const triggerEmailProcessingFn = useServerFn(triggerEmailProcessing);
   const getEmailCampaignsFn = useServerFn(getEmailCampaigns);
+  const terminateEmailCampaignFn = useServerFn(terminateEmailCampaign);
   const getAppSettingsFn = useServerFn(getAppSettings);
   const updateAppSettingsFn = useServerFn(updateAppSettings);
   const [appSettings, setAppSettings] = useState<{ registrationsOpen: boolean }>({ registrationsOpen: true });
@@ -304,6 +307,53 @@ function Admin() {
       education: "Education",
       open: "Open",
     })[track] || track || "Unassigned";
+
+  const emailTargetLabel = (targetFilter: any) => {
+    const target =
+      typeof targetFilter === "string"
+        ? (() => {
+            try {
+              return JSON.parse(targetFilter);
+            } catch {
+              return { type: targetFilter };
+            }
+          })()
+        : targetFilter || { type: "all" };
+
+    const labels: Record<string, string> = {
+      all: "All Participants",
+      verified: "Verified (Paid)",
+      paid: "Verified (Paid)",
+      unverified: "Unverified",
+      unpaid: "Unverified",
+      complete: "Complete Profiles",
+      track: target.track ? `${trackLabel(target.track)} Track` : "Specific Track",
+    };
+
+    return labels[target.type] || "All Participants";
+  };
+
+  const campaignStatusTone = (
+    status?: string,
+  ): "green" | "yellow" | "red" | "blue" | "gray" => {
+    if (status === "completed") return "green";
+    if (status === "failed" || status === "terminated") return "red";
+    if (status === "processing") return "yellow";
+    if (status === "queued" || status === "pending") return "blue";
+    return "gray";
+  };
+
+  const canTerminateCampaign = (campaign: any) =>
+    ["queued", "processing", "pending"].includes(campaign.status) &&
+    (campaign.pending_count ?? 0) > 0;
+
+  const refreshCampaigns = async () => {
+    if (!session?.access_token) return;
+    const res = await getEmailCampaignsFn({
+      data: { adminAccessToken: session.access_token },
+    });
+    setCampaigns(res.campaigns);
+  };
 
   const groupBy = (items: any[], getKey: (item: any) => string | null) => {
     const counts = new Map<string, number>();
@@ -1902,11 +1952,7 @@ function Admin() {
                         );
                         setEmailSubject("");
                         setEmailBody("");
-                        // Refresh campaigns
-                        const res = await getEmailCampaignsFn({
-                          data: { adminAccessToken: session.access_token },
-                        });
-                        setCampaigns(res.campaigns);
+                        await refreshCampaigns();
                       } else {
                         toast.info(result.message || "No recipients found.");
                       }
@@ -1950,11 +1996,7 @@ function Admin() {
                       toast.success(
                         `Processed ${result.processed} emails (${result.sent} sent, ${result.failed} failed).`,
                       );
-                      // Refresh campaigns
-                      const res = await getEmailCampaignsFn({
-                        data: { adminAccessToken: session.access_token },
-                      });
-                      setCampaigns(res.campaigns);
+                      await refreshCampaigns();
                     } catch (err: any) {
                       toast.error(
                         err?.message || "Failed to process email queue.",
@@ -2041,10 +2083,7 @@ function Admin() {
                 onClick={async () => {
                   if (!session?.access_token) return;
                   try {
-                    const res = await getEmailCampaignsFn({
-                      data: { adminAccessToken: session.access_token },
-                    });
-                    setCampaigns(res.campaigns);
+                    await refreshCampaigns();
                     toast.success("Campaigns refreshed.");
                   } catch {
                     toast.error("Failed to load campaigns.");
@@ -2072,7 +2111,7 @@ function Admin() {
               >
                 <thead>
                   <tr style={{ background: "#f9fafb" }}>
-                    {["Subject", "Target", "Status", "Sent / Total", "Created"].map(
+                    {["Subject", "Target", "Status", "Progress", "Created", "Actions"].map(
                       (h) => (
                         <th
                           key={h}
@@ -2097,7 +2136,7 @@ function Admin() {
                   {campaigns.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         style={{
                           padding: "32px 16px",
                           textAlign: "center",
@@ -2126,21 +2165,12 @@ function Admin() {
                           {c.subject}
                         </td>
                         <td style={{ padding: "12px 16px", color: "#6b7280" }}>
-                          {c.target_filter?.type || "all"}
-                          {c.target_filter?.track
-                            ? ` (${c.target_filter.track})`
-                            : ""}
+                          {emailTargetLabel(c.target_filter)}
                         </td>
                         <td style={{ padding: "12px 16px" }}>
                           {badge(
                             c.status,
-                            c.status === "completed"
-                              ? "green"
-                              : c.status === "failed"
-                                ? "red"
-                                : c.status === "processing"
-                                  ? "yellow"
-                                  : "blue",
+                            campaignStatusTone(c.status),
                           )}
                         </td>
                         <td
@@ -2150,6 +2180,9 @@ function Admin() {
                           }}
                         >
                           {c.sent_count}/{c.total_count}
+                          {(c.failed_count ?? 0) > 0
+                            ? ` (${c.failed_count} stopped/failed)`
+                            : ""}
                         </td>
                         <td style={{ padding: "12px 16px", color: "#6b7280" }}>
                           {new Date(c.created_at).toLocaleDateString("en-IN", {
@@ -2158,6 +2191,67 @@ function Admin() {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
+                        </td>
+                        <td style={{ padding: "12px 16px" }}>
+                          {canTerminateCampaign(c) ? (
+                            <button
+                              disabled={terminatingCampaignId === c.id}
+                              onClick={async () => {
+                                if (!session?.access_token) {
+                                  toast.error("Please sign in again.");
+                                  return;
+                                }
+                                const confirmed = window.confirm(
+                                  `Terminate "${c.subject}"? Pending emails will be stopped and cannot be resumed.`,
+                                );
+                                if (!confirmed) return;
+
+                                setTerminatingCampaignId(c.id);
+                                try {
+                                  const result = await terminateEmailCampaignFn({
+                                    data: {
+                                      adminAccessToken: session.access_token,
+                                      campaignId: c.id,
+                                    },
+                                  });
+                                  toast.success(
+                                    `Campaign terminated. ${result.pendingCancelled} pending emails stopped.`,
+                                  );
+                                  await refreshCampaigns();
+                                } catch (err: any) {
+                                  toast.error(
+                                    err?.message || "Failed to terminate campaign.",
+                                  );
+                                } finally {
+                                  setTerminatingCampaignId(null);
+                                }
+                              }}
+                              style={{
+                                padding: "6px 12px",
+                                borderRadius: 6,
+                                border: "1px solid #fecaca",
+                                background:
+                                  terminatingCampaignId === c.id
+                                    ? "#f3f4f6"
+                                    : "#fef2f2",
+                                color: "#b91c1c",
+                                cursor:
+                                  terminatingCampaignId === c.id
+                                    ? "not-allowed"
+                                    : "pointer",
+                                fontSize: 13,
+                                fontWeight: 600,
+                              }}
+                            >
+                              {terminatingCampaignId === c.id
+                                ? "Terminating..."
+                                : "Terminate"}
+                            </button>
+                          ) : (
+                            <span style={{ color: "#9ca3af", fontSize: 13 }}>
+                              -
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))
