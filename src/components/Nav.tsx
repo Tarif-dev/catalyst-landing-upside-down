@@ -39,6 +39,7 @@ export function Nav() {
     { href: "/#venue", label: "Venue" },
     { href: "/#faq", label: "FAQ" },
     { href: "/#contact", label: "Contact" },
+    { href: "https://sincere-sherbet-9ff.notion.site/CATALYST-2K26-IN-CAMPUS-AI-HACKATHON-RULEBOOK-3541fdb81c1a803e81e8c82cf250da72", label: "Rulebook" },
   ];
 
   return (
@@ -70,18 +71,23 @@ export function Nav() {
 
         {/* Desktop links */}
         <ul className="hidden lg:flex items-center gap-8 xl:gap-10">
-          {links.map((l) => (
-            <li key={l.href}>
-              <a
-                href={l.href}
-                className="group relative text-[15px] italic text-bone/70 transition-colors hover:text-bone"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
-              >
-                {l.label}
-                <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-blood transition-all duration-500 group-hover:w-full" />
-              </a>
-            </li>
-          ))}
+          {links.map((l) => {
+            const isExternal = l.href.startsWith("http");
+            return (
+              <li key={l.href}>
+                <a
+                  href={l.href}
+                  target={isExternal ? "_blank" : undefined}
+                  rel={isExternal ? "noopener noreferrer" : undefined}
+                  className="group relative text-[15px] italic text-bone/70 transition-colors hover:text-bone"
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                >
+                  {l.label}
+                  <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-blood transition-all duration-500 group-hover:w-full" />
+                </a>
+              </li>
+            );
+          })}
         </ul>
 
         <div className="flex items-center gap-3">
@@ -130,21 +136,26 @@ export function Nav() {
         }`}
       >
         <ul className="flex flex-col border-t border-blood/15 bg-black/90 backdrop-blur-xl px-6 py-4">
-          {links.map((l) => (
-            <li key={l.href} className="border-b border-bone/5 last:border-0">
-              <a
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between py-4 text-lg italic text-bone/80 hover:text-blood transition-colors"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
-              >
-                <span>{l.label}</span>
-                <span className="font-mono text-[10px] tracking-[0.3em] text-blood/60">
-                  →
-                </span>
-              </a>
-            </li>
-          ))}
+          {links.map((l) => {
+            const isExternal = l.href.startsWith("http");
+            return (
+              <li key={l.href} className="border-b border-bone/5 last:border-0">
+                <a
+                  href={l.href}
+                  target={isExternal ? "_blank" : undefined}
+                  rel={isExternal ? "noopener noreferrer" : undefined}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between py-4 text-lg italic text-bone/80 hover:text-blood transition-colors"
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                >
+                  <span>{l.label}</span>
+                  <span className="font-mono text-[10px] tracking-[0.3em] text-blood/60">
+                    {isExternal ? "↗" : "→"}
+                  </span>
+                </a>
+              </li>
+            );
+          })}
           <li className="pt-4">
             <Link
               to={authed ? "/dashboard" : "/register"}

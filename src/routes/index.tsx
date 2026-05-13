@@ -262,21 +262,23 @@ function Details() {
           on the floor at Amity Kolkata, the night the world flickers.
         </p>
 
-        <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-4 text-center reveal reveal-delay-2 space-y-2">
-          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber">
+        <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-6 text-center reveal reveal-delay-2 space-y-5">
+          <p className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.35em] text-amber">
             Registrations temporarily paused due to overwhelming number of submissions
           </p>
-          <p className="font-serif text-sm text-bone/60 leading-relaxed">
-            In the meantime, explore our other events at the tech fest{" "}
+          <div className="pt-2 border-t border-amber/20">
+            <p className="font-serif text-sm sm:text-base text-bone/60 leading-relaxed mb-4">
+              In the meantime, explore our other events at the tech fest
+            </p>
             <a
               href="https://www.auktave.co.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber font-semibold hover:text-bone transition-colors underline underline-offset-4"
+              className="bracket inline-flex items-center justify-center border border-amber/40 bg-amber/10 px-6 py-2.5 font-mono text-[10px] uppercase tracking-[0.3em] text-amber transition-all hover:bg-amber hover:text-black"
             >
-              AUKTAVE
+              Explore AUKTAVE
             </a>
-          </p>
+          </div>
         </div>
 
         {/* Spec strip */}
@@ -320,6 +322,14 @@ function Details() {
           >
             <MessageCircle className="h-4 w-4" />
             Join Discord
+          </a>
+          <a
+            href="https://sincere-sherbet-9ff.notion.site/CATALYST-2K26-IN-CAMPUS-AI-HACKATHON-RULEBOOK-3541fdb81c1a803e81e8c82cf250da72"
+            target="_blank"
+            rel="noreferrer"
+            className="bracket relative inline-flex w-full items-center justify-center gap-3 border border-amber/50 bg-amber/10 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.35em] text-amber transition-all duration-500 hover:border-amber hover:bg-amber hover:text-black sm:w-auto sm:px-10"
+          >
+            Rulebook
           </a>
           <a
             href="#tracks"

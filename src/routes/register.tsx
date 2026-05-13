@@ -127,11 +127,13 @@ function RegisterPage() {
           One account per participant. The team leader registers first, then
           adds 1–4 teammates.
         </p>
-        <div className="mb-6 border border-amber/35 bg-amber/10 px-4 py-3 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
-            Registrations temporarily paused due to overwhelming number of submissions
-          </p>
-        </div>
+        {!settings.registrationsOpen && (
+          <div className="mb-6 border border-amber/35 bg-amber/10 px-4 py-3 text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+              Registrations temporarily paused due to overwhelming number of submissions
+            </p>
+          </div>
+        )}
         
         {!settings.registrationsOpen ? (
           <div className="panel p-8 sm:p-12 text-center space-y-6">
