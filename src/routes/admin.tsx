@@ -1237,6 +1237,31 @@ function Admin() {
                         >
                           {p.phone || "—"}
                         </div>
+                        {p.email && (
+                          <div
+                            style={{
+                              fontSize: 12,
+                              color: "#2563eb",
+                              marginTop: 2,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px"
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(p.email);
+                              toast.success("Email copied to clipboard");
+                            }}
+                            title="Click to copy email"
+                          >
+                            {p.email}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: "12px 16px", fontSize: 13 }}>
                         {p.college || "—"}

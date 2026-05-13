@@ -22,6 +22,7 @@ import { Route as TeamNewRouteImport } from './routes/team.new'
 import { Route as TeamJoinRouteImport } from './routes/team.join'
 import { Route as SubmitTeamIdRouteImport } from './routes/submit.$teamId'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
+import { Route as ApiDiscordCallbackRouteImport } from './routes/api.discord.callback'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -88,6 +89,11 @@ const CertificateCodeRoute = CertificateCodeRouteImport.update({
   path: '/certificate/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDiscordCallbackRoute = ApiDiscordCallbackRouteImport.update({
+  id: '/api/discord/callback',
+  path: '/api/discord/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
+  '/api/discord/callback': typeof ApiDiscordCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
+  '/api/discord/callback': typeof ApiDiscordCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
   '/verify/$code': typeof VerifyCodeRoute
+  '/api/discord/callback': typeof ApiDiscordCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/team/join'
     | '/team/new'
     | '/verify/$code'
+    | '/api/discord/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/team/join'
     | '/team/new'
     | '/verify/$code'
+    | '/api/discord/callback'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/team/join'
     | '/team/new'
     | '/verify/$code'
+    | '/api/discord/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   TeamJoinRoute: typeof TeamJoinRoute
   TeamNewRoute: typeof TeamNewRoute
   VerifyCodeRoute: typeof VerifyCodeRoute
+  ApiDiscordCallbackRoute: typeof ApiDiscordCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CertificateCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/discord/callback': {
+      id: '/api/discord/callback'
+      path: '/api/discord/callback'
+      fullPath: '/api/discord/callback'
+      preLoaderRoute: typeof ApiDiscordCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -309,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeamJoinRoute: TeamJoinRoute,
   TeamNewRoute: TeamNewRoute,
   VerifyCodeRoute: VerifyCodeRoute,
+  ApiDiscordCallbackRoute: ApiDiscordCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

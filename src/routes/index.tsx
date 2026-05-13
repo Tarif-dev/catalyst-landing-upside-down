@@ -99,7 +99,16 @@ function LinkedInLogo({ className }: SocialIconProps) {
   );
 }
 
+import { getAppSettings } from "@/lib/settings";
+
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    try {
+      return await getAppSettings();
+    } catch {
+      return { registrationsOpen: true };
+    }
+  },
   head: () => ({
     meta: [
       { title: "Catalyst 2K26 — 24hr AI Hackathon · Amity University Kolkata" },
@@ -185,6 +194,8 @@ function Hero() {
 }
 
 function Details() {
+  const settings = Route.useLoaderData();
+
   const socialItems = [
     {
       label: "Instagram",
@@ -262,24 +273,26 @@ function Details() {
           on the floor at Amity Kolkata, the night the world flickers.
         </p>
 
-        <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-6 text-center reveal reveal-delay-2 space-y-5">
-          <p className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.35em] text-amber">
-            Registrations temporarily paused due to overwhelming number of submissions
-          </p>
-          <div className="pt-2 border-t border-amber/20">
-            <p className="font-serif text-sm sm:text-base text-bone/60 leading-relaxed mb-4">
-              In the meantime, explore our other events at the tech fest
+        {!settings.registrationsOpen && (
+          <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-6 text-center reveal reveal-delay-2 space-y-5">
+            <p className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.35em] text-amber">
+              Registrations temporarily paused due to overwhelming number of submissions
             </p>
-            <a
-              href="https://www.auktave.co.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bracket inline-flex items-center justify-center border border-amber/40 bg-amber/10 px-6 py-2.5 font-mono text-[10px] uppercase tracking-[0.3em] text-amber transition-all hover:bg-amber hover:text-black"
-            >
-              Explore AUKTAVE
-            </a>
+            <div className="pt-2 border-t border-amber/20">
+              <p className="font-serif text-sm sm:text-base text-bone/60 leading-relaxed mb-4">
+                In the meantime, explore our other events at the tech fest
+              </p>
+              <a
+                href="https://www.auktave.co.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bracket inline-flex items-center justify-center border border-amber/40 bg-amber/10 px-6 py-2.5 font-mono text-[10px] uppercase tracking-[0.3em] text-amber transition-all hover:bg-amber hover:text-black"
+              >
+                Explore AUKTAVE
+              </a>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Spec strip */}
         <div className="mx-auto mt-14 sm:mt-20 grid max-w-4xl grid-cols-2 gap-px bg-blood/10 md:grid-cols-4 reveal reveal-delay-3">
