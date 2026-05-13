@@ -129,7 +129,7 @@ function RegisterPage() {
         </p>
         <div className="mb-6 border border-amber/35 bg-amber/10 px-4 py-3 text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
-            Registrations close on 15 May 2026
+            Registrations temporarily paused due to overwhelming number of submissions
           </p>
         </div>
         
@@ -148,6 +148,21 @@ function RegisterPage() {
               >
                 Return to Hawkins
               </Link>
+            </div>
+            <div className="mt-8 border-t border-bone/15 pt-6 space-y-3">
+              <p className="font-serif text-base text-bone/80 leading-relaxed">
+                Please fill the form below to join the waitlist.
+                <br />
+                <span className="text-amber font-semibold">It is on a first come, first serve basis.</span>
+              </p>
+              <a
+                href="https://forms.gle/67MctQhxQDKB6eBC7"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary inline-flex px-8 py-3"
+              >
+                Join Waitlist
+              </a>
             </div>
             <p className="text-center text-sm font-serif italic text-bone/60 mt-8">
               Already registered?{" "}
