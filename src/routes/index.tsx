@@ -262,9 +262,20 @@ function Details() {
           on the floor at Amity Kolkata, the night the world flickers.
         </p>
 
-        <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-4 text-center reveal reveal-delay-2">
+        <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-4 text-center reveal reveal-delay-2 space-y-2">
           <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber">
-            Registrations close on 15 May 2026
+            Registrations temporarily paused due to overwhelming number of submissions
+          </p>
+          <p className="font-serif text-sm text-bone/60 leading-relaxed">
+            In the meantime, explore our other events at the tech fest{" "}
+            <a
+              href="https://www.auktave.co.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber font-semibold hover:text-bone transition-colors underline underline-offset-4"
+            >
+              AUKTAVE
+            </a>
           </p>
         </div>
 
