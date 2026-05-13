@@ -1,23 +1,55 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin as adminClient } from "@/integrations/supabase/client.server";
 import { supabase } from "@/integrations/supabase/client";
 
-export const getAppSettings = createServerFn({ method: "GET" }).handler(async () => {
-  // Use adminClient to ensure it can always read
-  const supa = adminClient;
-  const { data, error } = await supa.storage.from("config").download("settings.json");
+export type AppSettings = {
+  registrationsOpen: boolean;
+};
+
+export const DEFAULT_APP_SETTINGS: AppSettings = {
+  registrationsOpen: true,
+};
+
+async function getAdminClient() {
+  const { supabaseAdmin } =
+    await import("@/integrations/supabase/client.server");
+  return supabaseAdmin;
+}
+
+function normalizeAppSettings(value: unknown): AppSettings {
+  if (!value || typeof value !== "object") return DEFAULT_APP_SETTINGS;
+
+  const settings = value as Partial<AppSettings>;
+  return {
+    registrationsOpen:
+      typeof settings.registrationsOpen === "boolean"
+        ? settings.registrationsOpen
+        : DEFAULT_APP_SETTINGS.registrationsOpen,
+  };
+}
+
+export async function readAppSettings(): Promise<AppSettings> {
+  const adminClient = await getAdminClient();
+  const { data, error } = await adminClient.storage
+    .from("config")
+    .download("settings.json");
+
   if (error || !data) {
-    // Return default settings if file doesn't exist
-    return { registrationsOpen: true };
+    return DEFAULT_APP_SETTINGS;
   }
-  const text = await data.text();
+
   try {
-    return JSON.parse(text) as { registrationsOpen: boolean };
+    return normalizeAppSettings(JSON.parse(await data.text()));
   } catch {
-    return { registrationsOpen: true };
+    return DEFAULT_APP_SETTINGS;
   }
-});
+}
+
+export const getAppSettings = createServerFn({ method: "GET" }).handler(
+  async () => {
+    return readAppSettings();
+  },
+);
 
 export const updateAppSettings = createServerFn({ method: "POST" })
   .inputValidator(
@@ -30,7 +62,7 @@ export const updateAppSettings = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     // 1. Verify admin
-    const supa = adminClient;
+    const supa = await getAdminClient();
     const { data: callerUser, error: callerErr } = await supabase.auth.getUser(
       data.adminAccessToken,
     );

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 
 import { PortalShell } from "@/components/PortalShell";
@@ -45,6 +46,7 @@ function readRegisterDraft() {
 
 function RegisterPage() {
   const settings = Route.useLoaderData();
+  const getAppSettingsFn = useServerFn(getAppSettings);
   const nav = useNavigate();
   const [form, setForm] = useState(readRegisterDraft);
   const didMount = useRef(false);
@@ -74,6 +76,13 @@ function RegisterPage() {
       return;
     }
     setLoading(true);
+    const latestSettings = await getAppSettingsFn().catch(() => settings);
+    if (!latestSettings.registrationsOpen) {
+      setLoading(false);
+      toast.error("All participant slots are full. Registrations are closed.");
+      return;
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
@@ -130,11 +139,12 @@ function RegisterPage() {
         {!settings.registrationsOpen && (
           <div className="mb-6 border border-amber/35 bg-amber/10 px-4 py-3 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
-              Registrations temporarily paused due to overwhelming number of submissions
+              Registrations temporarily paused due to overwhelming number of
+              submissions
             </p>
           </div>
         )}
-        
+
         {!settings.registrationsOpen ? (
           <div className="panel p-8 sm:p-12 text-center space-y-6">
             <h2 className="font-display text-3xl sm:text-4xl text-bone">
@@ -144,10 +154,7 @@ function RegisterPage() {
               But the slots are filled. We will be happy to host you next time.
             </p>
             <div className="pt-4">
-              <Link
-                to="/"
-                className="btn-secondary inline-flex px-8 py-3"
-              >
+              <Link to="/" className="btn-secondary inline-flex px-8 py-3">
                 Return to Hawkins
               </Link>
             </div>
@@ -155,7 +162,9 @@ function RegisterPage() {
               <p className="font-serif text-base text-bone/80 leading-relaxed">
                 Please fill the form below to join the waitlist.
                 <br />
-                <span className="text-amber font-semibold">It is on a first come, first serve basis.</span>
+                <span className="text-amber font-semibold">
+                  It is on a first come, first serve basis.
+                </span>
               </p>
               <a
                 href="https://forms.gle/67MctQhxQDKB6eBC7"
@@ -214,7 +223,9 @@ function RegisterPage() {
                   required
                   autoComplete="new-password"
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                   className="input-styled pr-12"
                   placeholder="••••••••"
                 />

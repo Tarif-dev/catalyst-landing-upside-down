@@ -5,6 +5,7 @@ import { PortalShell } from "@/components/PortalShell";
 import { useAuth } from "@/lib/auth";
 import { useServerFn } from "@tanstack/react-start";
 import { sendPaymentInfoEmail } from "@/lib/email";
+import { getAppSettings } from "@/lib/settings";
 import { getDiscordAuthUrl } from "@/lib/discord";
 import { toast } from "sonner";
 import { Copy, LogOut, Crown, MessageSquare, X } from "lucide-react";
@@ -51,11 +52,13 @@ function Dashboard() {
   const [busy, setBusy] = useState(true);
   const [emailBusy, setEmailBusy] = useState(false);
   const [paymentInfoRequested, setPaymentInfoRequested] = useState(false);
+  const [appSettings, setAppSettings] = useState({ registrationsOpen: true });
   const [discordBusy, setDiscordBusy] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showDiscordBanner, setShowDiscordBanner] = useState(true);
 
   const sendPaymentInfoFn = useServerFn(sendPaymentInfoEmail);
+  const getAppSettingsFn = useServerFn(getAppSettings);
   const getDiscordAuthUrlFn = useServerFn(getDiscordAuthUrl);
 
   const displayName =
@@ -104,7 +107,7 @@ function Dashboard() {
 
   const loadData = useCallback(async () => {
     if (!user) return;
-    const [{ data: tm }, { data: freshProfile }] = await Promise.all([
+    const [{ data: tm }, { data: freshProfile }, settings] = await Promise.all([
       supabase
         .from("team_members")
         .select("team_id, teams(*)")
@@ -113,17 +116,27 @@ function Dashboard() {
         .limit(1)
         .maybeSingle(),
       supabase.from("profiles").select("*").eq("user_id", user.id).single(),
+      getAppSettingsFn().catch(() => ({ registrationsOpen: true })),
     ]);
-    
+
     const currentProfile = freshProfile ?? profile;
     setParticipantProfile(currentProfile);
-    
+    setAppSettings(settings);
+
     const t = (tm as any)?.teams ?? null;
     setTeam(t);
     if (t) {
       const [{ data: ms }, { data: sub }] = await Promise.all([
-        supabase.from("team_members").select("*").eq("team_id", t.id).order("created_at"),
-        supabase.from("submissions").select("*").eq("team_id", t.id).maybeSingle(),
+        supabase
+          .from("team_members")
+          .select("*")
+          .eq("team_id", t.id)
+          .order("created_at"),
+        supabase
+          .from("submissions")
+          .select("*")
+          .eq("team_id", t.id)
+          .maybeSingle(),
       ]);
       setMembers(ms ?? []);
       setSubmission(sub);
@@ -131,14 +144,14 @@ function Dashboard() {
       setMembers([]);
       setSubmission(null);
     }
-    
+
     const { data: c } = await supabase
       .from("certificates")
       .select("*")
       .eq("user_id", user.id);
     setCerts(c ?? []);
     setBusy(false);
-  }, [user, profile]);
+  }, [user, profile, getAppSettingsFn]);
 
   useEffect(() => {
     if (loading) return;
@@ -168,9 +181,12 @@ function Dashboard() {
   };
 
   const makeLeader = async (userId: string) => {
-    if (!confirm("Transfer leadership? You will become a regular member.")) return;
+    if (!confirm("Transfer leadership? You will become a regular member."))
+      return;
     setBusy(true);
-    const { error } = await supabase.rpc("change_team_leader", { p_new_leader_id: userId });
+    const { error } = await supabase.rpc("change_team_leader", {
+      p_new_leader_id: userId,
+    });
     if (error) {
       toast.error(error.message);
       setBusy(false);
@@ -182,7 +198,9 @@ function Dashboard() {
 
   const changeTrack = async (newTrack: string) => {
     setBusy(true);
-    const { error } = await supabase.rpc("change_team_track", { p_new_track: newTrack as any });
+    const { error } = await supabase.rpc("change_team_track", {
+      p_new_track: newTrack as any,
+    });
     if (error) {
       toast.error(error.message);
       setBusy(false);
@@ -203,7 +221,9 @@ function Dashboard() {
     if (!confirm(msg)) return;
 
     setBusy(true);
-    const { error } = await supabase.rpc(isLeader ? "delete_team" : "leave_team");
+    const { error } = await supabase.rpc(
+      isLeader ? "delete_team" : "leave_team",
+    );
     if (error) {
       toast.error(error.message);
       setBusy(false);
@@ -263,10 +283,13 @@ function Dashboard() {
         {activeTab === "overview" && (
           <div className="space-y-8">
             {/* Discord Verification Banner */}
-            {showDiscordBanner && (
-              participantProfile?.is_in_discord ? (
+            {showDiscordBanner &&
+              (participantProfile?.is_in_discord ? (
                 <div className="panel border-[#5865F2]/40 bg-[#5865F2]/5 p-4 sm:p-5 reveal relative">
-                  <button onClick={() => setShowDiscordBanner(false)} className="absolute top-4 right-4 text-bone/50 hover:text-bone">
+                  <button
+                    onClick={() => setShowDiscordBanner(false)}
+                    className="absolute top-4 right-4 text-bone/50 hover:text-bone"
+                  >
                     <X className="w-4 h-4" />
                   </button>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pr-8">
@@ -281,7 +304,8 @@ function Dashboard() {
                         <p className="mt-1 font-serif text-sm text-bone/70">
                           Connected as{" "}
                           <span className="font-mono text-[#5865F2] font-bold">
-                            {participantProfile.discord_username || "Discord User"}
+                            {participantProfile.discord_username ||
+                              "Discord User"}
                           </span>
                         </p>
                       </div>
@@ -298,7 +322,10 @@ function Dashboard() {
                 </div>
               ) : (
                 <div className="panel border-[#5865F2]/40 bg-[#5865F2]/10 p-4 sm:p-5 reveal relative">
-                  <button onClick={() => setShowDiscordBanner(false)} className="absolute top-4 right-4 text-[#8ea0ff] hover:text-white">
+                  <button
+                    onClick={() => setShowDiscordBanner(false)}
+                    className="absolute top-4 right-4 text-[#8ea0ff] hover:text-white"
+                  >
                     <X className="w-4 h-4" />
                   </button>
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between pr-8">
@@ -328,11 +355,17 @@ function Dashboard() {
                           setDiscordBusy(true);
                           try {
                             const { url } = await getDiscordAuthUrlFn({
-                              data: { accessToken: session.access_token, redirectOrigin: window.location.origin },
+                              data: {
+                                accessToken: session.access_token,
+                                redirectOrigin: window.location.origin,
+                              },
                             });
                             window.location.href = url;
                           } catch (err: any) {
-                            toast.error(err?.message || "Failed to start Discord verification.");
+                            toast.error(
+                              err?.message ||
+                                "Failed to start Discord verification.",
+                            );
                             setDiscordBusy(false);
                           }
                         }}
@@ -343,8 +376,7 @@ function Dashboard() {
                     </div>
                   </div>
                 </div>
-              )
-            )}
+              ))}
 
             {/* Participant card */}
             <div className="panel p-5 sm:p-8 reveal-delay-1">
@@ -367,28 +399,59 @@ function Dashboard() {
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="border border-white/10 bg-black/20 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">Email</p>
-                  <p className="mt-2 font-mono text-sm text-bone/80 break-all">{user?.email}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                    Email
+                  </p>
+                  <p className="mt-2 font-mono text-sm text-bone/80 break-all">
+                    {user?.email}
+                  </p>
                 </div>
                 <div className="border border-white/10 bg-black/20 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">Phone</p>
-                  <p className="mt-2 font-mono text-sm text-bone/80">{participantProfile?.phone || "—"}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                    Phone
+                  </p>
+                  <p className="mt-2 font-mono text-sm text-bone/80">
+                    {participantProfile?.phone || "—"}
+                  </p>
                 </div>
                 <div className="border border-white/10 bg-black/20 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">College</p>
-                  <p className="mt-2 font-serif text-sm text-bone/80 truncate" title={participantProfile?.college}>{participantProfile?.college || "—"}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                    College
+                  </p>
+                  <p
+                    className="mt-2 font-serif text-sm text-bone/80 truncate"
+                    title={participantProfile?.college}
+                  >
+                    {participantProfile?.college || "—"}
+                  </p>
                 </div>
                 <div className="border border-white/10 bg-black/20 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">Course / Year</p>
-                  <p className="mt-2 font-serif text-sm text-bone/80">{participantProfile?.course || "—"} · {participantProfile?.year_of_study || "—"}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                    Course / Year
+                  </p>
+                  <p className="mt-2 font-serif text-sm text-bone/80">
+                    {participantProfile?.course || "—"} ·{" "}
+                    {participantProfile?.year_of_study || "—"}
+                  </p>
                 </div>
                 <div className="border border-white/10 bg-black/20 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">Dietary</p>
-                  <p className="mt-2 font-serif text-sm text-bone/80 truncate" title={participantProfile?.dietary_restrictions}>{participantProfile?.dietary_restrictions || "None"}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                    Dietary
+                  </p>
+                  <p
+                    className="mt-2 font-serif text-sm text-bone/80 truncate"
+                    title={participantProfile?.dietary_restrictions}
+                  >
+                    {participantProfile?.dietary_restrictions || "None"}
+                  </p>
                 </div>
                 <div className="border border-white/10 bg-black/20 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">T-Shirt Size</p>
-                  <p className="mt-2 font-mono text-sm text-bone/80">{participantProfile?.tshirt_size || "—"}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                    T-Shirt Size
+                  </p>
+                  <p className="mt-2 font-mono text-sm text-bone/80">
+                    {participantProfile?.tshirt_size || "—"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -425,8 +488,8 @@ function Dashboard() {
                   Assemble your party
                 </h2>
                 <p className="font-serif italic text-bone/80 max-w-lg mx-auto mb-8 text-lg">
-                  Teams of 2–5. You'll be the leader. Invite your members by email
-                  after creation.
+                  Teams of 2–5. You'll be the leader. Invite your members by
+                  email after creation.
                 </p>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4">
                   <Link
@@ -460,36 +523,45 @@ function Dashboard() {
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="flex flex-col items-start sm:items-end">
-                       <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-cyan text-glow-cyan mb-2 font-bold">
-                         Track
-                       </p>
-                       {isLeader ? (
-                         <select
-                           value={team.track}
-                           onChange={(e) => changeTrack(e.target.value)}
-                           className="input-styled appearance-none cursor-pointer py-2 max-w-[250px] text-sm"
-                         >
-                           {!TRACKS.some((t) => t.v === team.track) && (
-                             <option value={team.track} disabled className="bg-void text-bone">
-                               Retired track
-                             </option>
-                           )}
-                           {TRACKS.map((t) => (
-                             <option key={t.v} value={t.v} className="bg-void text-bone">
-                               {t.l}
-                             </option>
-                           ))}
-                         </select>
-                       ) : (
-                         <div className="input-styled bg-black/40 text-bone/70 py-2 cursor-not-allowed text-sm">
-                           {TRACKS.find((t) => t.v === team.track)?.l || "Retired track"}
-                         </div>
-                       )}
+                      <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-cyan text-glow-cyan mb-2 font-bold">
+                        Track
+                      </p>
+                      {isLeader ? (
+                        <select
+                          value={team.track}
+                          onChange={(e) => changeTrack(e.target.value)}
+                          className="input-styled appearance-none cursor-pointer py-2 max-w-[250px] text-sm"
+                        >
+                          {!TRACKS.some((t) => t.v === team.track) && (
+                            <option
+                              value={team.track}
+                              disabled
+                              className="bg-void text-bone"
+                            >
+                              Retired track
+                            </option>
+                          )}
+                          {TRACKS.map((t) => (
+                            <option
+                              key={t.v}
+                              value={t.v}
+                              className="bg-void text-bone"
+                            >
+                              {t.l}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="input-styled bg-black/40 text-bone/70 py-2 cursor-not-allowed text-sm">
+                          {TRACKS.find((t) => t.v === team.track)?.l ||
+                            "Retired track"}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/10 pt-8">
                     {/* Access Code */}
                     <div>
@@ -497,7 +569,8 @@ function Dashboard() {
                         Access Code
                       </p>
                       <p className="text-sm font-serif italic text-bone/70 mb-3 max-w-sm">
-                        Share this 8-character code with your teammates so they can join.
+                        Share this 8-character code with your teammates so they
+                        can join.
                       </p>
                       <div className="flex items-center gap-3">
                         <span className="font-display text-3xl tracking-widest text-bone bg-black/40 px-4 py-2 rounded-lg border border-white/10">
@@ -512,12 +585,13 @@ function Dashboard() {
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* Action Panel */}
                     <div className="flex flex-col justify-end items-start md:items-end">
                       {!canSubmit && (
                         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-glow-cyan mb-4 md:text-right">
-                          Add at least 1 more member to unlock submission & pass.
+                          Add at least 1 more member to unlock submission &
+                          pass.
                         </p>
                       )}
                       <button
@@ -525,7 +599,9 @@ function Dashboard() {
                         className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.3em] text-bone/50 hover:text-blood transition-colors px-4 py-2"
                       >
                         <LogOut className="w-4 h-4" />
-                        {isLeader && members.length === 1 ? "Delete Team" : "Leave Team"}
+                        {isLeader && members.length === 1
+                          ? "Delete Team"
+                          : "Leave Team"}
                       </button>
                     </div>
                   </div>
@@ -543,7 +619,9 @@ function Dashboard() {
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-3">
-                            <p className="text-bone truncate text-lg">{m.full_name}</p>
+                            <p className="text-bone truncate text-lg">
+                              {m.full_name}
+                            </p>
                             {m.role === "leader" && (
                               <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-blood bg-blood/10 px-2 py-0.5 rounded border border-blood/20">
                                 <Crown className="w-3 h-3" /> Leader
@@ -554,7 +632,7 @@ function Dashboard() {
                             {m.email}
                           </p>
                         </div>
-                        
+
                         <div className="flex items-center gap-3 shrink-0">
                           {isLeader && m.role !== "leader" && (
                             <>
@@ -597,11 +675,15 @@ function Dashboard() {
                   </p>
                   <p
                     className={`mt-2 font-mono text-lg uppercase tracking-[0.25em] ${
-                      STATUS_LABEL[participantProfile?.payment_status || "unpaid"].tone
+                      STATUS_LABEL[
+                        participantProfile?.payment_status || "unpaid"
+                      ].tone
                     }`}
                   >
                     {
-                      STATUS_LABEL[participantProfile?.payment_status || "unpaid"].label
+                      STATUS_LABEL[
+                        participantProfile?.payment_status || "unpaid"
+                      ].label
                     }
                   </p>
                 </div>
@@ -619,18 +701,20 @@ function Dashboard() {
               {participantProfile?.payment_status !== "paid" && (
                 <div className="mt-6 border border-amber/25 bg-amber/5 p-5">
                   <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber">
-                    Payment Instructions
+                    {appSettings.registrationsOpen
+                      ? "Payment Instructions"
+                      : "Registrations Closed"}
                   </p>
                   <p className="mt-3 font-serif text-base leading-relaxed text-bone/70">
-                    Request the payment instructions by email. Once the admin
-                    verifies your payment, your event pass unlocks. Approval takes
-                    up to 2 business days after you send the screenshot and
-                    transaction reference.
+                    {appSettings.registrationsOpen
+                      ? "Request the payment instructions by email. Once the admin verifies your payment, your event pass unlocks. Approval takes up to 2 business days after you send the screenshot and transaction reference."
+                      : "All available slots are full, so payment requests are closed. You can request an email confirmation with the same update and explore other AUKTAVE events."}
                   </p>
                   {paymentInfoRequested && (
                     <div className="mt-4 border border-amber/30 bg-black/25 p-3 font-serif text-sm leading-relaxed text-amber/90">
-                      Payment details were sent. It will take 2 business days to
-                      approve your payment after you reply with proof of payment.
+                      {appSettings.registrationsOpen
+                        ? "Payment details were sent. It will take 2 business days to approve your payment after you reply with proof of payment."
+                        : "A slots-full notice was sent to your email."}
                     </div>
                   )}
                   <button
@@ -642,11 +726,13 @@ function Dashboard() {
                       }
                       setEmailBusy(true);
                       try {
-                        await sendPaymentInfoFn({
+                        const result = await sendPaymentInfoFn({
                           data: { accessToken: session.access_token },
                         });
                         toast.success(
-                          "Payment instructions sent! Check your email (and spam folder).",
+                          result.closed
+                            ? "Slots-full notice sent. Check your email."
+                            : "Payment instructions sent! Check your email (and spam folder).",
                         );
                         setPaymentInfoRequested(true);
                       } catch (err: any) {
@@ -659,7 +745,11 @@ function Dashboard() {
                     }}
                     className="btn-secondary mt-5 flex w-full sm:w-auto min-h-12 items-center justify-center text-center px-8 py-3 border-amber/50 text-amber bg-amber/5 hover:bg-amber/10 hover:border-amber cursor-pointer transition-colors disabled:opacity-50"
                   >
-                    {emailBusy ? "Sending..." : "Email Payment Details"}
+                    {emailBusy
+                      ? "Sending..."
+                      : appSettings.registrationsOpen
+                        ? "Email Payment Details"
+                        : "Email Slots Full Notice"}
                   </button>
                 </div>
               )}
@@ -667,34 +757,42 @@ function Dashboard() {
 
             {/* Event Pass Inline Rendering */}
             {team ? (
-               <div className={`panel p-5 sm:p-8 reveal-delay-1 ${isPaid ? "border-cyan/30" : "border-amber/30"}`}>
-                 {!canSubmit ? (
-                    <div className="text-center py-8">
-                      <p className="font-display text-3xl text-bone mb-2">Pass Locked</p>
-                      <p className="text-bone/80 text-lg font-serif">
-                        Your pass unlocks once your team has at least 2 members.
-                      </p>
-                      <button onClick={() => setActiveTab('team')} className="mt-6 btn-secondary inline-flex px-6 py-2">
-                        Manage Team
-                      </button>
+              <div
+                className={`panel p-5 sm:p-8 reveal-delay-1 ${isPaid ? "border-cyan/30" : "border-amber/30"}`}
+              >
+                {!canSubmit ? (
+                  <div className="text-center py-8">
+                    <p className="font-display text-3xl text-bone mb-2">
+                      Pass Locked
+                    </p>
+                    <p className="text-bone/80 text-lg font-serif">
+                      Your pass unlocks once your team has at least 2 members.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab("team")}
+                      className="mt-6 btn-secondary inline-flex px-6 py-2"
+                    >
+                      Manage Team
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="mb-6 font-serif italic text-bone/60 max-w-xl">
+                      Show this at the venue for verification and meal coupons.
+                      Download it as a PNG and post it on LinkedIn, X, or
+                      Instagram.
+                    </p>
+                    <div className="mx-auto max-w-md">
+                      <EventPass
+                        team={team}
+                        members={members}
+                        currentUser={currentUser}
+                        participantProfile={participantProfile}
+                      />
                     </div>
-                 ) : (
-                    <div>
-                      <p className="mb-6 font-serif italic text-bone/60 max-w-xl">
-                        Show this at the venue for verification and meal coupons. Download it as
-                        a PNG and post it on LinkedIn, X, or Instagram.
-                      </p>
-                      <div className="mx-auto max-w-md">
-                        <EventPass
-                          team={team}
-                          members={members}
-                          currentUser={currentUser}
-                          participantProfile={participantProfile}
-                        />
-                      </div>
-                    </div>
-                 )}
-               </div>
+                  </div>
+                )}
+              </div>
             ) : null}
           </div>
         )}
@@ -738,8 +836,8 @@ function Dashboard() {
                       Ready to ship?
                     </h2>
                     <p className="font-serif text-bone/70 mb-8 max-w-md mx-auto">
-                      Submit your project details, GitHub repo, and pitch deck. You
-                      can update it until the deadline.
+                      Submit your project details, GitHub repo, and pitch deck.
+                      You can update it until the deadline.
                     </p>
                     <Link
                       to="/submit/$teamId"

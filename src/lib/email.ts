@@ -19,9 +19,11 @@ import { prepareBulkMailContent } from "@/lib/bulk-email-content";
 import {
   getWelcomeEmailTemplate,
   getPaymentInfoEmailTemplate,
+  getSlotsFullEmailTemplate,
   getPaymentConfirmedEmailTemplate,
   getCongratulationsEmailTemplate,
 } from "@/lib/email-templates";
+import { readAppSettings } from "@/lib/settings";
 import type { Database } from "@/integrations/supabase/types";
 
 /* ── helpers ───────────────────────────────────────────────── */
@@ -143,7 +145,9 @@ async function syncCampaignStatus(
     .eq("id", campaignId)
     .maybeSingle();
 
-  if (["terminated", "cancelled", "canceled"].includes((campaign as any)?.status)) {
+  if (
+    ["terminated", "cancelled", "canceled"].includes((campaign as any)?.status)
+  ) {
     return;
   }
 
@@ -218,7 +222,22 @@ export const sendPaymentInfoEmail = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .maybeSingle();
 
-    const dashboardUrl = new URL("/dashboard", requestOrigin()).toString();
+    const origin = requestOrigin();
+    const dashboardUrl = new URL("/dashboard", origin).toString();
+    const settings = await readAppSettings();
+
+    if (!settings.registrationsOpen) {
+      await sendMail({
+        to: email,
+        subject: "Catalyst 2K26 Slots Are Full",
+        html: getSlotsFullEmailTemplate({
+          participantName: profile?.full_name || "",
+          homeUrl: new URL("/", origin).toString(),
+        }),
+      });
+
+      return { sent: true, closed: true };
+    }
 
     await sendMail({
       to: email,
@@ -434,7 +453,11 @@ export const createEmailCampaign = createServerFn({ method: "POST" })
           .eq("track", data.targetFilter.track);
         const teamIds = (trackTeams ?? []).map((t) => t.id);
         if (teamIds.length === 0) {
-          return { campaignId: null, totalCount: 0, message: "No teams in this track." };
+          return {
+            campaignId: null,
+            totalCount: 0,
+            message: "No teams in this track.",
+          };
         }
         const { data: trackMembers } = await supa
           .from("team_members")
@@ -442,7 +465,11 @@ export const createEmailCampaign = createServerFn({ method: "POST" })
           .in("team_id", teamIds);
         const userIds = (trackMembers ?? []).map((m) => m.user_id);
         if (userIds.length === 0) {
-          return { campaignId: null, totalCount: 0, message: "No participants in this track." };
+          return {
+            campaignId: null,
+            totalCount: 0,
+            message: "No participants in this track.",
+          };
         }
         query = query.in("user_id", userIds);
         break;
@@ -458,9 +485,7 @@ export const createEmailCampaign = createServerFn({ method: "POST" })
     for (const r of recipients ?? []) {
       let email = r.email;
       if (!email) {
-        const { data: authUser } = await supa.auth.admin.getUserById(
-          r.user_id,
-        );
+        const { data: authUser } = await supa.auth.admin.getUserById(r.user_id);
         email = authUser?.user?.email ?? null;
       }
       if (email) {
@@ -469,7 +494,11 @@ export const createEmailCampaign = createServerFn({ method: "POST" })
     }
 
     if (recipientList.length === 0) {
-      return { campaignId: null, totalCount: 0, message: "No recipients found." };
+      return {
+        campaignId: null,
+        totalCount: 0,
+        message: "No recipients found.",
+      };
     }
 
     // Create campaign
@@ -630,20 +659,20 @@ export const getEmailCampaigns = createServerFn({ method: "POST" })
       .limit(50);
 
     if (error) throw error;
-    
+
     // Calculate counts
-    const campaignsWithCounts = (campaigns ?? []).map(c => {
+    const campaignsWithCounts = (campaigns ?? []).map((c) => {
       const jobs = (c as any).email_jobs || [];
       return {
         ...c,
         target_filter: parseTargetFilter((c as any).target_filter),
         total_count: jobs.length,
-        sent_count: jobs.filter((j: any) => j.status === 'sent').length,
-        failed_count: jobs.filter((j: any) => j.status === 'failed').length,
-        pending_count: jobs.filter((j: any) => j.status === 'pending').length,
+        sent_count: jobs.filter((j: any) => j.status === "sent").length,
+        failed_count: jobs.filter((j: any) => j.status === "failed").length,
+        pending_count: jobs.filter((j: any) => j.status === "pending").length,
       };
     });
-    
+
     return { campaigns: campaignsWithCounts };
   });
 
@@ -670,7 +699,11 @@ export const terminateEmailCampaign = createServerFn({ method: "POST" })
 
     const status = (campaign as any).status;
     if (["completed", "terminated", "cancelled", "canceled"].includes(status)) {
-      return { terminated: status !== "completed", pendingCancelled: 0, status };
+      return {
+        terminated: status !== "completed",
+        pendingCancelled: 0,
+        status,
+      };
     }
 
     const { count: pendingCount } = await supa
@@ -681,7 +714,10 @@ export const terminateEmailCampaign = createServerFn({ method: "POST" })
 
     const { error: jobsErr } = await supa
       .from("email_jobs")
-      .update({ status: "failed", error_msg: "Campaign terminated by admin" } as any)
+      .update({
+        status: "failed",
+        error_msg: "Campaign terminated by admin",
+      } as any)
       .eq("campaign_id", data.campaignId)
       .eq("status", "pending");
     if (jobsErr) throw jobsErr;

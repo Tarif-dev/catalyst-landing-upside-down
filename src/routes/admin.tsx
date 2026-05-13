@@ -43,7 +43,9 @@ function Admin() {
   const [emailSending, setEmailSending] = useState(false);
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [processingEmails, setProcessingEmails] = useState(false);
-  const [terminatingCampaignId, setTerminatingCampaignId] = useState<string | null>(null);
+  const [terminatingCampaignId, setTerminatingCampaignId] = useState<
+    string | null
+  >(null);
   const setParticipantPaymentStatusServer = useServerFn(
     setParticipantPaymentStatusFn,
   );
@@ -54,7 +56,9 @@ function Admin() {
   const terminateEmailCampaignFn = useServerFn(terminateEmailCampaign);
   const getAppSettingsFn = useServerFn(getAppSettings);
   const updateAppSettingsFn = useServerFn(updateAppSettings);
-  const [appSettings, setAppSettings] = useState<{ registrationsOpen: boolean }>({ registrationsOpen: true });
+  const [appSettings, setAppSettings] = useState<{
+    registrationsOpen: boolean;
+  }>({ registrationsOpen: true });
   const [settingsBusy, setSettingsBusy] = useState(false);
 
   const load = async () => {
@@ -69,7 +73,7 @@ function Admin() {
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false }),
-      getAppSettingsFn()
+      getAppSettingsFn(),
     ]);
     setTeams(teamsRes.data ?? []);
     setParticipants(participantsRes.data ?? []);
@@ -263,8 +267,12 @@ function Admin() {
   const unpaidParticipants = totalParticipants - paidParticipants;
   const completeProfiles = participants.filter((p) => p.is_complete).length;
   const incompleteProfiles = totalParticipants - completeProfiles;
-  const participantsWithResume = participants.filter((p) => p.resume_url).length;
-  const participantsWithGithub = participants.filter((p) => p.github_url).length;
+  const participantsWithResume = participants.filter(
+    (p) => p.resume_url,
+  ).length;
+  const participantsWithGithub = participants.filter(
+    (p) => p.github_url,
+  ).length;
   const participantsWithLinkedIn = participants.filter(
     (p) => p.linkedin_url,
   ).length;
@@ -306,7 +314,9 @@ function Admin() {
       sustainability: "Sustainability",
       education: "Education",
       open: "Open",
-    })[track] || track || "Unassigned";
+    })[track] ||
+    track ||
+    "Unassigned";
 
   const emailTargetLabel = (targetFilter: any) => {
     const target =
@@ -327,7 +337,9 @@ function Admin() {
       unverified: "Unverified",
       unpaid: "Unverified",
       complete: "Complete Profiles",
-      track: target.track ? `${trackLabel(target.track)} Track` : "Specific Track",
+      track: target.track
+        ? `${trackLabel(target.track)} Track`
+        : "Specific Track",
     };
 
     return labels[target.type] || "All Participants";
@@ -922,14 +934,54 @@ function Admin() {
                 gap: 16,
               }}
             >
-              {analyticsCard("Payment conversion", `${paymentConversion}%`, `${paidParticipants}/${totalParticipants} participants verified`, paymentConversion >= 70 ? "green" : "yellow")}
-              {analyticsCard("Profile completion", `${profileCompletionRate}%`, `${incompleteProfiles} profiles still incomplete`, profileCompletionRate >= 85 ? "green" : "yellow")}
-              {analyticsCard("Project submission", `${submissionRate}%`, `${submittedTeams}/${totalTeams} teams have submitted`, submissionRate >= 60 ? "green" : "red")}
-              {analyticsCard("Team verification", `${fullTeamVerificationRate}%`, `${fullyVerifiedTeams}/${totalTeams} teams fully paid`, fullTeamVerificationRate >= 70 ? "green" : "yellow")}
-              {analyticsCard("Average team size", averageTeamSize.toFixed(1), `${totalTeamMembers} assigned team members`, "blue")}
-              {analyticsCard("Winner teams", winnerTeams, "Marked by admin console", "purple")}
-              {analyticsCard("Resume coverage", `${totalParticipants ? Math.round((participantsWithResume / totalParticipants) * 100) : 0}%`, `${participantsWithResume} participants uploaded resumes`, "blue")}
-              {analyticsCard("Profile links", `${participantsWithGithub}/${participantsWithLinkedIn}`, "GitHub / LinkedIn coverage", "blue")}
+              {analyticsCard(
+                "Payment conversion",
+                `${paymentConversion}%`,
+                `${paidParticipants}/${totalParticipants} participants verified`,
+                paymentConversion >= 70 ? "green" : "yellow",
+              )}
+              {analyticsCard(
+                "Profile completion",
+                `${profileCompletionRate}%`,
+                `${incompleteProfiles} profiles still incomplete`,
+                profileCompletionRate >= 85 ? "green" : "yellow",
+              )}
+              {analyticsCard(
+                "Project submission",
+                `${submissionRate}%`,
+                `${submittedTeams}/${totalTeams} teams have submitted`,
+                submissionRate >= 60 ? "green" : "red",
+              )}
+              {analyticsCard(
+                "Team verification",
+                `${fullTeamVerificationRate}%`,
+                `${fullyVerifiedTeams}/${totalTeams} teams fully paid`,
+                fullTeamVerificationRate >= 70 ? "green" : "yellow",
+              )}
+              {analyticsCard(
+                "Average team size",
+                averageTeamSize.toFixed(1),
+                `${totalTeamMembers} assigned team members`,
+                "blue",
+              )}
+              {analyticsCard(
+                "Winner teams",
+                winnerTeams,
+                "Marked by admin console",
+                "purple",
+              )}
+              {analyticsCard(
+                "Resume coverage",
+                `${totalParticipants ? Math.round((participantsWithResume / totalParticipants) * 100) : 0}%`,
+                `${participantsWithResume} participants uploaded resumes`,
+                "blue",
+              )}
+              {analyticsCard(
+                "Profile links",
+                `${participantsWithGithub}/${participantsWithLinkedIn}`,
+                "GitHub / LinkedIn coverage",
+                "blue",
+              )}
             </section>
 
             <section
@@ -953,11 +1005,14 @@ function Admin() {
                 gap: 16,
               }}
             >
-              {barList("Track Health", trackAnalytics.map((track) => ({
-                label: track.label,
-                value: track.participants,
-                meta: `participants · ${track.teams} teams · ${track.verified} verified`,
-              })))}
+              {barList(
+                "Track Health",
+                trackAnalytics.map((track) => ({
+                  label: track.label,
+                  value: track.participants,
+                  meta: `participants · ${track.teams} teams · ${track.verified} verified`,
+                })),
+              )}
               {barList("Team Size Distribution", teamSizeAnalytics)}
               {barList("Top Colleges", collegeAnalytics)}
               {barList("Top Courses", courseAnalytics)}
@@ -973,17 +1028,44 @@ function Admin() {
                 gap: 16,
               }}
             >
-              {attentionList("Incomplete Profiles", needsAttention.incomplete, (p) => p.full_name || p.email || "Unnamed participant", (p) => `${p.phone || "No phone"} · ${p.college || "No college"}`, "All profiles are complete.")}
-              {attentionList("Pending Payments", needsAttention.unverified, (p) => p.full_name || p.email || "Unnamed participant", (p) => `${p.pass_code || "No pass"} · ${p.course || "No course"}`, "No completed profile is waiting on payment.")}
-              {attentionList("Teams Missing Submission", needsAttention.teamsMissingSubmission, (team) => team.name, (team) => `${trackLabel(team.track)} · ${(team.team_members || []).length}/5 members`, "Every team has submitted a project.")}
-              {attentionList("Teams Not Fully Verified", needsAttention.teamsNotFullyVerified, (team) => team.name, (team) => {
-                const verified = (team.team_members || []).filter(
-                  (member: any) =>
-                    participantByUserId.get(member.user_id)?.payment_status ===
-                    "paid",
-                ).length;
-                return `${verified}/${(team.team_members || []).length} verified`;
-              }, "Every team is fully verified.")}
+              {attentionList(
+                "Incomplete Profiles",
+                needsAttention.incomplete,
+                (p) => p.full_name || p.email || "Unnamed participant",
+                (p) =>
+                  `${p.phone || "No phone"} · ${p.college || "No college"}`,
+                "All profiles are complete.",
+              )}
+              {attentionList(
+                "Pending Payments",
+                needsAttention.unverified,
+                (p) => p.full_name || p.email || "Unnamed participant",
+                (p) =>
+                  `${p.pass_code || "No pass"} · ${p.course || "No course"}`,
+                "No completed profile is waiting on payment.",
+              )}
+              {attentionList(
+                "Teams Missing Submission",
+                needsAttention.teamsMissingSubmission,
+                (team) => team.name,
+                (team) =>
+                  `${trackLabel(team.track)} · ${(team.team_members || []).length}/5 members`,
+                "Every team has submitted a project.",
+              )}
+              {attentionList(
+                "Teams Not Fully Verified",
+                needsAttention.teamsNotFullyVerified,
+                (team) => team.name,
+                (team) => {
+                  const verified = (team.team_members || []).filter(
+                    (member: any) =>
+                      participantByUserId.get(member.user_id)
+                        ?.payment_status === "paid",
+                  ).length;
+                  return `${verified}/${(team.team_members || []).length} verified`;
+                },
+                "Every team is fully verified.",
+              )}
             </section>
           </div>
         )}
@@ -1246,7 +1328,7 @@ function Admin() {
                               cursor: "pointer",
                               display: "inline-flex",
                               alignItems: "center",
-                              gap: "4px"
+                              gap: "4px",
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1256,8 +1338,24 @@ function Admin() {
                             title="Click to copy email"
                           >
                             {p.email}
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <rect
+                                x="9"
+                                y="9"
+                                width="13"
+                                height="13"
+                                rx="2"
+                                ry="2"
+                              ></rect>
                               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                             </svg>
                           </div>
@@ -1945,7 +2043,9 @@ function Admin() {
               </div>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                 <button
-                  disabled={emailSending || !emailSubject.trim() || !emailBody.trim()}
+                  disabled={
+                    emailSending || !emailSubject.trim() || !emailBody.trim()
+                  }
                   onClick={async () => {
                     if (!session?.access_token) {
                       toast.error("Please sign in again.");
@@ -2135,25 +2235,30 @@ function Admin() {
               >
                 <thead>
                   <tr style={{ background: "#f9fafb" }}>
-                    {["Subject", "Target", "Status", "Progress", "Created", "Actions"].map(
-                      (h) => (
-                        <th
-                          key={h}
-                          style={{
-                            padding: "10px 16px",
-                            textAlign: "left",
-                            fontSize: 11,
-                            fontWeight: 600,
-                            color: "#6b7280",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.05em",
-                            borderBottom: "1px solid #e5e7eb",
-                          }}
-                        >
-                          {h}
-                        </th>
-                      ),
-                    )}
+                    {[
+                      "Subject",
+                      "Target",
+                      "Status",
+                      "Progress",
+                      "Created",
+                      "Actions",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          padding: "10px 16px",
+                          textAlign: "left",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: "#6b7280",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          borderBottom: "1px solid #e5e7eb",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -2192,10 +2297,7 @@ function Admin() {
                           {emailTargetLabel(c.target_filter)}
                         </td>
                         <td style={{ padding: "12px 16px" }}>
-                          {badge(
-                            c.status,
-                            campaignStatusTone(c.status),
-                          )}
+                          {badge(c.status, campaignStatusTone(c.status))}
                         </td>
                         <td
                           style={{
@@ -2232,19 +2334,22 @@ function Admin() {
 
                                 setTerminatingCampaignId(c.id);
                                 try {
-                                  const result = await terminateEmailCampaignFn({
-                                    data: {
-                                      adminAccessToken: session.access_token,
-                                      campaignId: c.id,
+                                  const result = await terminateEmailCampaignFn(
+                                    {
+                                      data: {
+                                        adminAccessToken: session.access_token,
+                                        campaignId: c.id,
+                                      },
                                     },
-                                  });
+                                  );
                                   toast.success(
                                     `Campaign terminated. ${result.pendingCancelled} pending emails stopped.`,
                                   );
                                   await refreshCampaigns();
                                 } catch (err: any) {
                                   toast.error(
-                                    err?.message || "Failed to terminate campaign.",
+                                    err?.message ||
+                                      "Failed to terminate campaign.",
                                   );
                                 } finally {
                                   setTerminatingCampaignId(null);
@@ -2302,17 +2407,37 @@ function Admin() {
             <h3 style={{ margin: "0 0 20px", fontSize: 17, fontWeight: 700 }}>
               Global Settings
             </h3>
-            
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "16px",
+                background: "#f9fafb",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+              }}
+            >
               <div>
-                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#111827" }}>
-                  Allow New Registrations
+                <h4
+                  style={{
+                    margin: 0,
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: "#111827",
+                  }}
+                >
+                  Allow Registrations & Payment Requests
                 </h4>
-                <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}>
-                  When disabled, the registration page will display a message that slots are filled.
+                <p
+                  style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}
+                >
+                  When disabled, registrations close and payment-detail requests
+                  send a polite slots-full email instead.
                 </p>
               </div>
-              
+
               <button
                 disabled={settingsBusy}
                 onClick={async () => {
@@ -2323,11 +2448,15 @@ function Admin() {
                     await updateAppSettingsFn({
                       data: {
                         adminAccessToken: session.access_token,
-                        settings: { registrationsOpen: newVal }
-                      }
+                        settings: { registrationsOpen: newVal },
+                      },
                     });
                     setAppSettings({ registrationsOpen: newVal });
-                    toast.success(newVal ? "Registrations opened." : "Registrations closed.");
+                    toast.success(
+                      newVal
+                        ? "Registrations and payment requests opened."
+                        : "Registrations and payment requests closed.",
+                    );
                   } catch (err: any) {
                     toast.error("Failed to update settings.");
                   } finally {
@@ -2340,13 +2469,19 @@ function Admin() {
                   fontWeight: 600,
                   fontSize: "13px",
                   cursor: settingsBusy ? "not-allowed" : "pointer",
-                  background: appSettings.registrationsOpen ? "#dc2626" : "#059669",
+                  background: appSettings.registrationsOpen
+                    ? "#dc2626"
+                    : "#059669",
                   color: "#fff",
                   border: "none",
-                  transition: "background 0.2s"
+                  transition: "background 0.2s",
                 }}
               >
-                {settingsBusy ? "Updating..." : appSettings.registrationsOpen ? "Stop Registrations" : "Open Registrations"}
+                {settingsBusy
+                  ? "Updating..."
+                  : appSettings.registrationsOpen
+                    ? "Close Slots"
+                    : "Reopen Slots"}
               </button>
             </div>
           </div>

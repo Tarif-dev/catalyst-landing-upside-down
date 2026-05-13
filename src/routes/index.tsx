@@ -276,7 +276,7 @@ function Details() {
         {!settings.registrationsOpen && (
           <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-6 text-center reveal reveal-delay-2 space-y-5">
             <p className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.35em] text-amber">
-              Registrations temporarily paused due to overwhelming number of submissions
+              All Catalyst 2K26 participant slots are full
             </p>
             <div className="pt-2 border-t border-amber/20">
               <p className="font-serif text-sm sm:text-base text-bone/60 leading-relaxed mb-4">
@@ -325,7 +325,7 @@ function Details() {
             to="/register"
             className="bracket relative w-full sm:w-auto text-center border border-blood bg-blood px-8 sm:px-12 py-4 font-mono text-[10px] uppercase tracking-[0.4em] sm:tracking-[0.45em] text-black transition-all duration-500 hover:bg-transparent hover:text-blood"
           >
-            Register Now
+            {settings.registrationsOpen ? "Register Now" : "Slots Full"}
           </Link>
           <a
             href={socialLinks.discord}

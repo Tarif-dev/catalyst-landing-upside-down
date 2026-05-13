@@ -215,6 +215,38 @@ export function getPaymentInfoEmailTemplate(opts: {
   `);
 }
 
+export function getSlotsFullEmailTemplate(opts: {
+  participantName: string;
+  homeUrl: string;
+  auktaveUrl?: string;
+}) {
+  const auktaveUrl = opts.auktaveUrl || "https://www.auktave.co.in";
+
+  return wrap(`
+    <div style="margin-bottom:30px">
+      <span class="eyebrow">Catalyst 2K26</span>
+      <h1 class="title">All Slots Are <span class="hl">Full.</span></h1>
+    </div>
+
+    <div class="body-text">
+      <p>Hi ${opts.participantName || "Participant"},</p>
+      <p>Thank you for your interest in <strong>Catalyst 2K26</strong>. We truly appreciate the enthusiasm and support the event has received.</p>
+      <p>At this time, all available participant slots have been filled, so we are unable to share payment instructions or accept any further registration payments.</p>
+      <p>We are sorry for the inconvenience and would be happy to welcome you at a future edition of Catalyst.</p>
+      <p>In the meantime, we invite you to explore the other events at <strong>AUKTAVE</strong>.</p>
+    </div>
+
+    <div style="margin:32px 0 12px">
+      <a href="${auktaveUrl}" class="btn">Explore AUKTAVE</a>
+    </div>
+
+    <p style="font-size:13px;color:#888;margin:0 20px 30px">
+      You can also return to the Catalyst website for future updates:
+      <a href="${opts.homeUrl}" style="color:#cc2222;text-decoration:none">Catalyst 2K26</a>
+    </p>
+  `);
+}
+
 export function getPaymentConfirmedEmailTemplate(opts: {
   participantName: string;
   passCode: string;
