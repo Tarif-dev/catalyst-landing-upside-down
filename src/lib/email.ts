@@ -226,7 +226,7 @@ export const sendPaymentInfoEmail = createServerFn({ method: "POST" })
     const dashboardUrl = new URL("/dashboard", origin).toString();
     const settings = await readAppSettings();
 
-    if (!settings.registrationsOpen) {
+    if (!settings.paymentRequestsOpen) {
       await sendMail({
         to: email,
         subject: "Catalyst 2K26 Slots Are Full",

@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type AppSettings = {
   registrationsOpen: boolean;
+  paymentRequestsOpen: boolean;
 };
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   registrationsOpen: true,
+  paymentRequestsOpen: true,
 };
 
 async function getAdminClient() {
@@ -25,6 +27,10 @@ function normalizeAppSettings(value: unknown): AppSettings {
       typeof settings.registrationsOpen === "boolean"
         ? settings.registrationsOpen
         : DEFAULT_APP_SETTINGS.registrationsOpen,
+    paymentRequestsOpen:
+      typeof settings.paymentRequestsOpen === "boolean"
+        ? settings.paymentRequestsOpen
+        : DEFAULT_APP_SETTINGS.paymentRequestsOpen,
   };
 }
 
@@ -57,6 +63,7 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       adminAccessToken: z.string().min(20),
       settings: z.object({
         registrationsOpen: z.boolean(),
+        paymentRequestsOpen: z.boolean(),
       }),
     }),
   )

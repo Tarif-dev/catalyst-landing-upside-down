@@ -52,7 +52,7 @@ function Dashboard() {
   const [busy, setBusy] = useState(true);
   const [emailBusy, setEmailBusy] = useState(false);
   const [paymentInfoRequested, setPaymentInfoRequested] = useState(false);
-  const [appSettings, setAppSettings] = useState({ registrationsOpen: true });
+  const [appSettings, setAppSettings] = useState({ registrationsOpen: true, paymentRequestsOpen: true });
   const [discordBusy, setDiscordBusy] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showDiscordBanner, setShowDiscordBanner] = useState(true);
@@ -116,7 +116,7 @@ function Dashboard() {
         .limit(1)
         .maybeSingle(),
       supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-      getAppSettingsFn().catch(() => ({ registrationsOpen: true })),
+      getAppSettingsFn().catch(() => ({ registrationsOpen: true, paymentRequestsOpen: true })),
     ]);
 
     const currentProfile = freshProfile ?? profile;
@@ -701,18 +701,18 @@ function Dashboard() {
               {participantProfile?.payment_status !== "paid" && (
                 <div className="mt-6 border border-amber/25 bg-amber/5 p-5">
                   <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber">
-                    {appSettings.registrationsOpen
+                    {appSettings.paymentRequestsOpen
                       ? "Payment Instructions"
-                      : "Registrations Closed"}
+                      : "Slots Full"}
                   </p>
                   <p className="mt-3 font-serif text-base leading-relaxed text-bone/70">
-                    {appSettings.registrationsOpen
+                    {appSettings.paymentRequestsOpen
                       ? "Request the payment instructions by email. Once the admin verifies your payment, your event pass unlocks. Approval takes up to 2 business days after you send the screenshot and transaction reference."
                       : "All available slots are full, so payment requests are closed. You can request an email confirmation with the same update and explore other AUKTAVE events."}
                   </p>
                   {paymentInfoRequested && (
                     <div className="mt-4 border border-amber/30 bg-black/25 p-3 font-serif text-sm leading-relaxed text-amber/90">
-                      {appSettings.registrationsOpen
+                      {appSettings.paymentRequestsOpen
                         ? "Payment details were sent. It will take 2 business days to approve your payment after you reply with proof of payment."
                         : "A slots-full notice was sent to your email."}
                     </div>
@@ -747,7 +747,7 @@ function Dashboard() {
                   >
                     {emailBusy
                       ? "Sending..."
-                      : appSettings.registrationsOpen
+                      : appSettings.paymentRequestsOpen
                         ? "Email Payment Details"
                         : "Email Slots Full Notice"}
                   </button>

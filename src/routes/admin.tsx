@@ -58,7 +58,8 @@ function Admin() {
   const updateAppSettingsFn = useServerFn(updateAppSettings);
   const [appSettings, setAppSettings] = useState<{
     registrationsOpen: boolean;
-  }>({ registrationsOpen: true });
+    paymentRequestsOpen: boolean;
+  }>({ registrationsOpen: true, paymentRequestsOpen: true });
   const [settingsBusy, setSettingsBusy] = useState(false);
 
   const load = async () => {
@@ -77,7 +78,7 @@ function Admin() {
     ]);
     setTeams(teamsRes.data ?? []);
     setParticipants(participantsRes.data ?? []);
-    setAppSettings(settingsRes || { registrationsOpen: true });
+    setAppSettings(settingsRes || { registrationsOpen: true, paymentRequestsOpen: true });
     setBusy(false);
   };
 
@@ -2408,81 +2409,158 @@ function Admin() {
               Global Settings
             </h3>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "16px",
-                background: "#f9fafb",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
-              }}
-            >
-              <div>
-                <h4
-                  style={{
-                    margin: 0,
-                    fontSize: 15,
-                    fontWeight: 600,
-                    color: "#111827",
-                  }}
-                >
-                  Allow Registrations & Payment Requests
-                </h4>
-                <p
-                  style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}
-                >
-                  When disabled, registrations close and payment-detail requests
-                  send a polite slots-full email instead.
-                </p>
-              </div>
-
-              <button
-                disabled={settingsBusy}
-                onClick={async () => {
-                  if (!session?.access_token) return;
-                  setSettingsBusy(true);
-                  const newVal = !appSettings.registrationsOpen;
-                  try {
-                    await updateAppSettingsFn({
-                      data: {
-                        adminAccessToken: session.access_token,
-                        settings: { registrationsOpen: newVal },
-                      },
-                    });
-                    setAppSettings({ registrationsOpen: newVal });
-                    toast.success(
-                      newVal
-                        ? "Registrations and payment requests opened."
-                        : "Registrations and payment requests closed.",
-                    );
-                  } catch (err: any) {
-                    toast.error("Failed to update settings.");
-                  } finally {
-                    setSettingsBusy(false);
-                  }
-                }}
+            <div style={{ display: "grid", gap: 16 }}>
+              <div
                 style={{
-                  padding: "8px 16px",
-                  borderRadius: "6px",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  cursor: settingsBusy ? "not-allowed" : "pointer",
-                  background: appSettings.registrationsOpen
-                    ? "#dc2626"
-                    : "#059669",
-                  color: "#fff",
-                  border: "none",
-                  transition: "background 0.2s",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "16px",
+                  background: "#f9fafb",
+                  borderRadius: "8px",
+                  border: "1px solid #e5e7eb",
                 }}
               >
-                {settingsBusy
-                  ? "Updating..."
-                  : appSettings.registrationsOpen
-                    ? "Close Slots"
-                    : "Reopen Slots"}
-              </button>
+                <div>
+                  <h4
+                    style={{
+                      margin: 0,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: "#111827",
+                    }}
+                  >
+                    Allow New Registrations
+                  </h4>
+                  <p
+                    style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}
+                  >
+                    When disabled, the registration page will be closed.
+                  </p>
+                </div>
+
+                <button
+                  disabled={settingsBusy}
+                  onClick={async () => {
+                    if (!session?.access_token) return;
+                    setSettingsBusy(true);
+                    const newVal = !appSettings.registrationsOpen;
+                    try {
+                      await updateAppSettingsFn({
+                        data: {
+                          adminAccessToken: session.access_token,
+                          settings: { ...appSettings, registrationsOpen: newVal },
+                        },
+                      });
+                      setAppSettings((prev) => ({ ...prev, registrationsOpen: newVal }));
+                      toast.success(
+                        newVal
+                          ? "Registrations opened."
+                          : "Registrations closed.",
+                      );
+                    } catch (err: any) {
+                      toast.error("Failed to update settings.");
+                    } finally {
+                      setSettingsBusy(false);
+                    }
+                  }}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    fontWeight: 600,
+                    fontSize: "13px",
+                    cursor: settingsBusy ? "not-allowed" : "pointer",
+                    background: appSettings.registrationsOpen
+                      ? "#dc2626"
+                      : "#059669",
+                    color: "#fff",
+                    border: "none",
+                    transition: "background 0.2s",
+                  }}
+                >
+                  {settingsBusy
+                    ? "Updating..."
+                    : appSettings.registrationsOpen
+                      ? "Close Registrations"
+                      : "Open Registrations"}
+                </button>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "16px",
+                  background: "#f9fafb",
+                  borderRadius: "8px",
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <div>
+                  <h4
+                    style={{
+                      margin: 0,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: "#111827",
+                    }}
+                  >
+                    Allow Payment Requests
+                  </h4>
+                  <p
+                    style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}
+                  >
+                    When disabled, payment-detail requests will send a polite slots-full email instead.
+                  </p>
+                </div>
+
+                <button
+                  disabled={settingsBusy}
+                  onClick={async () => {
+                    if (!session?.access_token) return;
+                    setSettingsBusy(true);
+                    const newVal = !appSettings.paymentRequestsOpen;
+                    try {
+                      await updateAppSettingsFn({
+                        data: {
+                          adminAccessToken: session.access_token,
+                          settings: { ...appSettings, paymentRequestsOpen: newVal },
+                        },
+                      });
+                      setAppSettings((prev) => ({ ...prev, paymentRequestsOpen: newVal }));
+                      toast.success(
+                        newVal
+                          ? "Payment requests opened."
+                          : "Payment requests closed.",
+                      );
+                    } catch (err: any) {
+                      toast.error("Failed to update settings.");
+                    } finally {
+                      setSettingsBusy(false);
+                    }
+                  }}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    fontWeight: 600,
+                    fontSize: "13px",
+                    cursor: settingsBusy ? "not-allowed" : "pointer",
+                    background: appSettings.paymentRequestsOpen
+                      ? "#dc2626"
+                      : "#059669",
+                    color: "#fff",
+                    border: "none",
+                    transition: "background 0.2s",
+                  }}
+                >
+                  {settingsBusy
+                    ? "Updating..."
+                    : appSettings.paymentRequestsOpen
+                      ? "Close Requests"
+                      : "Open Requests"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
