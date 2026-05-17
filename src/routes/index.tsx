@@ -276,20 +276,12 @@ function Details() {
         {!settings.registrationsOpen && (
           <div className="mx-auto mt-8 max-w-2xl border border-amber/35 bg-amber/10 px-5 py-6 text-center reveal reveal-delay-2 space-y-5">
             <p className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.35em] text-amber">
-              All Catalyst 2K26 participant slots are full
+              Registrations are closed for Catalyst 2026
             </p>
             <div className="pt-2 border-t border-amber/20">
-              <p className="font-serif text-sm sm:text-base text-bone/60 leading-relaxed mb-4">
-                In the meantime, explore our other events at the tech fest
+              <p className="font-serif text-sm sm:text-base text-bone/60 leading-relaxed">
+                We hope you join the party next year.
               </p>
-              <a
-                href="https://www.auktave.co.in"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bracket inline-flex items-center justify-center border border-amber/40 bg-amber/10 px-6 py-2.5 font-mono text-[10px] uppercase tracking-[0.3em] text-amber transition-all hover:bg-amber hover:text-black"
-              >
-                Explore AUKTAVE
-              </a>
             </div>
           </div>
         )}

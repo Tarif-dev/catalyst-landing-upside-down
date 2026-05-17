@@ -139,8 +139,10 @@ function RegisterPage() {
         {!settings.registrationsOpen && (
           <div className="mb-6 border border-amber/35 bg-amber/10 px-4 py-3 text-center">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
-              Registrations temporarily paused due to overwhelming number of
-              submissions
+              Registrations are closed for Catalyst 2026
+            </p>
+            <p className="mt-3 font-serif text-sm text-bone/65">
+              We hope you join the party next year.
             </p>
           </div>
         )}
@@ -148,32 +150,16 @@ function RegisterPage() {
         {!settings.registrationsOpen ? (
           <div className="panel p-8 sm:p-12 text-center space-y-6">
             <h2 className="font-display text-3xl sm:text-4xl text-bone">
-              We are grateful
+              Registrations are closed
             </h2>
             <p className="font-serif text-lg text-bone/80 max-w-md mx-auto leading-relaxed">
-              But the slots are filled. We will be happy to host you next time.
+              Registrations are closed for Catalyst 2026. We hope you join the
+              party next year.
             </p>
             <div className="pt-4">
               <Link to="/" className="btn-secondary inline-flex px-8 py-3">
                 Return to Hawkins
               </Link>
-            </div>
-            <div className="mt-8 border-t border-bone/15 pt-6 space-y-3">
-              <p className="font-serif text-base text-bone/80 leading-relaxed">
-                Please fill the form below to join the waitlist.
-                <br />
-                <span className="text-amber font-semibold">
-                  It is on a first come, first serve basis.
-                </span>
-              </p>
-              <a
-                href="https://forms.gle/67MctQhxQDKB6eBC7"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary inline-flex px-8 py-3"
-              >
-                Join Waitlist
-              </a>
             </div>
             <p className="text-center text-sm font-serif italic text-bone/60 mt-8">
               Already registered?{" "}
