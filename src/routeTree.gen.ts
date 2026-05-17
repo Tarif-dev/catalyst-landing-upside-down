@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -24,6 +26,11 @@ import { Route as SubmitTeamIdRouteImport } from './routes/submit.$teamId'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 import { Route as ApiDiscordCallbackRouteImport } from './routes/api.discord.callback'
 
+const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
+  id: '/update-password',
+  path: '/update-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -42,6 +49,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -100,10 +112,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/update-password': typeof UpdatePasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
@@ -116,10 +130,12 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/update-password': typeof UpdatePasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
@@ -133,10 +149,12 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/update-password': typeof UpdatePasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
@@ -151,10 +169,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-login'
     | '/dashboard'
+    | '/forgot-password'
     | '/login'
     | '/onboarding'
     | '/profile'
     | '/register'
+    | '/update-password'
     | '/certificate/$code'
     | '/submit/$teamId'
     | '/team/join'
@@ -167,10 +187,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-login'
     | '/dashboard'
+    | '/forgot-password'
     | '/login'
     | '/onboarding'
     | '/profile'
     | '/register'
+    | '/update-password'
     | '/certificate/$code'
     | '/submit/$teamId'
     | '/team/join'
@@ -183,10 +205,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-login'
     | '/dashboard'
+    | '/forgot-password'
     | '/login'
     | '/onboarding'
     | '/profile'
     | '/register'
+    | '/update-password'
     | '/certificate/$code'
     | '/submit/$teamId'
     | '/team/join'
@@ -200,10 +224,12 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
   DashboardRoute: typeof DashboardRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
+  UpdatePasswordRoute: typeof UpdatePasswordRoute
   CertificateCodeRoute: typeof CertificateCodeRoute
   SubmitTeamIdRoute: typeof SubmitTeamIdRoute
   TeamJoinRoute: typeof TeamJoinRoute
@@ -214,6 +240,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/update-password': {
+      id: '/update-password'
+      path: '/update-password'
+      fullPath: '/update-password'
+      preLoaderRoute: typeof UpdatePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -240,6 +273,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -320,10 +360,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AdminLoginRoute: AdminLoginRoute,
   DashboardRoute: DashboardRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
+  UpdatePasswordRoute: UpdatePasswordRoute,
   CertificateCodeRoute: CertificateCodeRoute,
   SubmitTeamIdRoute: SubmitTeamIdRoute,
   TeamJoinRoute: TeamJoinRoute,

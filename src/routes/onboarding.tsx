@@ -32,6 +32,9 @@ const schema = z.object({
     .string()
     .trim()
     .min(2, "Dietary restrictions are required. Enter None if not applicable."),
+  gender: z.enum(["male", "female", "others"], {
+    errorMap: () => ({ message: "Please select your gender" }),
+  }),
 });
 
 const emptyOnboardingForm = {
@@ -46,12 +49,16 @@ const emptyOnboardingForm = {
   linkedinUrl: "",
   githubUrl: "",
   dietaryRestrictions: "None",
+  gender: "",
 };
 
 const batchYears = Array.from({ length: 9 }, (_, i) => String(2023 + i));
 
 const onboardingDraftKey = (userId: string) =>
   `catalyst:onboarding-draft:${userId}`;
+
+const normalizeGender = (gender?: string | null) =>
+  gender?.toLowerCase() === "other" ? "others" : gender?.toLowerCase() || "";
 
 function readOnboardingDraft(userId: string) {
   if (typeof window === "undefined") return null;
@@ -104,6 +111,7 @@ function OnboardingPage() {
             linkedinUrl: profile.linkedin_url || "",
             githubUrl: profile.github_url || "",
             dietaryRestrictions: profile.dietary_restrictions || "None",
+            gender: normalizeGender(profile.gender),
           }
         : emptyOnboardingForm;
       const draft = readOnboardingDraft(user.id);
@@ -184,6 +192,7 @@ function OnboardingPage() {
           linkedin_url: parsed.data.linkedinUrl,
           github_url: parsed.data.githubUrl || null,
           dietary_restrictions: parsed.data.dietaryRestrictions,
+          gender: parsed.data.gender,
           resume_url: resumeUrl,
           is_complete: true,
         })
@@ -301,6 +310,22 @@ function OnboardingPage() {
                 onChange={(e) => setForm({ ...form, dob: e.target.value })}
                 className="input-styled [color-scheme:dark]"
               />
+            </div>
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70 mb-2">
+                Sex / Gender
+              </label>
+              <select
+                required
+                value={form.gender}
+                onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                className="input-styled [color-scheme:dark]"
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="others">Others</option>
+              </select>
             </div>
           </div>
 

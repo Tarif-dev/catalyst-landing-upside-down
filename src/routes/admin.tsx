@@ -100,6 +100,15 @@ function Admin() {
   const participantByUserId = new Map(participants.map((p) => [p.user_id, p]));
   const statusLabel = (status?: string | null) =>
     status === "paid" ? "verified" : status || "unpaid";
+  const genderLabel = (gender?: string | null) =>
+    ({
+      male: "Male",
+      female: "Female",
+      other: "Others",
+      others: "Others",
+    })[gender || ""] ||
+    gender ||
+    "Not provided";
 
   const setParticipantPaymentStatus = async (
     id: string,
@@ -252,9 +261,9 @@ function Admin() {
 
   const downloadParticipantsCSV = () => {
     let csv =
-      "Full Name,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,Profile Status,Status,Individual Pass Code\n";
+      "Full Name,Sex/Gender,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,Profile Status,Status,Individual Pass Code\n";
     participants.forEach((p) => {
-      csv += `"${p.full_name || ""}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${statusLabel(p.payment_status)}","${p.pass_code || ""}"\n`;
+      csv += `"${p.full_name || ""}","${genderLabel(p.gender)}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${statusLabel(p.payment_status)}","${p.pass_code || ""}"\n`;
     });
     downloadCSV(csv, "catalyst-participants.csv");
   };
@@ -410,6 +419,9 @@ function Admin() {
     0,
     8,
   );
+  const genderAnalytics = groupBy(participants, (p) =>
+    p.gender ? genderLabel(p.gender) : null,
+  );
   const teamSizeAnalytics = [1, 2, 3, 4, 5].map((size) => ({
     label: `${size} member${size === 1 ? "" : "s"}`,
     value: teams.filter((team) => (team.team_members || []).length === size)
@@ -487,6 +499,9 @@ function Admin() {
       [],
       ["Top colleges", "Participants"],
       ...collegeAnalytics.map((item) => [item.label, item.value]),
+      [],
+      ["Sex/Gender", "Participants"],
+      ...genderAnalytics.map((item) => [item.label, item.value]),
       [],
       ["Recent registrations", "Participants"],
       ...registrationTrend.map((item) => [item.label, item.value]),
@@ -1017,6 +1032,7 @@ function Admin() {
               {barList("Team Size Distribution", teamSizeAnalytics)}
               {barList("Top Colleges", collegeAnalytics)}
               {barList("Top Courses", courseAnalytics)}
+              {barList("Sex / Gender", genderAnalytics)}
               {barList("Graduating Years", yearAnalytics)}
               {barList("Registrations: Last 7 Days", registrationTrend)}
             </section>
@@ -1261,6 +1277,7 @@ function Admin() {
                       "Name & Contact",
                       "Institution",
                       "Course",
+                      "Sex/Gender",
                       "Profile",
                       "Payment",
                       "Individual Pass Code",
@@ -1288,7 +1305,7 @@ function Admin() {
                   {participants.length === 0 && (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={8}
                         style={{
                           padding: "32px 16px",
                           textAlign: "center",
@@ -1370,6 +1387,9 @@ function Admin() {
                         <div style={{ fontSize: 12, color: "#6b7280" }}>
                           {p.year_of_study || ""}
                         </div>
+                      </td>
+                      <td style={{ padding: "12px 16px", fontSize: 13 }}>
+                        {genderLabel(p.gender)}
                       </td>
                       <td style={{ padding: "12px 16px" }}>
                         {badge(
@@ -1528,6 +1548,7 @@ function Admin() {
                     ["Individual Pass Code", selectedParticipant.pass_code],
                     ["Phone", selectedParticipant.phone],
                     ["Date of Birth", selectedParticipant.dob],
+                    ["Sex / Gender", genderLabel(selectedParticipant.gender)],
                     [
                       "Dietary Restrictions",
                       selectedParticipant.dietary_restrictions,

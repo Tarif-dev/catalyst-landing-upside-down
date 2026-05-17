@@ -30,6 +30,9 @@ const schema = z.object({
     .string()
     .trim()
     .min(2, "Dietary restrictions are required. Enter None if not applicable."),
+  gender: z.enum(["male", "female", "others"], {
+    errorMap: () => ({ message: "Please select your gender" }),
+  }),
 });
 
 const emptyProfileForm = {
@@ -44,9 +47,13 @@ const emptyProfileForm = {
   linkedinUrl: "",
   githubUrl: "",
   dietaryRestrictions: "None",
+  gender: "",
 };
 
 const graduatingYears = Array.from({ length: 9 }, (_, i) => String(2023 + i));
+
+const normalizeGender = (gender?: string | null) =>
+  gender?.toLowerCase() === "other" ? "others" : gender?.toLowerCase() || "";
 
 function formFromProfile(profile: any) {
   return {
@@ -65,6 +72,7 @@ function formFromProfile(profile: any) {
     linkedinUrl: profile?.linkedin_url || "",
     githubUrl: profile?.github_url || "",
     dietaryRestrictions: profile?.dietary_restrictions || "None",
+    gender: normalizeGender(profile?.gender),
   };
 }
 
@@ -176,6 +184,7 @@ function ProfilePage() {
           linkedin_url: parsed.data.linkedinUrl,
           github_url: parsed.data.githubUrl,
           dietary_restrictions: parsed.data.dietaryRestrictions,
+          gender: parsed.data.gender,
           resume_url: resumeUrl || null,
           is_complete: true,
         })
@@ -291,6 +300,22 @@ function ProfilePage() {
                 onChange={(e) => setForm({ ...form, dob: e.target.value })}
                 className="input-styled [color-scheme:dark]"
               />
+            </div>
+            <div>
+              <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.3em] text-bone/70">
+                Sex / Gender
+              </label>
+              <select
+                required
+                value={form.gender}
+                onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                className="input-styled [color-scheme:dark]"
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="others">Others</option>
+              </select>
             </div>
           </div>
 

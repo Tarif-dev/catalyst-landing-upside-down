@@ -84,6 +84,7 @@ export type Database = {
           email: string | null
           first_name: string | null
           full_name: string | null
+          gender: string | null
           github_url: string | null
           id: string
           is_complete: boolean
@@ -113,6 +114,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           full_name?: string | null
+          gender?: string | null
           github_url?: string | null
           id?: string
           is_complete?: boolean
@@ -142,6 +144,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           full_name?: string | null
+          gender?: string | null
           github_url?: string | null
           id?: string
           is_complete?: boolean
