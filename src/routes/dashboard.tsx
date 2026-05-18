@@ -39,6 +39,16 @@ const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
   refunded: { label: "Refunded", tone: "text-bone/50" },
 };
 
+const genderLabel = (gender?: string | null) =>
+  ({
+    male: "Male",
+    female: "Female",
+    other: "Others",
+    others: "Others",
+  })[gender?.toLowerCase() || ""] ||
+  gender ||
+  "—";
+
 type TabId = "overview" | "team" | "pass" | "submission" | "certificates";
 
 function Dashboard() {
@@ -52,7 +62,10 @@ function Dashboard() {
   const [busy, setBusy] = useState(true);
   const [emailBusy, setEmailBusy] = useState(false);
   const [paymentInfoRequested, setPaymentInfoRequested] = useState(false);
-  const [appSettings, setAppSettings] = useState({ registrationsOpen: true, paymentRequestsOpen: true });
+  const [appSettings, setAppSettings] = useState({
+    registrationsOpen: true,
+    paymentRequestsOpen: true,
+  });
   const [discordBusy, setDiscordBusy] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showDiscordBanner, setShowDiscordBanner] = useState(true);
@@ -116,7 +129,10 @@ function Dashboard() {
         .limit(1)
         .maybeSingle(),
       supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-      getAppSettingsFn().catch(() => ({ registrationsOpen: true, paymentRequestsOpen: true })),
+      getAppSettingsFn().catch(() => ({
+        registrationsOpen: true,
+        paymentRequestsOpen: true,
+      })),
     ]);
 
     const currentProfile = freshProfile ?? profile;
@@ -447,10 +463,10 @@ function Dashboard() {
                 </div>
                 <div className="border border-white/10 bg-black/20 p-4">
                   <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
-                    T-Shirt Size
+                    Sex / Gender
                   </p>
                   <p className="mt-2 font-mono text-sm text-bone/80">
-                    {participantProfile?.tshirt_size || "—"}
+                    {genderLabel(participantProfile?.gender)}
                   </p>
                 </div>
               </div>
