@@ -403,6 +403,68 @@ export type Database = {
           },
         ]
       }
+      checkins: {
+        Row: {
+          id: string
+          pass_code: string
+          gate_entry: boolean
+          checked_in: boolean
+          meal_1: boolean
+          meal_2: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          pass_code: string
+          gate_entry?: boolean
+          checked_in?: boolean
+          meal_1?: boolean
+          meal_2?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          pass_code?: string
+          gate_entry?: boolean
+          checked_in?: boolean
+          meal_1?: boolean
+          meal_2?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkins_pass_code_fkey"
+            columns: ["pass_code"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["pass_code"]
+          },
+        ]
+      }
+      volunteers: {
+        Row: {
+          id: string
+          email: string
+          name: string | null
+          created_at: string
+        }
+        Insert: {
+          id: string
+          email: string
+          name?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

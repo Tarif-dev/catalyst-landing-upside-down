@@ -3,6 +3,7 @@ import dustin from "@/assets/dustin.webp";
 import hopper from "@/assets/hopper.webp";
 import eleven from "@/assets/eleven.webp";
 import will from "@/assets/will.webp";
+import riseInStellarLogo from "@/assets/sponsors/rise_in_stellar.png";
 
 const tracks = [
   {
@@ -195,9 +196,102 @@ export function Tracks() {
           })}
         </div>
 
+        {/* ─── Best use of Stellar — Special Cross-Track Award ─── */}
+        <div className="mt-20 md:mt-28 reveal">
+          <div className="bracket relative overflow-hidden border border-cyan/30 bg-gradient-to-br from-cyan/[0.06] via-black to-cyan/[0.03] px-6 py-10 sm:px-10 sm:py-14 md:px-14 md:py-16">
+            {/* Decorative glow */}
+            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan/10 blur-3xl" />
+            <div className="pointer-events-none absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-cyan/8 blur-2xl" />
+
+            <div className="relative flex flex-col items-center text-center">
+              {/* Eyebrow */}
+              <div className="mb-4 flex items-center gap-3 md:gap-4">
+                <span className="block h-px w-8 md:w-12 bg-cyan/50" />
+                <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-[0.45em] text-cyan whitespace-nowrap">
+                  Bonus Track · Cross-Track Award
+                </span>
+                <span className="block h-px w-8 md:w-12 bg-cyan/50" />
+              </div>
+
+              {/* Title */}
+              <h3 className="font-display text-3xl sm:text-4xl md:text-5xl italic text-bone leading-tight mb-4">
+                Best Use of{" "}
+                <span className="text-cyan text-glow-cyan">Stellar</span>
+              </h3>
+
+              {/* Stellar logo */}
+              <div className="mb-6 flex items-center justify-center">
+                <img
+                  src={riseInStellarLogo}
+                  alt="Rise In Stellar"
+                  className="max-h-14 w-auto object-contain opacity-90 drop-shadow-[0_0_18px_rgba(100,200,255,0.25)]"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Divider */}
+              <div className="h-px w-24 sm:w-32 bg-cyan/30 mb-8" />
+
+              {/* Description */}
+              <p className="max-w-2xl font-serif text-base sm:text-lg md:text-xl leading-relaxed text-bone/70 mb-8">
+                This isn't a separate track — it's a{" "}
+                <span className="text-cyan font-medium not-italic">
+                  cross-track special award
+                </span>
+                . Teams from{" "}
+                <span className="text-bone/90 font-medium">any</span> of the
+                four tracks (Healthcare, Fintech, Sustainability, or Education)
+                can integrate{" "}
+                <span className="text-cyan font-medium not-italic">
+                  Stellar's blockchain
+                </span>{" "}
+                into their project and become eligible for this award — on top of
+                their track prizes.
+              </p>
+
+              <p className="max-w-xl font-serif text-sm sm:text-base text-bone/55 italic mb-10 leading-relaxed">
+                Build on Stellar. Use its SDKs, smart contracts, or
+                decentralised infrastructure alongside your AI solution. The
+                team that makes the best use of the Stellar blockchain — as
+                judged across all tracks — wins.
+              </p>
+
+              {/* Prize card */}
+              <div className="bracket w-full max-w-md border border-cyan/30 bg-gradient-to-r from-cyan/10 via-cyan/5 to-transparent px-6 py-6 sm:px-8 sm:py-8 mb-6">
+                <div className="font-mono text-[9px] uppercase tracking-[0.45em] text-cyan/80 mb-3">
+                  Cash Prize
+                </div>
+                <div className="font-display text-5xl sm:text-6xl md:text-7xl text-bone italic leading-none text-glow-cyan">
+                  $100
+                </div>
+                <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.35em] text-bone/40">
+                  Cash · Awarded to 01 team
+                </div>
+              </div>
+
+              {/* Eligibility tags */}
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                {[
+                  "Open to all tracks",
+                  "Use Stellar SDK / Smart Contracts",
+                  "Judged across tracks",
+                  "Stacks with track prizes",
+                ].map((tag) => (
+                  <span
+                    key={tag}
+                    className="border border-cyan/20 px-3 py-1.5 text-[9px] sm:text-[10px] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-cyan/70 font-mono transition-colors hover:border-cyan/60 hover:text-cyan"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-12 flex flex-col items-center gap-4 text-center reveal">
           <p className="font-serif italic text-bone/55 text-lg">
-            Four tracks. Four winners. ₹50,000 worth of prize pool.
+            Four tracks. Four winners. One special Stellar award. ₹50,000+ worth of prize pool.
           </p>
           <a
             href="#register"

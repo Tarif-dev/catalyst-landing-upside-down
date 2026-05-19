@@ -13,13 +13,16 @@ import {
   terminateEmailCampaign,
 } from "@/lib/email";
 import { getAppSettings, updateAppSettings } from "@/lib/settings";
+import { AdminScanner } from "@/components/AdminScanner";
+import { getVolunteers, addVolunteer, removeVolunteer, getAllCheckinStatuses } from "@/lib/checkin";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Console — Catalyst 2K26" }] }),
   component: Admin,
 });
 
-type Tab = "analytics" | "teams" | "participants" | "comms" | "settings";
+type Tab = "analytics" | "teams" | "participants" | "comms" | "settings" | "scanner";
+type ScannerSubTab = "scanner" | "status";
 
 function Admin() {
   const { user, isAdmin, loading, session } = useAuth();
@@ -56,11 +59,24 @@ function Admin() {
   const terminateEmailCampaignFn = useServerFn(terminateEmailCampaign);
   const getAppSettingsFn = useServerFn(getAppSettings);
   const updateAppSettingsFn = useServerFn(updateAppSettings);
+  const getVolunteersFn = useServerFn(getVolunteers);
+  const addVolunteerFn = useServerFn(addVolunteer);
+  const removeVolunteerFn = useServerFn(removeVolunteer);
   const [appSettings, setAppSettings] = useState<{
     registrationsOpen: boolean;
     paymentRequestsOpen: boolean;
   }>({ registrationsOpen: true, paymentRequestsOpen: true });
   const [settingsBusy, setSettingsBusy] = useState(false);
+  const [volunteerList, setVolunteerList] = useState<any[]>([]);
+  const [newVolunteerEmail, setNewVolunteerEmail] = useState("");
+  const [volunteerBusy, setVolunteerBusy] = useState(false);
+  const [scannerSubTab, setScannerSubTab] = useState<ScannerSubTab>("scanner");
+  const [checkinStatuses, setCheckinStatuses] = useState<any[]>([]);
+  const [checkinSummary, setCheckinSummary] = useState<{ gate_entry: number; checked_in: number; meal_1: number; meal_2: number; total: number }>({ gate_entry: 0, checked_in: 0, meal_1: 0, meal_2: 0, total: 0 });
+  const [checkinLoading, setCheckinLoading] = useState(false);
+  const [checkinSearch, setCheckinSearch] = useState("");
+  const [checkinFilter, setCheckinFilter] = useState<string>("all");
+  const getAllCheckinStatusesFn = useServerFn(getAllCheckinStatuses);
 
   const load = async () => {
     const [teamsRes, participantsRes, settingsRes] = await Promise.all([
@@ -475,6 +491,26 @@ function Admin() {
       .slice(0, 6),
   };
 
+  const getFilteredCheckins = () => {
+    let items = checkinStatuses;
+    const q = checkinSearch.toLowerCase().trim();
+    if (q) {
+      items = items.filter((s: any) =>
+        s.name?.toLowerCase().includes(q) ||
+        s.passCode?.toLowerCase().includes(q) ||
+        s.teamName?.toLowerCase().includes(q) ||
+        s.email?.toLowerCase().includes(q) ||
+        s.college?.toLowerCase().includes(q)
+      );
+    }
+    if (checkinFilter === "at_gate") items = items.filter((s: any) => s.gate_entry);
+    else if (checkinFilter === "checked_in") items = items.filter((s: any) => s.checked_in);
+    else if (checkinFilter === "meal_1") items = items.filter((s: any) => s.meal_1);
+    else if (checkinFilter === "meal_2") items = items.filter((s: any) => s.meal_2);
+    else if (checkinFilter === "not_arrived") items = items.filter((s: any) => !s.gate_entry && !s.checked_in);
+    return items;
+  };
+
   const downloadAnalyticsCSV = () => {
     const rows = [
       ["Metric", "Value"],
@@ -885,6 +921,7 @@ function Admin() {
           {tabBtn("Analytics Command Center", "analytics")}
           {tabBtn("Teams Database", "teams")}
           {tabBtn("Individual Participants", "participants")}
+          {tabBtn("🔍 Scanner", "scanner")}
           {tabBtn("Communications", "comms")}
           {tabBtn("Settings", "settings")}
         </div>
@@ -2414,6 +2451,161 @@ function Admin() {
         </div>
       )}
 
+      {/* ── Scanner Tab ── */}
+      {activeTab === "scanner" && (
+        <div>
+          {/* Sub-tab toggle */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 24, background: "#f3f4f6", borderRadius: 10, padding: 4, width: "fit-content" }}>
+            {([["scanner", "🔍 QR Scanner"], ["status", "📊 Check-in Status"]] as const).map(([key, label]) => (
+              <button key={key} onClick={() => {
+                setScannerSubTab(key as ScannerSubTab);
+                if (key === "status" && checkinStatuses.length === 0 && !checkinLoading) {
+                  // auto-load
+                  (async () => {
+                    if (!session?.access_token) return;
+                    setCheckinLoading(true);
+                    try {
+                      const res = await getAllCheckinStatusesFn({ data: { accessToken: session.access_token } });
+                      setCheckinStatuses(res.statuses);
+                      setCheckinSummary(res.summary);
+                    } catch { toast.error("Failed to load check-in statuses."); }
+                    finally { setCheckinLoading(false); }
+                  })();
+                }
+              }} style={{ padding: "10px 24px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, background: scannerSubTab === key ? "#fff" : "transparent", color: scannerSubTab === key ? "#111827" : "#6b7280", boxShadow: scannerSubTab === key ? "0 1px 3px rgba(0,0,0,0.1)" : "none", transition: "all 0.15s" }}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* QR Scanner sub-tab */}
+          {scannerSubTab === "scanner" && (
+            <div style={{ maxWidth: 640 }}>
+              <div style={{ marginBottom: 20 }}>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>QR Scanner</h2>
+                <p style={{ margin: "6px 0 0", fontSize: 13, color: "#6b7280" }}>
+                  Scan participant QR codes for gate entry, check-in, and meal tracking.
+                  Also available at <a href="/volunteer" style={{ color: "#2563eb" }}>/volunteer</a> for volunteer accounts.
+                </p>
+              </div>
+              {session?.access_token && (
+                <AdminScanner accessToken={session.access_token} />
+              )}
+            </div>
+          )}
+
+          {/* Check-in Status sub-tab */}
+          {scannerSubTab === "status" && (
+            <div style={{ display: "grid", gap: 20 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Check-in Status Dashboard</h2>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={async () => {
+                    if (!session?.access_token) return;
+                    setCheckinLoading(true);
+                    try {
+                      const res = await getAllCheckinStatusesFn({ data: { accessToken: session.access_token } });
+                      setCheckinStatuses(res.statuses);
+                      setCheckinSummary(res.summary);
+                      toast.success("Check-in data refreshed.");
+                    } catch { toast.error("Failed to load."); }
+                    finally { setCheckinLoading(false); }
+                  }} disabled={checkinLoading} style={{ padding: "8px 18px", borderRadius: 8, border: "1px solid #d1d5db", background: "#fff", cursor: checkinLoading ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                    {checkinLoading ? "Loading..." : "🔄 Refresh"}
+                  </button>
+                  <button onClick={() => {
+                    const filtered = getFilteredCheckins();
+                    let csv = "Name,Pass Code,Team,Track,College,Gender,Gate Entry,Check-in,Meal 1,Meal 2\n";
+                    filtered.forEach((s: any) => {
+                      csv += `"${s.name}","${s.passCode}","${s.teamName}","${s.track}","${s.college}","${s.gender}","${s.gate_entry ? "Yes" : "No"}","${s.checked_in ? "Yes" : "No"}","${s.meal_1 ? "Yes" : "No"}","${s.meal_2 ? "Yes" : "No"}"\n`;
+                    });
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a"); a.href = url; a.download = "catalyst-checkin-status.csv"; a.click();
+                    URL.revokeObjectURL(url);
+                  }} style={{ padding: "8px 18px", borderRadius: 8, border: "1px solid #bfdbfe", background: "#eff6ff", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#1d4ed8" }}>
+                    📥 Export CSV
+                  </button>
+                </div>
+              </div>
+
+              {/* Summary Cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
+                {[
+                  { label: "Total Verified", value: checkinSummary.total, color: "#6366f1", bg: "#eef2ff", border: "#c7d2fe" },
+                  { label: "Gate Entry", value: checkinSummary.gate_entry, color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+                  { label: "Checked In", value: checkinSummary.checked_in, color: "#059669", bg: "#f0fdf4", border: "#bbf7d0" },
+                  { label: "Meal 1 Served", value: checkinSummary.meal_1, color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+                  { label: "Meal 2 Served", value: checkinSummary.meal_2, color: "#7c3aed", bg: "#faf5ff", border: "#e9d5ff" },
+                ].map(card => (
+                  <div key={card.label} style={{ background: "#fff", border: `1px solid ${card.border}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: card.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>{card.label}</div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: "#111827", marginTop: 4 }}>{card.value}</div>
+                    {checkinSummary.total > 0 && card.label !== "Total Verified" && (
+                      <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>{Math.round((card.value / checkinSummary.total) * 100)}%</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Search + Filter */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                <input type="text" value={checkinSearch} onChange={e => setCheckinSearch(e.target.value)} placeholder="Search name, pass code, team..." style={{ flex: 1, minWidth: 200, padding: "10px 14px", border: "1px solid #d1d5db", borderRadius: 8, fontSize: 14, outline: "none" }} />
+                <select value={checkinFilter} onChange={e => setCheckinFilter(e.target.value)} style={{ padding: "10px 14px", border: "1px solid #d1d5db", borderRadius: 8, fontSize: 14, background: "#fff", cursor: "pointer" }}>
+                  <option value="all">All Participants</option>
+                  <option value="at_gate">At Gate (entry done)</option>
+                  <option value="checked_in">Checked In</option>
+                  <option value="meal_1">Meal 1 Done</option>
+                  <option value="meal_2">Meal 2 Done</option>
+                  <option value="not_arrived">Not Arrived</option>
+                </select>
+              </div>
+
+              {/* Table */}
+              {checkinLoading ? (
+                <div style={{ textAlign: "center", padding: 40, color: "#6b7280" }}>Loading check-in data...</div>
+              ) : (
+                <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                      <thead>
+                        <tr style={{ background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
+                          {["Name", "Pass Code", "Team", "Track", "🚪 Gate", "✅ Check-in", "🍽 Meal 1", "🍽 Meal 2"].map(h => (
+                            <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 700, color: "#374151", whiteSpace: "nowrap", fontSize: 12 }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getFilteredCheckins().length === 0 ? (
+                          <tr><td colSpan={8} style={{ padding: 24, textAlign: "center", color: "#9ca3af" }}>No participants match the criteria.</td></tr>
+                        ) : getFilteredCheckins().map((s: any) => (
+                          <tr key={s.passCode} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                            <td style={{ padding: "8px 12px", fontWeight: 600, color: "#111827" }}>{s.name}</td>
+                            <td style={{ padding: "8px 12px", fontFamily: "monospace", fontWeight: 700, color: "#6b7280" }}>{s.passCode}</td>
+                            <td style={{ padding: "8px 12px", color: "#6b7280" }}>{s.teamName || "—"}</td>
+                            <td style={{ padding: "8px 12px", color: "#6b7280" }}>{s.track ? s.track.charAt(0).toUpperCase() + s.track.slice(1) : "—"}</td>
+                            {[s.gate_entry, s.checked_in, s.meal_1, s.meal_2].map((val, i) => (
+                              <td key={i} style={{ padding: "8px 12px", textAlign: "center" }}>
+                                <span style={{ display: "inline-block", width: 24, height: 24, lineHeight: "24px", borderRadius: 6, fontSize: 12, fontWeight: 700, background: val ? "#dcfce7" : "#f3f4f6", color: val ? "#166534" : "#d1d5db" }}>
+                                  {val ? "✓" : "—"}
+                                </span>
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style={{ padding: "10px 16px", borderTop: "1px solid #e5e7eb", fontSize: 12, color: "#6b7280" }}>
+                    Showing {getFilteredCheckins().length} of {checkinStatuses.length} verified participants
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Settings Tab ── */}
       {activeTab === "settings" && (
         <div style={{ display: "grid", gap: 24 }}>
@@ -2583,6 +2775,177 @@ function Admin() {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* ── Volunteer Management ── */}
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 12,
+              padding: 24,
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+            }}
+          >
+            <h3 style={{ margin: "0 0 6px", fontSize: 17, fontWeight: 700 }}>
+              Volunteer Scanner Access
+            </h3>
+            <p style={{ margin: "0 0 20px", fontSize: 13, color: "#6b7280" }}>
+              Volunteers can scan QR codes at <strong>/volunteer</strong> but cannot access admin data.
+              They must have an existing account on the platform.
+            </p>
+
+            {/* Add Volunteer */}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!session?.access_token || !newVolunteerEmail.trim()) return;
+                setVolunteerBusy(true);
+                try {
+                  const res = await addVolunteerFn({
+                    data: {
+                      accessToken: session.access_token,
+                      email: newVolunteerEmail.trim(),
+                    },
+                  });
+                  if (res.added) {
+                    toast.success(res.message);
+                    setNewVolunteerEmail("");
+                    // Refresh list
+                    const list = await getVolunteersFn({ data: { accessToken: session.access_token } });
+                    setVolunteerList(list.volunteers);
+                  } else {
+                    toast.info(res.message);
+                  }
+                } catch (err: any) {
+                  toast.error(err?.message || "Failed to add volunteer.");
+                } finally {
+                  setVolunteerBusy(false);
+                }
+              }}
+              style={{ display: "flex", gap: 10, marginBottom: 20 }}
+            >
+              <input
+                type="email"
+                value={newVolunteerEmail}
+                onChange={(e) => setNewVolunteerEmail(e.target.value)}
+                placeholder="volunteer@email.com"
+                required
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  outline: "none",
+                }}
+              />
+              <button
+                type="submit"
+                disabled={volunteerBusy}
+                style={{
+                  padding: "10px 20px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#2563eb",
+                  color: "#fff",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: volunteerBusy ? "not-allowed" : "pointer",
+                  opacity: volunteerBusy ? 0.5 : 1,
+                }}
+              >
+                {volunteerBusy ? "Adding..." : "Add Volunteer"}
+              </button>
+            </form>
+
+            {/* Load / Refresh button */}
+            <div style={{ marginBottom: 16 }}>
+              <button
+                onClick={async () => {
+                  if (!session?.access_token) return;
+                  try {
+                    const list = await getVolunteersFn({ data: { accessToken: session.access_token } });
+                    setVolunteerList(list.volunteers);
+                    toast.success("Volunteers loaded.");
+                  } catch {
+                    toast.error("Failed to load volunteers.");
+                  }
+                }}
+                style={{
+                  padding: "6px 14px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  background: "#fff",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontWeight: 500,
+                }}
+              >
+                {volunteerList.length > 0 ? "Refresh List" : "Load Volunteers"}
+              </button>
+            </div>
+
+            {/* Volunteer List */}
+            {volunteerList.length > 0 && (
+              <div style={{ display: "grid", gap: 8 }}>
+                {volunteerList.map((v: any) => (
+                  <div
+                    key={v.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 14px",
+                      background: "#f9fafb",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 8,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>
+                        {v.name || v.email}
+                      </div>
+                      <div style={{ fontSize: 12, color: "#6b7280" }}>
+                        {v.email}
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!session?.access_token) return;
+                        if (!window.confirm(`Remove ${v.email} as volunteer?`)) return;
+                        try {
+                          await removeVolunteerFn({
+                            data: { accessToken: session.access_token, volunteerId: v.id },
+                          });
+                          toast.success("Volunteer removed.");
+                          setVolunteerList((prev) => prev.filter((x: any) => x.id !== v.id));
+                        } catch (err: any) {
+                          toast.error(err?.message || "Failed to remove.");
+                        }
+                      }}
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: 6,
+                        border: "1px solid #fecaca",
+                        background: "#fef2f2",
+                        color: "#b91c1c",
+                        cursor: "pointer",
+                        fontSize: 12,
+                        fontWeight: 600,
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {volunteerList.length === 0 && (
+              <p style={{ fontSize: 13, color: "#9ca3af", margin: 0 }}>
+                No volunteers added yet. Click "Load Volunteers" to see existing ones.
+              </p>
+            )}
           </div>
         </div>
       )}

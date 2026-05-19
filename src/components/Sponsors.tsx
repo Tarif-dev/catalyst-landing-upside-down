@@ -1,5 +1,12 @@
 import { SectionTitle } from "./SectionTitle";
 import cloudPartnerLogo from "@/assets/sponsors/cloud_partner_utho_white.png";
+import osenLogo from "@/assets/sponsors/Osen_white_logo.png";
+import miroLogo from "@/assets/sponsors/Miro.png";
+import riseInStellarLogo from "@/assets/sponsors/rise_in_stellar.png";
+import sajagLogo from "@/assets/sponsors/Sajag_media.png";
+import drogLogo from "@/assets/sponsors/The_Drop_Organisation.png";
+import interviewBuddyLogo from "@/assets/sponsors/InterviewBuddy.png";
+import xyzLogo from "@/assets/sponsors/xyz-logo-white.png";
 
 type Tier = {
   tier: string;
@@ -11,24 +18,24 @@ type Tier = {
 
 const tiers: Tier[] = [
   {
-    tier: "Title Sponsor",
+    tier: "Gold Sponsor",
     tag: "Tier 01 · Headline",
-    note: "Presenting partner of Catalyst 2K26.",
+    note: "Leading the charge for Catalyst 2K26.",
     size: "xl",
-    sponsors: [{ name: "Hawkins National Lab", desc: "Presenting Partner" }],
-  },
-  {
-    tier: "Powered By",
-    tag: "Tier 02 · Co-Presenter",
-    note: "Fueling the 24-hour floor.",
-    size: "lg",
-    sponsors: [{ name: "Palace Arcade" }, { name: "Scoops Ahoy" }],
+    sponsors: [
+      {
+        name: "Osen",
+        desc: "Gold Sponsor",
+        logo: osenLogo,
+        href: "https://osen.io/",
+      },
+    ],
   },
   {
     tier: "Cloud Partner",
-    tag: "Tier 03 · Infrastructure",
+    tag: "Tier 02 · Infrastructure",
     note: "Compute, storage, and the grid beneath it all.",
-    size: "md",
+    size: "lg",
     sponsors: [
       {
         name: "Utho",
@@ -39,44 +46,77 @@ const tiers: Tier[] = [
     ],
   },
   {
-    tier: "AI Partner",
-    tag: "Tier 04 · Intelligence",
-    note: "Models, APIs, and the minds behind the demons.",
+    tier: "Blockchain Partner",
+    tag: "Tier 03 · Blockchain",
+    note: "Powering decentralised innovation on-chain.",
+    size: "lg",
+    sponsors: [
+      {
+        name: "Rise In Stellar",
+        desc: "Blockchain Partner",
+        logo: riseInStellarLogo,
+        href: "https://www.risein.com/",
+      },
+    ],
+  },
+  {
+    tier: "Associate Partners",
+    tag: "Tier 04 · Associates",
+    note: "The allies amplifying the signal.",
     size: "md",
     sponsors: [
-      { name: "Eleven Labs" },
-      { name: "Vecna Vectors" },
-      { name: "Demogorgon AI" },
+      {
+        name: "Miro",
+        desc: "Associate Partner",
+        logo: miroLogo,
+        href: "https://miro.com/",
+      },
+      {
+        name: "Interview Buddy",
+        desc: "Associate Partner",
+        logo: interviewBuddyLogo,
+        href: "https://interviewbuddy.net/",
+      },
+      {
+        name: ".xyz",
+        desc: "Associate Partner",
+        logo: xyzLogo,
+        href: "https://gen.xyz/",
+      },
     ],
   },
   {
     tier: "Community Partners",
-    tag: "Tier 05 · Outreach",
+    tag: "Tier 05 · Community",
     note: "The network. The signal carriers.",
-    size: "sm",
+    size: "md",
     sponsors: [
-      { name: "The Party" },
-      { name: "Hellfire Club" },
-      { name: "Radio Shack" },
-      { name: "Hawkins Post" },
-      { name: "Bradley's Big Buy" },
-      { name: "Family Video" },
+      {
+        name: "Sajag",
+        desc: "Media Partner",
+        logo: sajagLogo,
+      },
+      {
+        name: "The Drog Organisation",
+        desc: "Merchandise Partner",
+        logo: drogLogo,
+      },
     ],
   },
 ];
 
-const sizeMap = {
-  xl: "text-4xl md:text-6xl",
-  lg: "text-3xl md:text-5xl",
-  md: "text-2xl md:text-4xl",
-  sm: "text-xl md:text-2xl",
-};
-
 const colsMap = {
   xl: "grid-cols-1",
-  lg: "grid-cols-1 sm:grid-cols-2",
-  md: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  lg: "grid-cols-1",
+  md: "grid-cols-1 sm:grid-cols-3",
   sm: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
+};
+
+const logoSizeMap = {
+  xl: "max-h-36 max-w-[360px]",
+  lg: "max-h-24 max-w-[300px]",
+  md: "max-h-20 max-w-[240px]",
+  sm: "max-h-16 max-w-[200px]",
 };
 
 export function Sponsors() {
@@ -93,8 +133,7 @@ export function Sponsors() {
         </SectionTitle>
 
         <p className="mx-auto -mt-6 mb-16 md:mb-20 max-w-2xl text-center font-serif text-base md:text-lg italic text-bone/55 reveal">
-          The partners keeping the lights on when Hawkins flickers. More names
-          stepping through the gate soon.
+          The partners keeping the lights on when Hawkins flickers.
         </p>
 
         <div className="flex flex-col gap-16 md:gap-20">
@@ -137,14 +176,12 @@ export function Sponsors() {
                           <img
                             src={s.logo}
                             alt={s.name}
-                            className="max-h-20 w-auto max-w-[240px] object-contain opacity-95 drop-shadow-[0_0_22px_rgba(240,230,230,0.22)] transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
+                            className={`${logoSizeMap[t.size]} w-auto object-contain opacity-95 drop-shadow-[0_0_22px_rgba(240,230,230,0.22)] transition-all duration-500 group-hover:scale-105 group-hover:opacity-100`}
                             loading="lazy"
                           />
                         </div>
                       ) : (
-                        <div
-                          className={`font-display italic text-bone/85 leading-tight transition-all duration-500 group-hover:text-blood group-hover:text-glow-blood ${sizeMap[t.size]}`}
-                        >
+                        <div className="font-display text-4xl md:text-6xl italic text-bone/85 leading-tight transition-all duration-500 group-hover:text-blood group-hover:text-glow-blood">
                           {s.name}
                         </div>
                       )}

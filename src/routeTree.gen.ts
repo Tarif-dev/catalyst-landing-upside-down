@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VolunteerLoginRouteImport } from './routes/volunteer-login'
+import { Route as VolunteerRouteImport } from './routes/volunteer'
 import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -26,6 +28,16 @@ import { Route as SubmitTeamIdRouteImport } from './routes/submit.$teamId'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 import { Route as ApiDiscordCallbackRouteImport } from './routes/api.discord.callback'
 
+const VolunteerLoginRoute = VolunteerLoginRouteImport.update({
+  id: '/volunteer-login',
+  path: '/volunteer-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VolunteerRoute = VolunteerRouteImport.update({
+  id: '/volunteer',
+  path: '/volunteer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
   id: '/update-password',
   path: '/update-password',
@@ -118,6 +130,8 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/volunteer': typeof VolunteerRoute
+  '/volunteer-login': typeof VolunteerLoginRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
@@ -136,6 +150,8 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/volunteer': typeof VolunteerRoute
+  '/volunteer-login': typeof VolunteerLoginRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
@@ -155,6 +171,8 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/volunteer': typeof VolunteerRoute
+  '/volunteer-login': typeof VolunteerLoginRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
@@ -175,6 +193,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/update-password'
+    | '/volunteer'
+    | '/volunteer-login'
     | '/certificate/$code'
     | '/submit/$teamId'
     | '/team/join'
@@ -193,6 +213,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/update-password'
+    | '/volunteer'
+    | '/volunteer-login'
     | '/certificate/$code'
     | '/submit/$teamId'
     | '/team/join'
@@ -211,6 +233,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/update-password'
+    | '/volunteer'
+    | '/volunteer-login'
     | '/certificate/$code'
     | '/submit/$teamId'
     | '/team/join'
@@ -230,6 +254,8 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
+  VolunteerRoute: typeof VolunteerRoute
+  VolunteerLoginRoute: typeof VolunteerLoginRoute
   CertificateCodeRoute: typeof CertificateCodeRoute
   SubmitTeamIdRoute: typeof SubmitTeamIdRoute
   TeamJoinRoute: typeof TeamJoinRoute
@@ -240,6 +266,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/volunteer-login': {
+      id: '/volunteer-login'
+      path: '/volunteer-login'
+      fullPath: '/volunteer-login'
+      preLoaderRoute: typeof VolunteerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/volunteer': {
+      id: '/volunteer'
+      path: '/volunteer'
+      fullPath: '/volunteer'
+      preLoaderRoute: typeof VolunteerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/update-password': {
       id: '/update-password'
       path: '/update-password'
@@ -366,6 +406,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
+  VolunteerRoute: VolunteerRoute,
+  VolunteerLoginRoute: VolunteerLoginRoute,
   CertificateCodeRoute: CertificateCodeRoute,
   SubmitTeamIdRoute: SubmitTeamIdRoute,
   TeamJoinRoute: TeamJoinRoute,
