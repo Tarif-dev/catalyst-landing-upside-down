@@ -76,6 +76,10 @@ function Admin() {
   const [checkinLoading, setCheckinLoading] = useState(false);
   const [checkinSearch, setCheckinSearch] = useState("");
   const [checkinFilter, setCheckinFilter] = useState<string>("all");
+  const [participantsSearch, setParticipantsSearch] = useState("");
+  const [participantsPaymentFilter, setParticipantsPaymentFilter] = useState<string>("all");
+  const [participantsProfileFilter, setParticipantsProfileFilter] = useState<string>("all");
+  const [participantsGenderFilter, setParticipantsGenderFilter] = useState<string>("all");
   const getAllCheckinStatusesFn = useServerFn(getAllCheckinStatuses);
 
   const load = async () => {
@@ -254,10 +258,38 @@ function Admin() {
     URL.revokeObjectURL(url);
   };
 
+  const getFilteredParticipants = () => {
+    let items = participants;
+    const q = participantsSearch.toLowerCase().trim();
+    if (q) {
+      items = items.filter((p: any) =>
+        (p.full_name || "").toLowerCase().includes(q) ||
+        (p.email || "").toLowerCase().includes(q) ||
+        (p.phone || "").toLowerCase().includes(q) ||
+        (p.college || "").toLowerCase().includes(q) ||
+        (p.course || "").toLowerCase().includes(q) ||
+        (p.pass_code || "").toLowerCase().includes(q)
+      );
+    }
+    if (participantsPaymentFilter !== "all") {
+      items = items.filter((p: any) => p.payment_status === participantsPaymentFilter);
+    }
+    if (participantsProfileFilter !== "all") {
+      const isCompleteExpected = participantsProfileFilter === "complete";
+      items = items.filter((p: any) => !!p.is_complete === isCompleteExpected);
+    }
+    if (participantsGenderFilter !== "all") {
+      items = items.filter((p: any) => p.gender === participantsGenderFilter);
+    }
+    return items;
+  };
+
   const downloadTeamsCSV = () => {
     let csv =
-      "Team Name,Track,Team Code,Winner,Members,Verified Participants,Submission\n";
+      "Team Name,Track,Team Code,Winner,Leader Email,Members,Member Emails,Verified Participants,Submission\n";
     teams.forEach((t) => {
+      const leaderMember = t.team_members.find((m: any) => m.role === "leader");
+      const leaderEmail = leaderMember?.email || "";
       const members = t.team_members
         .map((m: any) => {
           const payment =
@@ -265,21 +297,26 @@ function Admin() {
           return `${m.full_name}(${m.role}, ${statusLabel(payment)})`;
         })
         .join("; ");
+      const memberEmails = t.team_members
+        .map((m: any) => m.email || "")
+        .filter(Boolean)
+        .join("; ");
       const paidCount = t.team_members.filter(
         (m: any) =>
           participantByUserId.get(m.user_id)?.payment_status === "paid",
       ).length;
       const sub = t.submissions?.[0]?.title ?? "";
-      csv += `"${t.name}","${t.track}","${t.pass_code}","${t.is_winner ? "Yes" : "No"}","${members}","${paidCount}/${t.team_members.length}","${sub}"\n`;
+      csv += `"${t.name}","${t.track}","${t.pass_code}","${t.is_winner ? "Yes" : "No"}","${leaderEmail}","${members}","${memberEmails}","${paidCount}/${t.team_members.length}","${sub}"\n`;
     });
     downloadCSV(csv, "catalyst-teams.csv");
   };
 
   const downloadParticipantsCSV = () => {
     let csv =
-      "Full Name,Sex/Gender,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,Profile Status,Status,Individual Pass Code\n";
-    participants.forEach((p) => {
-      csv += `"${p.full_name || ""}","${genderLabel(p.gender)}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${statusLabel(p.payment_status)}","${p.pass_code || ""}"\n`;
+      "Full Name,Email,Sex/Gender,Phone,College,Course,Year,DOB,Address,LinkedIn,GitHub,Resume,Dietary,Profile Status,Status,Individual Pass Code\n";
+    const filtered = getFilteredParticipants();
+    filtered.forEach((p) => {
+      csv += `"${p.full_name || ""}","${p.email || ""}","${genderLabel(p.gender)}","${p.phone || ""}","${p.college || ""}","${p.course || ""}","${p.year_of_study || ""}","${p.dob || ""}","${(p.address || "").replace(/\n/g, " ")}","${p.linkedin_url || ""}","${p.github_url || ""}","${p.resume_url || ""}","${p.dietary_restrictions || ""}","${p.is_complete ? "Complete" : "Incomplete"}","${statusLabel(p.payment_status)}","${p.pass_code || ""}"\n`;
     });
     downloadCSV(csv, "catalyst-participants.csv");
   };
@@ -1300,188 +1337,305 @@ function Admin() {
             )}
 
             {/* ────── PARTICIPANTS TAB ────── */}
-            {activeTab === "participants" && (
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: 14,
-                }}
-              >
-                <thead>
-                  <tr style={{ background: "#f9fafb" }}>
-                    {[
-                      "Name & Contact",
-                      "Institution",
-                      "Course",
-                      "Sex/Gender",
-                      "Profile",
-                      "Payment",
-                      "Individual Pass Code",
-                      "Actions",
-                    ].map((h) => (
-                      <th
-                        key={h}
+            {activeTab === "participants" && (() => {
+              const filteredParticipants = getFilteredParticipants();
+              return (
+                <div>
+                  {/* Filters Row */}
+                  <div style={{ padding: "16px 24px", borderBottom: "1px solid #e5e7eb", background: "#f9fafb", display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                    <div style={{ flex: "1 1 240px", minWidth: 200, position: "relative" }}>
+                      <input
+                        type="text"
+                        placeholder="Search name, email, phone, college, pass code..."
+                        value={participantsSearch}
+                        onChange={(e) => setParticipantsSearch(e.target.value)}
                         style={{
-                          padding: "10px 16px",
-                          textAlign: "left",
-                          fontSize: 11,
-                          fontWeight: 600,
-                          color: "#6b7280",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                          borderBottom: "1px solid #e5e7eb",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {participants.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={8}
-                        style={{
-                          padding: "32px 16px",
-                          textAlign: "center",
-                          color: "#9ca3af",
-                        }}
-                      >
-                        No participants yet.
-                      </td>
-                    </tr>
-                  )}
-                  {participants.map((p, i) => (
-                    <tr
-                      key={p.id}
-                      style={{
-                        borderBottom: "1px solid #f3f4f6",
-                        background: i % 2 === 0 ? "#fff" : "#fafafa",
-                      }}
-                    >
-                      <td style={{ padding: "12px 16px" }}>
-                        <div style={{ fontWeight: 600 }}>
-                          {p.full_name || "Anonymous"}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            color: "#6b7280",
-                            marginTop: 2,
-                          }}
-                        >
-                          {p.phone || "—"}
-                        </div>
-                        {p.email && (
-                          <div
-                            style={{
-                              fontSize: 12,
-                              color: "#2563eb",
-                              marginTop: 2,
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigator.clipboard.writeText(p.email);
-                              toast.success("Email copied to clipboard");
-                            }}
-                            title="Click to copy email"
-                          >
-                            {p.email}
-                            <svg
-                              width="12"
-                              height="12"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <rect
-                                x="9"
-                                y="9"
-                                width="13"
-                                height="13"
-                                rx="2"
-                                ry="2"
-                              ></rect>
-                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: "12px 16px", fontSize: 13 }}>
-                        {p.college || "—"}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <div style={{ fontSize: 13 }}>{p.course || "—"}</div>
-                        <div style={{ fontSize: 12, color: "#6b7280" }}>
-                          {p.year_of_study || ""}
-                        </div>
-                      </td>
-                      <td style={{ padding: "12px 16px", fontSize: 13 }}>
-                        {genderLabel(p.gender)}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        {badge(
-                          p.is_complete ? "Complete" : "Incomplete",
-                          p.is_complete ? "green" : "red",
-                        )}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        {badge(
-                          statusLabel(p.payment_status),
-                          p.payment_status === "paid" ? "green" : "yellow",
-                        )}
-                      </td>
-                      <td
-                        style={{
-                          padding: "12px 16px",
-                          fontFamily: "ui-monospace, SFMono-Regular, monospace",
+                          width: "100%",
+                          padding: "8px 12px 8px 36px",
+                          borderRadius: 6,
+                          border: "1px solid #d1d5db",
                           fontSize: 13,
                         }}
+                      />
+                      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#9ca3af", fontSize: 14 }}>🔍</span>
+                    </div>
+
+                    <div style={{ minWidth: 140 }}>
+                      <select
+                        value={participantsPaymentFilter}
+                        onChange={(e) => setParticipantsPaymentFilter(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          borderRadius: 6,
+                          border: "1px solid #d1d5db",
+                          fontSize: 13,
+                          background: "#fff",
+                          cursor: "pointer"
+                        }}
                       >
-                        {p.pass_code || "—"}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <div
-                          style={{ display: "flex", gap: 6, flexWrap: "wrap" }}
+                        <option value="all">All Payments</option>
+                        <option value="paid">Verified (Paid)</option>
+                        <option value="unpaid">Unverified (Unpaid)</option>
+                        <option value="pending">Pending</option>
+                        <option value="refunded">Refunded</option>
+                      </select>
+                    </div>
+
+                    <div style={{ minWidth: 140 }}>
+                      <select
+                        value={participantsProfileFilter}
+                        onChange={(e) => setParticipantsProfileFilter(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          borderRadius: 6,
+                          border: "1px solid #d1d5db",
+                          fontSize: 13,
+                          background: "#fff",
+                          cursor: "pointer"
+                        }}
+                      >
+                        <option value="all">All Profile Statuses</option>
+                        <option value="complete">Complete</option>
+                        <option value="incomplete">Incomplete</option>
+                      </select>
+                    </div>
+
+                    <div style={{ minWidth: 120 }}>
+                      <select
+                        value={participantsGenderFilter}
+                        onChange={(e) => setParticipantsGenderFilter(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          borderRadius: 6,
+                          border: "1px solid #d1d5db",
+                          fontSize: 13,
+                          background: "#fff",
+                          cursor: "pointer"
+                        }}
+                      >
+                        <option value="all">All Genders</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Others</option>
+                      </select>
+                    </div>
+
+                    {(participantsSearch || participantsPaymentFilter !== "all" || participantsProfileFilter !== "all" || participantsGenderFilter !== "all") && (
+                      <button
+                        onClick={() => {
+                          setParticipantsSearch("");
+                          setParticipantsPaymentFilter("all");
+                          setParticipantsProfileFilter("all");
+                          setParticipantsGenderFilter("all");
+                        }}
+                        style={{
+                          padding: "8px 16px",
+                          borderRadius: 6,
+                          border: "1px solid #e5e7eb",
+                          background: "#f3f4f6",
+                          color: "#374151",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Reset Filters
+                      </button>
+                    )}
+
+                    <div style={{ marginLeft: "auto", fontSize: 13, color: "#6b7280", fontWeight: 500 }}>
+                      Showing {filteredParticipants.length} of {participants.length}
+                    </div>
+                  </div>
+
+                  <table
+                    style={{
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      fontSize: 14,
+                    }}
+                  >
+                    <thead>
+                      <tr style={{ background: "#f9fafb" }}>
+                        {[
+                          "Name & Contact",
+                          "Institution",
+                          "Course",
+                          "Sex/Gender",
+                          "Profile",
+                          "Payment",
+                          "Individual Pass Code",
+                          "Actions",
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            style={{
+                              padding: "10px 16px",
+                              textAlign: "left",
+                              fontSize: 11,
+                              fontWeight: 600,
+                              color: "#6b7280",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                              borderBottom: "1px solid #e5e7eb",
+                            }}
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredParticipants.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={8}
+                            style={{
+                              padding: "32px 16px",
+                              textAlign: "center",
+                              color: "#9ca3af",
+                            }}
+                          >
+                            {participants.length === 0
+                              ? "No participants yet."
+                              : "No participants match the selected filters."}
+                          </td>
+                        </tr>
+                      )}
+                      {filteredParticipants.map((p, i) => (
+                        <tr
+                          key={p.id}
+                          style={{
+                            borderBottom: "1px solid #f3f4f6",
+                            background: i % 2 === 0 ? "#fff" : "#fafafa",
+                          }}
                         >
-                          {p.payment_status !== "paid"
-                            ? btn(
-                                "Mark Verified",
-                                () => setParticipantPaymentStatus(p.id, "paid"),
-                                "green",
-                              )
-                            : btn(
-                                "Mark Unverified",
-                                () =>
-                                  setParticipantPaymentStatus(p.id, "unpaid"),
-                                "yellow",
+                          <td style={{ padding: "12px 16px" }}>
+                            <div style={{ fontWeight: 600 }}>
+                              {p.full_name || "Anonymous"}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: "#6b7280",
+                                marginTop: 2,
+                              }}
+                            >
+                              {p.phone || "—"}
+                            </div>
+                            {p.email && (
+                              <div
+                                style={{
+                                  fontSize: 12,
+                                  color: "#2563eb",
+                                  marginTop: 2,
+                                  cursor: "pointer",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "4px",
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(p.email);
+                                  toast.success("Email copied to clipboard");
+                                }}
+                                title="Click to copy email"
+                              >
+                                {p.email}
+                                <svg
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <rect
+                                    x="9"
+                                    y="9"
+                                    width="13"
+                                    height="13"
+                                    rx="2"
+                                    ry="2"
+                                  ></rect>
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: "12px 16px", fontSize: 13 }}>
+                            {p.college || "—"}
+                          </td>
+                          <td style={{ padding: "12px 16px" }}>
+                            <div style={{ fontSize: 13 }}>{p.course || "—"}</div>
+                            <div style={{ fontSize: 12, color: "#6b7280" }}>
+                              {p.year_of_study || ""}
+                            </div>
+                          </td>
+                          <td style={{ padding: "12px 16px", fontSize: 13 }}>
+                            {genderLabel(p.gender)}
+                          </td>
+                          <td style={{ padding: "12px 16px" }}>
+                            {badge(
+                              p.is_complete ? "Complete" : "Incomplete",
+                              p.is_complete ? "green" : "red",
+                            )}
+                          </td>
+                          <td style={{ padding: "12px 16px" }}>
+                            {badge(
+                              statusLabel(p.payment_status),
+                              p.payment_status === "paid" ? "green" : "yellow",
+                            )}
+                          </td>
+                          <td
+                            style={{
+                              padding: "12px 16px",
+                              fontFamily: "ui-monospace, SFMono-Regular, monospace",
+                              fontSize: 13,
+                            }}
+                          >
+                            {p.pass_code || "—"}
+                          </td>
+                          <td style={{ padding: "12px 16px" }}>
+                            <div
+                              style={{ display: "flex", gap: 6, flexWrap: "wrap" }}
+                            >
+                              {p.payment_status !== "paid"
+                                ? btn(
+                                    "Mark Verified",
+                                    () => setParticipantPaymentStatus(p.id, "paid"),
+                                    "green",
+                                  )
+                                : btn(
+                                    "Mark Unverified",
+                                    () =>
+                                      setParticipantPaymentStatus(p.id, "unpaid"),
+                                    "yellow",
+                                  )}
+                              {btn(
+                                "View Details",
+                                () => setSelectedParticipant(p),
+                                "blue",
                               )}
-                          {btn(
-                            "View Details",
-                            () => setSelectedParticipant(p),
-                            "blue",
-                          )}
-                          {btn(
-                            "Delete",
-                            () => beginDeleteParticipant(p),
-                            "red",
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                              {btn(
+                                "Delete",
+                                () => beginDeleteParticipant(p),
+                                "red",
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </main>
@@ -2515,9 +2669,9 @@ function Admin() {
                   </button>
                   <button onClick={() => {
                     const filtered = getFilteredCheckins();
-                    let csv = "Name,Pass Code,Team,Track,College,Gender,Gate Entry,Check-in,Meal 1,Meal 2\n";
+                    let csv = "Name,Email,Pass Code,Team,Track,College,Gender,Gate Entry,Check-in,Meal 1,Meal 2\n";
                     filtered.forEach((s: any) => {
-                      csv += `"${s.name}","${s.passCode}","${s.teamName}","${s.track}","${s.college}","${s.gender}","${s.gate_entry ? "Yes" : "No"}","${s.checked_in ? "Yes" : "No"}","${s.meal_1 ? "Yes" : "No"}","${s.meal_2 ? "Yes" : "No"}"\n`;
+                      csv += `"${s.name}","${s.email || ""}","${s.passCode}","${s.teamName}","${s.track}","${s.college}","${s.gender}","${s.gate_entry ? "Yes" : "No"}","${s.checked_in ? "Yes" : "No"}","${s.meal_1 ? "Yes" : "No"}","${s.meal_2 ? "Yes" : "No"}"\n`;
                     });
                     const blob = new Blob([csv], { type: "text/csv" });
                     const url = URL.createObjectURL(blob);
