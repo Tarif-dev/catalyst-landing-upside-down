@@ -152,6 +152,7 @@ export function AdminScanner({ accessToken }: { accessToken: string }) {
   const scannerContainerId = "qr-scanner-container";
   const lastScannedRef = useRef<string>("");
   const cooldownRef = useRef<number>(0);
+  const stopPromiseRef = useRef<Promise<void>>(Promise.resolve());
 
   const lookupFn = useServerFn(lookupParticipant);
   const recordFn = useServerFn(recordCheckinAction);
@@ -318,6 +319,7 @@ export function AdminScanner({ accessToken }: { accessToken: string }) {
     let html5QrCode: any = null;
     let mounted = true;
     const initScanner = async () => {
+      await stopPromiseRef.current;
       try {
         const { Html5Qrcode } = await import("html5-qrcode");
         if (!mounted) return;
@@ -351,11 +353,12 @@ export function AdminScanner({ accessToken }: { accessToken: string }) {
     return () => {
       mounted = false;
       clearTimeout(timeout);
-      if (html5QrCode)
-        html5QrCode
+      if (html5QrCode) {
+        stopPromiseRef.current = html5QrCode
           .stop()
           .then(() => html5QrCode.clear())
           .catch(() => {});
+      }
       scannerRef.current = null;
       setScannerReady(false);
     };
