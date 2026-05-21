@@ -90,7 +90,7 @@ function NewTeam() {
       return;
     }
     toast.success("Team created. Now add your members.");
-    nav({ to: "/team/$teamId", params: { teamId: data.id } });
+    nav({ to: "/dashboard" });
   };
 
   return (

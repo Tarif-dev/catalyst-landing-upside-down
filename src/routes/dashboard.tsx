@@ -10,6 +10,7 @@ import { getDiscordAuthUrl } from "@/lib/discord";
 import { toast } from "sonner";
 import { Copy, LogOut, Crown, MessageSquare, X } from "lucide-react";
 import { EventPass } from "@/components/EventPass";
+import ReactMarkdown from "react-markdown";
 
 const DISCORD_URL = "https://discord.gg/SDDT9D5kqs";
 
@@ -49,7 +50,29 @@ const genderLabel = (gender?: string | null) =>
   gender ||
   "—";
 
-type TabId = "overview" | "team" | "pass" | "submission" | "certificates";
+const splitTechStack = (value?: string | null) =>
+  value
+    ?.split(",")
+    .map((item) => item.trim())
+    .filter(Boolean) ?? [];
+
+const formatProjectTimestamp = (value?: string | null) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+};
+
+type TabId =
+  | "overview"
+  | "team"
+  | "pass"
+  | "submission"
+  | "project"
+  | "certificates";
 
 function Dashboard() {
   const { user, profile, session, loading } = useAuth();
@@ -84,6 +107,7 @@ function Dashboard() {
   const canSubmit = members.length >= 2;
   const isPaid = participantProfile?.payment_status === "paid";
   const currentUser = members.find((m) => m.user_id === user?.id) || members[0];
+  const submissionTechStack = splitTechStack(submission?.tech_stack);
 
   // Handle Discord callback query params
   useEffect(() => {
@@ -268,6 +292,7 @@ function Dashboard() {
     { id: "team", label: "My Team" },
     { id: "pass", label: "Pass & Payment" },
     { id: "submission", label: "Submission" },
+    { id: "project", label: "Your Project" },
   ];
   if (certs.length > 0) {
     tabs.push({ id: "certificates", label: "Certificates" });
@@ -864,6 +889,202 @@ function Dashboard() {
                     </Link>
                   </div>
                 )}
+              </>
+            )}
+          </div>
+        )}
+
+        {activeTab === "project" && (
+          <div className="space-y-8">
+            {!team ? (
+              <div className="panel p-8 text-center text-bone/70 font-serif reveal">
+                Join a team first to view your project submission.
+              </div>
+            ) : !submission ? (
+              <div className="panel p-8 text-center reveal">
+                <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-blood mb-4">
+                  Your Project
+                </p>
+                <h2 className="font-display text-3xl text-bone mb-4">
+                  No project submitted yet
+                </h2>
+                <p className="font-serif text-bone/70 mb-8 max-w-md mx-auto">
+                  Once your team submits, the full project details and
+                  screenshots will appear here.
+                </p>
+                <Link
+                  to="/submit/$teamId"
+                  params={{ teamId: team.id }}
+                  className="btn-primary inline-flex items-center"
+                >
+                  Submit Project
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="panel p-5 sm:p-8 reveal">
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-blood">
+                        Your Project
+                      </p>
+                      <h2 className="mt-2 font-display text-3xl sm:text-4xl text-bone">
+                        {submission.title}
+                      </h2>
+                      <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.28em] text-bone/40">
+                        Submitted{" "}
+                        {formatProjectTimestamp(submission.submitted_at)}
+                      </p>
+                      <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.28em] text-bone/40">
+                        Last updated{" "}
+                        {formatProjectTimestamp(submission.updated_at)}
+                      </p>
+                    </div>
+
+                    <Link
+                      to="/submit/$teamId"
+                      params={{ teamId: team.id }}
+                      className="btn-secondary inline-flex min-h-10 items-center justify-center px-5"
+                    >
+                      Edit project
+                    </Link>
+                  </div>
+
+                  <div className="mt-8 grid gap-4 lg:grid-cols-2">
+                    <div className="border border-white/10 bg-black/20 p-5">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                        Problem Statement
+                      </p>
+                      <p className="mt-3 font-serif text-base leading-relaxed text-bone/80 whitespace-pre-wrap">
+                        {submission.problem_statement || "—"}
+                      </p>
+                    </div>
+
+                    <div className="border border-white/10 bg-black/20 p-5">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-bone/45">
+                        Solution & AI Usage
+                      </p>
+                      <p className="mt-3 font-serif text-base leading-relaxed text-bone/80 whitespace-pre-wrap">
+                        {submission.solution_approach || "—"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="panel p-5 sm:p-8 reveal-delay-1">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan">
+                    Project Description
+                  </p>
+                  <div className="mt-5 prose prose-invert prose-blood prose-sm sm:prose-base max-w-none text-bone/80">
+                    <ReactMarkdown>{submission.description}</ReactMarkdown>
+                  </div>
+                </div>
+
+                <div className="grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
+                  <div className="panel p-5 sm:p-8 reveal-delay-1">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan">
+                      Tech Stack
+                    </p>
+                    {submissionTechStack.length > 0 ? (
+                      <div className="mt-5 flex flex-wrap gap-2">
+                        {submissionTechStack.map((tech) => (
+                          <span
+                            key={tech}
+                            className="border border-cyan/25 bg-cyan/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-cyan"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-4 font-serif text-bone/65">
+                        No tech stack provided.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="panel p-5 sm:p-8 reveal-delay-2">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan">
+                      Project Links
+                    </p>
+                    <div className="mt-5 space-y-3">
+                      {[
+                        {
+                          label: "Repository",
+                          url: submission.repo_url,
+                        },
+                        {
+                          label: "Live Demo",
+                          url: submission.demo_url,
+                        },
+                        {
+                          label: "Video Walkthrough",
+                          url: submission.video_url,
+                        },
+                      ].map((item) => (
+                        <div
+                          key={item.label}
+                          className="border border-white/10 bg-black/20 p-4"
+                        >
+                          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-bone/40">
+                            {item.label}
+                          </p>
+                          {item.url ? (
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-2 block break-all font-mono text-sm text-cyan hover:text-bone transition-colors"
+                            >
+                              {item.url}
+                            </a>
+                          ) : (
+                            <p className="mt-2 font-serif text-sm text-bone/55">
+                              Not provided
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="panel p-5 sm:p-8 reveal-delay-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan">
+                      Screenshots
+                    </p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-bone/35">
+                      {submission.screenshots?.length ?? 0} attached
+                    </p>
+                  </div>
+
+                  {submission.screenshots?.length ? (
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {submission.screenshots.map(
+                        (src: string, index: number) => (
+                          <a
+                            key={`${src}-${index}`}
+                            href={src}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block overflow-hidden border border-white/10 bg-black/20 transition-colors hover:border-cyan/40"
+                          >
+                            <img
+                              src={src}
+                              alt={`${submission.title} screenshot ${index + 1}`}
+                              className="aspect-video w-full object-cover"
+                            />
+                          </a>
+                        ),
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-6 border border-white/10 bg-black/20 p-5 font-serif text-bone/65">
+                      No screenshots uploaded.
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>

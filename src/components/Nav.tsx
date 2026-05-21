@@ -31,6 +31,7 @@ export function Nav() {
   }, [open]);
 
   const links = [
+    { href: "/projects", label: "Projects" },
     { href: "/#details", label: "Details" },
     { href: "/#prizes", label: "Prizes" },
     { href: "/#tracks", label: "Tracks" },
@@ -39,7 +40,10 @@ export function Nav() {
     { href: "/#venue", label: "Venue" },
     { href: "/#faq", label: "FAQ" },
     { href: "/#contact", label: "Contact" },
-    { href: "https://sincere-sherbet-9ff.notion.site/CATALYST-2K26-IN-CAMPUS-AI-HACKATHON-RULEBOOK-3541fdb81c1a803e81e8c82cf250da72", label: "Rulebook" },
+    {
+      href: "https://sincere-sherbet-9ff.notion.site/CATALYST-2K26-IN-CAMPUS-AI-HACKATHON-RULEBOOK-3541fdb81c1a803e81e8c82cf250da72",
+      label: "Rulebook",
+    },
   ];
 
   return (

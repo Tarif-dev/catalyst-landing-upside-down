@@ -52,6 +52,20 @@ const TECH_OPTIONS = [
   "Other",
 ];
 
+const MAX_SCREENSHOTS = 5;
+const MAX_SCREENSHOT_SIZE_MB = 5;
+const MAX_SCREENSHOT_SIZE_BYTES = MAX_SCREENSHOT_SIZE_MB * 1024 * 1024;
+
+type ScreenshotItem = {
+  id: string;
+  src: string;
+  file?: File;
+  uploaded: boolean;
+};
+
+const createScreenshotItemId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
 const schema = z.object({
   title: z
     .string()
@@ -137,8 +151,7 @@ function Submit() {
 
   const [techStack, setTechStack] = useState<string[]>([]);
   const [customTech, setCustomTech] = useState("");
-  const [screenshots, setScreenshots] = useState<string[]>([]);
-  const [screenshotFiles, setScreenshotFiles] = useState<File[]>([]);
+  const [screenshotItems, setScreenshotItems] = useState<ScreenshotItem[]>([]);
 
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -150,6 +163,7 @@ function Submit() {
   const [submitted, setSubmitted] = useState(false);
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const screenshotItemsRef = useRef<ScreenshotItem[]>([]);
 
   const {
     register,
@@ -174,6 +188,20 @@ function Submit() {
   });
 
   const formValues = watch();
+
+  useEffect(() => {
+    screenshotItemsRef.current = screenshotItems;
+  }, [screenshotItems]);
+
+  useEffect(() => {
+    return () => {
+      screenshotItemsRef.current.forEach((item) => {
+        if (item.file && !item.uploaded) {
+          URL.revokeObjectURL(item.src);
+        }
+      });
+    };
+  }, []);
 
   // Auto-save logic
   useEffect(() => {
@@ -211,13 +239,16 @@ function Submit() {
       ]);
       setTeam(t);
       setMemberCount(count ?? 0);
+      setScreenshotItems([]);
 
       const localDraftStr = localStorage.getItem(`catalyst-draft-${teamId}`);
       let draft = null;
       if (localDraftStr) {
         try {
           draft = JSON.parse(localDraftStr);
-        } catch (e) {}
+        } catch {
+          draft = null;
+        }
       }
 
       if (s) {
@@ -239,7 +270,13 @@ function Submit() {
           );
         }
         if ((s as any).screenshots?.length) {
-          setScreenshots((s as any).screenshots);
+          setScreenshotItems(
+            (s as any).screenshots.map((src: string) => ({
+              id: createScreenshotItemId(),
+              src,
+              uploaded: true,
+            })),
+          );
         }
       } else if (draft) {
         reset({
@@ -271,30 +308,46 @@ function Submit() {
     }
   };
 
-  const handleScreenshots = async (files: File[]) => {
-    const total = screenshotFiles.length + files.length;
-    if (total > 5) {
-      toast.error("Maximum 5 screenshots allowed.");
-      return;
-    }
-    for (const f of files) {
-      if (f.size > 5 * 1024 * 1024) {
-        toast.error(`${f.name} exceeds 5MB limit.`);
+  const handleScreenshots = useCallback(
+    async (files: File[]) => {
+      const total = screenshotItems.length + files.length;
+      if (total > MAX_SCREENSHOTS) {
+        toast.error(`Maximum ${MAX_SCREENSHOTS} screenshots allowed.`);
         return;
       }
-      if (!f.type.startsWith("image/")) {
-        toast.error(`${f.name} is not an image.`);
-        return;
+      for (const f of files) {
+        if (f.size > MAX_SCREENSHOT_SIZE_BYTES) {
+          toast.error(
+            `${f.name} exceeds ${MAX_SCREENSHOT_SIZE_MB}MB per-photo limit.`,
+          );
+          return;
+        }
+        if (!f.type.startsWith("image/")) {
+          toast.error(`${f.name} is not an image.`);
+          return;
+        }
       }
-    }
-    setScreenshotFiles((prev) => [...prev, ...files]);
-    const previews = files.map((f) => URL.createObjectURL(f));
-    setScreenshots((prev) => [...prev, ...previews]);
-  };
+      setScreenshotItems((prev) => [
+        ...prev,
+        ...files.map((file) => ({
+          id: createScreenshotItemId(),
+          src: URL.createObjectURL(file),
+          file,
+          uploaded: false,
+        })),
+      ]);
+    },
+    [screenshotItems.length],
+  );
 
-  const removeScreenshot = (idx: number) => {
-    setScreenshots((prev) => prev.filter((_, i) => i !== idx));
-    setScreenshotFiles((prev) => prev.filter((_, i) => i !== idx));
+  const removeScreenshot = (id: string) => {
+    setScreenshotItems((prev) => {
+      const removed = prev.find((item) => item.id === id);
+      if (removed?.file && !removed.uploaded) {
+        URL.revokeObjectURL(removed.src);
+      }
+      return prev.filter((item) => item.id !== id);
+    });
   };
 
   const onDragOver = useCallback((e: React.DragEvent) => {
@@ -315,7 +368,7 @@ function Submit() {
         handleScreenshots(Array.from(e.dataTransfer.files));
       }
     },
-    [screenshotFiles, screenshots],
+    [handleScreenshots],
   );
 
   const nextStep = async () => {
@@ -338,22 +391,28 @@ function Submit() {
   const submit = async (values: FormValues) => {
     setSaving(true);
     try {
-      const uploadPromises = screenshotFiles.map(async (file) => {
-        const path = `${teamId}/${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-        const { error: upErr } = await supabase.storage
-          .from("submissions")
-          .upload(path, file, { upsert: true });
-        if (upErr) throw upErr;
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("submissions").getPublicUrl(path);
-        return publicUrl;
-      });
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const finalScreenshots = [
-        ...screenshots.filter((s) => s.startsWith("http")),
-        ...uploadedUrls,
-      ];
+      const uploadedEntries = await Promise.all(
+        screenshotItems
+          .filter((item) => item.file && !item.uploaded)
+          .map(async (item) => {
+            const file = item.file!;
+            const path = `${teamId}/${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+            const { error: upErr } = await supabase.storage
+              .from("submissions")
+              .upload(path, file, { upsert: true });
+            if (upErr) throw upErr;
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from("submissions").getPublicUrl(path);
+            return [item.id, publicUrl] as const;
+          }),
+      );
+      const uploadedUrlById = new Map(uploadedEntries);
+      const finalScreenshots = screenshotItems
+        .map((item) =>
+          item.uploaded ? item.src : uploadedUrlById.get(item.id),
+        )
+        .filter((url): url is string => Boolean(url));
 
       const payload: any = {
         team_id: teamId,
@@ -411,11 +470,7 @@ function Submit() {
         <p className="text-bone/60 mb-4">
           You need at least 2 members on your team before submitting.
         </p>
-        <Link
-          to="/team/$teamId"
-          params={{ teamId }}
-          className="text-blood underline"
-        >
+        <Link to="/dashboard" className="text-blood underline">
           Manage team →
         </Link>
       </PortalShell>
@@ -669,28 +724,32 @@ function Submit() {
               </div>
 
               <div className="pt-4 border-t border-bone/10">
-                {field("Screenshots (Max 5)")}
+                {field(`Screenshots (Max ${MAX_SCREENSHOTS})`)}
+                <p className="mt-2 font-serif text-sm text-bone/55">
+                  Upload up to {MAX_SCREENSHOTS} images, with a{" "}
+                  {MAX_SCREENSHOT_SIZE_MB}MB max per photo.
+                </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-2">
-                  {screenshots.map((src, i) => (
+                  {screenshotItems.map((item) => (
                     <div
-                      key={i}
+                      key={item.id}
                       className="relative aspect-video bg-black/40 border border-bone/15 overflow-hidden group"
                     >
                       <img
-                        src={src}
+                        src={item.src}
                         alt="Screenshot"
                         className="w-full h-full object-cover"
                       />
                       <button
                         type="button"
-                        onClick={() => removeScreenshot(i)}
+                        onClick={() => removeScreenshot(item.id)}
                         className="absolute top-1.5 right-1.5 bg-black/70 text-bone hover:text-blood p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   ))}
-                  {screenshots.length < 5 && (
+                  {screenshotItems.length < MAX_SCREENSHOTS && (
                     <label
                       onDragOver={onDragOver}
                       onDragLeave={onDragLeave}
@@ -702,6 +761,9 @@ function Submit() {
                       />
                       <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-center text-bone/40 px-2">
                         Click or Drop
+                      </span>
+                      <span className="mt-1 px-2 text-center font-mono text-[8px] uppercase tracking-[0.18em] text-bone/30">
+                        Max {MAX_SCREENSHOT_SIZE_MB}MB each
                       </span>
                       <input
                         ref={fileRef}
@@ -766,7 +828,7 @@ function Submit() {
                     Media
                   </span>
                   <p className="text-sm text-bone/80">
-                    {screenshots.length} Screenshots attached
+                    {screenshotItems.length} Screenshots attached
                   </p>
                 </div>
               </div>

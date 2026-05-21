@@ -13,6 +13,7 @@ import { Route as VolunteerLoginRouteImport } from './routes/volunteer-login'
 import { Route as VolunteerRouteImport } from './routes/volunteer'
 import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
@@ -46,6 +47,11 @@ const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/register': typeof RegisterRoute
   '/update-password': typeof UpdatePasswordRoute
   '/volunteer': typeof VolunteerRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/register': typeof RegisterRoute
   '/update-password': typeof UpdatePasswordRoute
   '/volunteer': typeof VolunteerRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/register': typeof RegisterRoute
   '/update-password': typeof UpdatePasswordRoute
   '/volunteer': typeof VolunteerRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/profile'
+    | '/projects'
     | '/register'
     | '/update-password'
     | '/volunteer'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/profile'
+    | '/projects'
     | '/register'
     | '/update-password'
     | '/volunteer'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/profile'
+    | '/projects'
     | '/register'
     | '/update-password'
     | '/volunteer'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
+  ProjectsRoute: typeof ProjectsRoute
   RegisterRoute: typeof RegisterRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   VolunteerRoute: typeof VolunteerRoute
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -404,6 +424,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
+  ProjectsRoute: ProjectsRoute,
   RegisterRoute: RegisterRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
   VolunteerRoute: VolunteerRoute,
