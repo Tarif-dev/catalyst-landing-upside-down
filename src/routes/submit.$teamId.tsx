@@ -53,6 +53,7 @@ const TECH_OPTIONS = [
 ];
 
 const MAX_SCREENSHOTS = 5;
+const MIN_SCREENSHOTS = 3;
 const MAX_SCREENSHOT_SIZE_MB = 5;
 const MAX_SCREENSHOT_SIZE_BYTES = MAX_SCREENSHOT_SIZE_MB * 1024 * 1024;
 
@@ -90,21 +91,21 @@ const schema = z.object({
   repo_url: z
     .string()
     .trim()
+    .min(1, "Repository URL is required")
     .url("Must be a valid URL")
-    .max(500)
-    .or(z.literal("")),
+    .max(500),
   demo_url: z
     .string()
     .trim()
+    .min(1, "Live demo URL is required")
     .url("Must be a valid URL")
-    .max(500)
-    .or(z.literal("")),
+    .max(500),
   video_url: z
     .string()
     .trim()
+    .min(1, "Video walkthrough URL is required")
     .url("Must be a valid URL")
-    .max(500)
-    .or(z.literal("")),
+    .max(500),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -172,7 +173,6 @@ function Submit() {
     formState: { errors },
     reset,
     trigger,
-    control,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -384,6 +384,10 @@ function Submit() {
         toast.error("Please select at least one technology.");
         return;
       }
+      if (step === 3 && screenshotItems.length < MIN_SCREENSHOTS) {
+        toast.error(`Please upload at least ${MIN_SCREENSHOTS} screenshots.`);
+        return;
+      }
       setStep((s) => s + 1);
     }
   };
@@ -391,6 +395,12 @@ function Submit() {
   const submit = async (values: FormValues) => {
     setSaving(true);
     try {
+      if (screenshotItems.length < MIN_SCREENSHOTS) {
+        throw new Error(
+          `Please upload at least ${MIN_SCREENSHOTS} screenshots.`,
+        );
+      }
+
       const uploadedEntries = await Promise.all(
         screenshotItems
           .filter((item) => item.file && !item.uploaded)
@@ -420,9 +430,9 @@ function Submit() {
         description: values.description,
         problem_statement: values.problem_statement,
         solution_approach: values.solution_approach,
-        repo_url: values.repo_url || null,
-        demo_url: values.demo_url || null,
-        video_url: values.video_url || null,
+        repo_url: values.repo_url,
+        demo_url: values.demo_url,
+        video_url: values.video_url,
         tech_stack: techStack.join(", "),
         screenshots: finalScreenshots.length ? finalScreenshots : null,
       };
@@ -699,35 +709,52 @@ function Submit() {
               </h2>
 
               <div className="space-y-3">
-                {field("Project Links")}
-                <div className="relative">
-                  <Github className="absolute left-3 top-3 h-5 w-5 text-bone/40" />
+                <div>
+                  {field("Repository URL", true, errors.repo_url?.message)}
+                  <div className="relative">
+                    <Github className="absolute left-3 top-3 h-5 w-5 text-bone/40" />
+                    <input
+                      {...register("repo_url")}
+                      type="url"
+                      className={`${inputClass(errors.repo_url?.message)} pl-10 border-amber/20`}
+                      placeholder="Repository URL (e.g. https://github.com/...)"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  {field("Live Demo URL", true, errors.demo_url?.message)}
                   <input
-                    {...register("repo_url")}
+                    {...register("demo_url")}
                     type="url"
-                    className={`${inputClass(errors.repo_url?.message)} pl-10 border-amber/20`}
-                    placeholder="Repository URL (e.g. https://github.com/...)"
+                    className={inputClass(errors.demo_url?.message)}
+                    placeholder="Live Demo URL (e.g. https://your-demo.vercel.app)"
                   />
                 </div>
-                <input
-                  {...register("demo_url")}
-                  type="url"
-                  className={inputClass(errors.demo_url?.message)}
-                  placeholder="Live Demo URL (e.g. https://your-demo.vercel.app)"
-                />
-                <input
-                  {...register("video_url")}
-                  type="url"
-                  className={inputClass(errors.video_url?.message)}
-                  placeholder="Video Walkthrough URL (YouTube, Loom)"
-                />
+
+                <div>
+                  {field(
+                    "Video Walkthrough URL",
+                    true,
+                    errors.video_url?.message,
+                  )}
+                  <input
+                    {...register("video_url")}
+                    type="url"
+                    className={inputClass(errors.video_url?.message)}
+                    placeholder="Video Walkthrough URL (YouTube, Loom)"
+                  />
+                </div>
               </div>
 
               <div className="pt-4 border-t border-bone/10">
-                {field(`Screenshots (Max ${MAX_SCREENSHOTS})`)}
+                {field(
+                  `Screenshots (${MIN_SCREENSHOTS}-${MAX_SCREENSHOTS})`,
+                  true,
+                )}
                 <p className="mt-2 font-serif text-sm text-bone/55">
-                  Upload up to {MAX_SCREENSHOTS} images, with a{" "}
-                  {MAX_SCREENSHOT_SIZE_MB}MB max per photo.
+                  Upload between {MIN_SCREENSHOTS} and {MAX_SCREENSHOTS} images,
+                  with a {MAX_SCREENSHOT_SIZE_MB}MB max per photo.
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-2">
                   {screenshotItems.map((item) => (
