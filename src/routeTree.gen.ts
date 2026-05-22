@@ -26,6 +26,7 @@ import { Route as VerifyCodeRouteImport } from './routes/verify.$code'
 import { Route as TeamNewRouteImport } from './routes/team.new'
 import { Route as TeamJoinRouteImport } from './routes/team.join'
 import { Route as SubmitTeamIdRouteImport } from './routes/submit.$teamId'
+import { Route as ProjectsProjectIdRouteImport } from './routes/projects_.$projectId'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 import { Route as ApiDiscordCallbackRouteImport } from './routes/api.discord.callback'
 
@@ -114,6 +115,11 @@ const SubmitTeamIdRoute = SubmitTeamIdRouteImport.update({
   path: '/submit/$teamId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
+  id: '/projects_/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CertificateCodeRoute = CertificateCodeRouteImport.update({
   id: '/certificate/$code',
   path: '/certificate/$code',
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/volunteer': typeof VolunteerRoute
   '/volunteer-login': typeof VolunteerLoginRoute
   '/certificate/$code': typeof CertificateCodeRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/volunteer': typeof VolunteerRoute
   '/volunteer-login': typeof VolunteerLoginRoute
   '/certificate/$code': typeof CertificateCodeRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/volunteer': typeof VolunteerRoute
   '/volunteer-login': typeof VolunteerLoginRoute
   '/certificate/$code': typeof CertificateCodeRoute
+  '/projects_/$projectId': typeof ProjectsProjectIdRoute
   '/submit/$teamId': typeof SubmitTeamIdRoute
   '/team/join': typeof TeamJoinRoute
   '/team/new': typeof TeamNewRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/volunteer'
     | '/volunteer-login'
     | '/certificate/$code'
+    | '/projects/$projectId'
     | '/submit/$teamId'
     | '/team/join'
     | '/team/new'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/volunteer'
     | '/volunteer-login'
     | '/certificate/$code'
+    | '/projects/$projectId'
     | '/submit/$teamId'
     | '/team/join'
     | '/team/new'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/volunteer'
     | '/volunteer-login'
     | '/certificate/$code'
+    | '/projects_/$projectId'
     | '/submit/$teamId'
     | '/team/join'
     | '/team/new'
@@ -270,6 +282,7 @@ export interface RootRouteChildren {
   VolunteerRoute: typeof VolunteerRoute
   VolunteerLoginRoute: typeof VolunteerLoginRoute
   CertificateCodeRoute: typeof CertificateCodeRoute
+  ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
   SubmitTeamIdRoute: typeof SubmitTeamIdRoute
   TeamJoinRoute: typeof TeamJoinRoute
   TeamNewRoute: typeof TeamNewRoute
@@ -398,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubmitTeamIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects_/$projectId': {
+      id: '/projects_/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof ProjectsProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/certificate/$code': {
       id: '/certificate/$code'
       path: '/certificate/$code'
@@ -430,6 +450,7 @@ const rootRouteChildren: RootRouteChildren = {
   VolunteerRoute: VolunteerRoute,
   VolunteerLoginRoute: VolunteerLoginRoute,
   CertificateCodeRoute: CertificateCodeRoute,
+  ProjectsProjectIdRoute: ProjectsProjectIdRoute,
   SubmitTeamIdRoute: SubmitTeamIdRoute,
   TeamJoinRoute: TeamJoinRoute,
   TeamNewRoute: TeamNewRoute,

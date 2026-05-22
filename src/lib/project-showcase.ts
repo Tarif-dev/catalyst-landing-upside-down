@@ -40,6 +40,40 @@ function normalizeTechStack(value?: string | null) {
   );
 }
 
+function mapPublicProject(item: any): PublicProjectShowcaseItem {
+  const team = Array.isArray(item.teams) ? item.teams[0] : item.teams;
+  const track = team?.track ?? null;
+
+  return {
+    id: item.id,
+    teamId: item.team_id,
+    title: item.title,
+    description: item.description,
+    problemStatement: item.problem_statement ?? null,
+    solutionApproach: item.solution_approach ?? null,
+    repoUrl: item.repo_url ?? null,
+    demoUrl: item.demo_url ?? null,
+    videoUrl: item.video_url ?? null,
+    techStack: normalizeTechStack(item.tech_stack),
+    screenshots: item.screenshots ?? [],
+    submittedAt: item.submitted_at,
+    updatedAt: item.updated_at,
+    team: team
+      ? {
+          id: team.id,
+          name: team.name,
+          tagline: team.tagline ?? null,
+          track,
+          trackLabel:
+            TRACK_LABEL[track || ""] ||
+            track?.replace(/_/g, " ") ||
+            "Open Track",
+          isWinner: Boolean(team.is_winner),
+        }
+      : null,
+  };
+}
+
 export async function readPublicProjectShowcase(): Promise<
   PublicProjectShowcaseItem[]
 > {
@@ -58,41 +92,45 @@ export async function readPublicProjectShowcase(): Promise<
     throw new Error("Could not load submitted projects.");
   }
 
-  return (data ?? []).map((item: any) => {
-    const team = Array.isArray(item.teams) ? item.teams[0] : item.teams;
-    const track = team?.track ?? null;
+  return (data ?? []).map(mapPublicProject);
+}
 
-    return {
-      id: item.id,
-      teamId: item.team_id,
-      title: item.title,
-      description: item.description,
-      problemStatement: item.problem_statement ?? null,
-      solutionApproach: item.solution_approach ?? null,
-      repoUrl: item.repo_url ?? null,
-      demoUrl: item.demo_url ?? null,
-      videoUrl: item.video_url ?? null,
-      techStack: normalizeTechStack(item.tech_stack),
-      screenshots: item.screenshots ?? [],
-      submittedAt: item.submitted_at,
-      updatedAt: item.updated_at,
-      team: team
-        ? {
-            id: team.id,
-            name: team.name,
-            tagline: team.tagline ?? null,
-            track,
-            trackLabel:
-              TRACK_LABEL[track || ""] ||
-              track?.replace(/_/g, " ") ||
-              "Open Track",
-            isWinner: Boolean(team.is_winner),
-          }
-        : null,
-    };
-  });
+export async function readPublicProjectById(projectId: string) {
+  const { supabaseAdmin } =
+    await import("@/integrations/supabase/client.server");
+
+  const { data, error } = await supabaseAdmin
+    .from("submissions")
+    .select(
+      "id, team_id, title, description, problem_statement, solution_approach, repo_url, demo_url, video_url, tech_stack, screenshots, submitted_at, updated_at, teams(id, name, tagline, track, is_winner)",
+    )
+    .eq("id", projectId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(`Failed to read public project ${projectId}`, error);
+    throw new Error("Could not load that project.");
+  }
+
+  if (!data) return null;
+  return mapPublicProject(data);
 }
 
 export const getPublicProjectShowcase = createServerFn({
   method: "GET",
 }).handler(async () => readPublicProjectShowcase());
+
+export const getPublicProjectById = createServerFn({
+  method: "GET",
+})
+  .inputValidator((input: unknown) => {
+    if (!input || typeof input !== "object" || !("projectId" in input)) {
+      throw new Error("Missing project id.");
+    }
+    const projectId = (input as { projectId?: unknown }).projectId;
+    if (typeof projectId !== "string" || !projectId.trim()) {
+      throw new Error("Missing project id.");
+    }
+    return { projectId };
+  })
+  .handler(async ({ data }) => readPublicProjectById(data.projectId));
